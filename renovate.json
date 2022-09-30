@@ -3,9 +3,16 @@
   "extends": ["config:base"],
   "packageRules": [
     {
+      "matchDepTypes": ["dependencies"],
+      "enabled": true
+    },
+    {
       "matchPackageNames": ["event-ticketing-system"],
       "enabled": true
+    },
+    {
+      "matchDepTypes": ["devDependencies"],
+      "enabled": false
     }
-    
   ]
 }
