@@ -1,8 +1,12 @@
-import { NFTStorage } from 'nft.storage';
-import axios from 'axios';
+import { NFTStorage } from "nft.storage";
+import axios from "axios";
 import { ethers } from "ethers";
-import {AVALANCHE_TESTNET_API,EVENT_TICKETING_SYSTEM_CONTRACT_ADDRESS,ABI,IPFS_GATEWAY_PROVIDER_URL} from '../configs/contract.config.js';
-
+import {
+  AVALANCHE_TESTNET_API,
+  EVENT_TICKETING_SYSTEM_CONTRACT_ADDRESS,
+  ABI,
+  IPFS_GATEWAY_PROVIDER_URL,
+} from "../configs/contract.config.js";
 const provider = ethers.getDefaultProvider(AVALANCHE_TESTNET_API);
 const eventTicketingSystemContract = new ethers.Contract(
   EVENT_TICKETING_SYSTEM_CONTRACT_ADDRESS,
@@ -24,14 +28,13 @@ async function uploadDataToIpfs(nftStorageApiKey, metadata, image) {
 }
 
 async function deleteDataFromService(nftStorageApiKey, eventId) {
-  const eventUri =
-  await  eventTicketingSystemContract.tokenURI(eventId);
+  const eventUri = await eventTicketingSystemContract.tokenURI(eventId);
 
-let cid = eventUri.split("/")[2];
+  const cid = eventUri.split("/")[2];
 
-const client = new NFTStorage({ token: nftStorageApiKey });
+  const client = new NFTStorage({ token: nftStorageApiKey });
 
-await client.delete(cid);
+  await client.delete(cid);
 }
 
 async function fetchEventsMetadata(eventIds) {
@@ -39,24 +42,18 @@ async function fetchEventsMetadata(eventIds) {
 
   for (const eventId of eventIds) {
     try {
-      const eventUri =
-        await  eventTicketingSystemContract.tokenURI(eventId);
+      const eventUri = await eventTicketingSystemContract.tokenURI(eventId);
       const url = makeGatewayUrl(eventUri);
 
       const eventMetadata = await axios.get(url);
 
       eventsMetadata.push(eventMetadata.data);
     } catch (error) {
-     return { error: error.reason };
+      return { error: error.reason };
     }
   }
 
   return eventsMetadata;
 }
 
-export {
-  uploadDataToIpfs,
-  deleteDataFromService,
-  fetchEventsMetadata,
-};
-
+export { uploadDataToIpfs, deleteDataFromService, fetchEventsMetadata };
