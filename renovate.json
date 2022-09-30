@@ -4,10 +4,12 @@
   "packageRules": [
     {
       "matchDepTypes": ["dependencies"],
+      "rangeStrategy": "bump",
       "enabled": true
     },
     {
       "matchPackageNames": ["event-ticketing-system"],
+      "versioning":"git",
       "enabled": true
     },
     {
