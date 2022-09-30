@@ -3,7 +3,7 @@
   "extends": ["config:base"],
   "hostRules": [
     {
-      "matchHost": "https://github.com/orgs/Applied-Blockchain-Lab",
+      "matchHost": "https://github.com/Applied-Blockchain-Lab",
       "encrypted": {
         "token": "wcFMA/xDdHCJBTolAQ//YqjFaDap0BM3+O+VJcwxCJV+qclSR0zAjrf2ivuLZ1cQOGnlbGZrFyej7uUEC3nDf3rq9JQOgG6c1OYOLZ0IrZkyCGkmCc9sMpeU12Z6fTFttqwnr1vaJmOKejcl+CDhQyXvcGdE+nfqCCdh3yHMMFx5AnVU4N39XP/HqPbcSRA+L4RZx/a5xW/frNvlhJ/VbTo/tWhiGpQF2EZmdDGIyCIzWB5YNB8XM/+lLgk79lXIerD4lEoEza0bFd3VHYdZIgdOv/N+g9ZlPh0YZHC/Hq12cleyeaMUWq/1IhnAUlay3FWsKrYLpO6FUkp+EoJl7+UrQFZegRTrM++Su43tAprpD7VFBzwHcrsb8cBywionJ9Ves88SSg7EsS5cs9+KcFGLCk7m4XA3Q60x6Z/mkI8b4eD773raYMTFy5Sa4FuhJBKQhA9LbQMqH4NgfWWHkhlOXtqd5ZqDwKjCfJiKsN9U9MHUjuqKn4jCc6aX9w7bPRGEctoG4bzS2ISfa0FtPHKdDLiJBj/MHFJCHu80w/+GsToi6GJFOKvpIzxMjSL2/qxDMC/XpQREt7KINTraeoI6bmHndVu+e2Nuilb+VC731B17C8vsTovw8FSNY3ks4Ko90GihSbZOz0b3cc3ZzK97AD4lJq0ueQXEakLI+TQd2qU8K03lasyhTGnr//XShQHxOLm7hzPmeVExnqUlDvtTtzOF1elTYP+qW+3JLWeKezR0Uqz3VanSJCayB3cPHutwOnsbdElBky5MxIGYjLYcIwv/DlumCLD49/21ZD6nDwUd+xLA6g0/E5iCyp8OVS3fav+uX74ZqrbgqD5nm+wJYhpUzfmnCQJJPyl78N/VW03NtQs"
       },
