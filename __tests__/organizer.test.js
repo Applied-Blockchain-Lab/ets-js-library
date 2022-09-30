@@ -34,7 +34,7 @@ describe("Organizer tests", () => {
     try {
       await removeEvent(NFT_STORAGE_API_KEY, 1, address);
     } catch (error) {
-      expect(error.reason).toBe("event does not exist !");
+      expect(error.reason).toBe("EventTicketingSystem: Caller is not an admin");
     }
   });
 

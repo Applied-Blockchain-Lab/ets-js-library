@@ -26,7 +26,7 @@
     "axios": "^0.27.2",
     "axios-mock-adapter": "^1.21.2",
     "ethers": "^5.7.1",
-    "event-ticketing-system": "github:Applied-Blockchain-Lab/ets-contracts",
+    "ets-contracts": "github:Applied-Blockchain-Lab/ets-contracts",
     "nft.storage": "^7.0.0",
     "node-blob": "^0.0.2"
   },
