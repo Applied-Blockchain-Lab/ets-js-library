@@ -9,6 +9,7 @@
     },
     {
       "matchPackageNames": ["ets-contracts"],
+      "rangeStrategy": "pin",
       "enabled": true
     },
     {
