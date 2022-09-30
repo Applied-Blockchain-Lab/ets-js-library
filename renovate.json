@@ -8,11 +8,6 @@
       "enabled": true
     },
     {
-      "matchPackageNames": ["ets-contracts"],
-      "rangeStrategy": "pin",
-      "enabled": true
-    },
-    {
       "matchDepTypes": ["devDependencies"],
       "enabled": false
     }
