@@ -4,12 +4,11 @@
   "packageRules": [
     {
       "matchDepTypes": ["dependencies"],
-      "rangeStrategy": "bump",
+      "rangeStrategy": "pin",
       "enabled": true
     },
     {
-      "matchPackageNames": ["event-ticketing-system"],
-      "versioning":"git",
+      "matchPackageNames": ["ets-contracts"],
       "enabled": true
     },
     {
