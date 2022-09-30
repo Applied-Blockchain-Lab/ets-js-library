@@ -138,7 +138,7 @@ describe("user", () => {
         "ipfs://bafybeiaxbpxaxxizq2s6vvodocbo2ahvh4dbrgnrwvmw4afnjgesza22ee/blob",
     };
     mock.onGet(metadataURI).reply(200, mockedData);
-    const res = await fetchEvents([20]);
+    const res = await fetchEvents([1]);
 
     expect(mockedData.toString()).toBe(res[0].toString());
   });
