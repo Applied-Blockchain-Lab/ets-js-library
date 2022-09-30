@@ -16,6 +16,7 @@
       "rangeStrategy": "pin",
       "enabled": true
     },
+    
     {
       "matchDepTypes": ["devDependencies"],
       "enabled": false
