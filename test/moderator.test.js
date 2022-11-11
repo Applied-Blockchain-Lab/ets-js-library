@@ -471,12 +471,17 @@ describe("Moderator tests", function () {
       },
       {
         row: 1,
+        seat: 3,
+        account: EXAMPLE_ADDRESS,
+      },
+      {
+        row: 1,
         seat: 4,
         account: "0x0000000000000000000000000000000000000000",
       },
     ];
     mockedTicketMetadata.image = imageBlob;
-    const ticketsMetadata = [mockedTicketMetadata, mockedTicketMetadata];
+    const ticketsMetadata = [mockedTicketMetadata, mockedTicketMetadata, mockedTicketMetadata];
 
     const populatedTx = await bookTickets(
       NFT_STORAGE_API_KEY,
@@ -486,16 +491,17 @@ describe("Moderator tests", function () {
       ticketsMetadata,
       ticketControllerFacet,
     );
+
     populatedTx.from = moderatorWallet.address;
     const tx = await moderatorWallet.sendTransaction(populatedTx);
     await tx.wait();
 
     const tickets = await getAddressTicketIdsByEvent(tokenId, ticketControllerFacet.address, ticketControllerFacet);
-    expect(tickets.length).to.equal(1); // buddy ignore:line
+    expect(tickets.length).to.equal(2); // buddy ignore:line
   });
 
   it("Should send invitation", async () => {
-    const ticketIds = [3]; // buddy ignore:line
+    const ticketIds = [4]; // buddy ignore:line
     const accounts = [EXAMPLE_ADDRESS];
 
     const populatedTx = await sendInvitation(tokenId, ticketIds, accounts, ticketControllerFacet);
@@ -503,7 +509,7 @@ describe("Moderator tests", function () {
     await tx.wait();
 
     const tickets = await getAddressTicketIdsByEvent(tokenId, EXAMPLE_ADDRESS, ticketControllerFacet);
-    expect(tickets.length).to.equal(2); // buddy ignore:line
+    expect(tickets.length).to.equal(3); // buddy ignore:line
   });
 
   it("Should clip ticket only once", async () => {
