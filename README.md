@@ -26,6 +26,10 @@ Install:
 npm i ets-js-library
 ```
 
+## Listeners docs
+
+Check listeners docs:[docs/listeners.md](https://github.com/Applied-Blockchain-Lab/ets-js-library/blob/main/docs/listeners.md)
+
 ## Available functionalities in format _Action name (who has the right)_
 
 ### Create event (Everyone)
@@ -267,7 +271,8 @@ const params = {
     offset: "",
     limit: "",
   },
-  organizer: "",
+  user: "",
+  tickets: "",
 };
 
 //This parameter is optional
@@ -414,70 +419,6 @@ Return data:
 
 ```js
 const eventIds = [1, 2, 3];
-```
-
-### Listen for new events (Everyone)
-
-1. Import listenForNewEvent function from the library.
-2. Create a callback function.
-3. Supply callback function to listenForNewEvent as parameter.
-
-```js
-import { listenForNewEvent } from "ets-js-library";
-
-function callback(data, membersData) {
-  //This function will be called when the event is emitted.
-}
-
-listenForNewEvent(callback);
-```
-
-### Listen for event update (Everyone)
-
-1. Import listenForEventUpdate function from the library.
-2. Create a callback function.
-3. Supply callback function to listenForEventUpdate as parameter.
-
-```js
-import { listenForEventUpdate } from "ets-js-library";
-
-function callback(data) {
-  //This function will be called when the event is emitted.
-}
-
-listenForEventUpdate(callback);
-```
-
-### Listen for Role Granted (Everyone)
-
-1. Import listenForRoleGrant function from the library.
-2. Create a callback function.
-3. Supply callback function to listenForRoleGrant as parameter.
-
-```js
-import { listenForRoleGrant } from "ets-js-library";
-
-function callback(data) {
-  //This function will be called when the event is emitted.
-}
-
-listenForRoleGrant(callback);
-```
-
-### Listen for Role Revoked (Everyone)
-
-1. Import listenForRoleRevoke function from the library.
-2. Create a callback function.
-3. Supply callback function to listenForRoleRevoke as parameter.
-
-```js
-import { listenForRoleRevoke } from "ets-js-library";
-
-function callback(data) {
-  //This function will be called when the event is emitted.
-}
-
-listenForRoleRevoke(callback);
 ```
 
 ### Set event cashier (Admin)

@@ -10,10 +10,7 @@ import {
   removeCategoryTicketsCount,
   manageCategorySelling,
   manageAllCategorySelling,
-  listenForNewEvent,
-  listenForEventUpdate,
-  listenForRoleGrant,
-  listenForRoleRevoke,
+  listeners,
   updateEvent,
   removeTeamMember,
   addTeamMember,
@@ -41,6 +38,7 @@ import { mockedCreateEvent, testSetUp } from "./utils.js";
 describe("Moderator tests", function () {
   let diamondAddress;
   let eventFacet;
+  let ticketControllerFacet;
   let tokenId;
   let imageBlob;
   let wallet;
@@ -58,9 +56,10 @@ describe("Moderator tests", function () {
   }
 
   before(async function () {
-    ({ diamondAddress, eventFacet, imageBlob, signers, wallet } = await testSetUp(
+    ({ diamondAddress, eventFacet, ticketControllerFacet, imageBlob, signers, wallet } = await testSetUp(
       diamondAddress,
       eventFacet,
+      ticketControllerFacet,
       imageBlob,
       signers,
       wallet,
@@ -435,20 +434,20 @@ describe("Moderator tests", function () {
       priceData,
       place,
       ticketsMetadata,
-      eventFacet,
+      ticketControllerFacet,
     );
     populatedTx.from = moderatorWallet.address;
     const tx = await moderatorWallet.sendTransaction(populatedTx);
     await tx.wait();
 
-    const tickets = await getAddressTicketIdsByEvent(tokenId, moderatorWallet.address, eventFacet);
+    const tickets = await getAddressTicketIdsByEvent(tokenId, moderatorWallet.address, ticketControllerFacet);
     expect(tickets.length).to.equal(place.length);
   });
 
   it("Should add refund date", async () => {
     const refundData = { date: DATES.EVENT_END_DATE, percentage: 100 };
 
-    const populatedTx = await addRefundDeadline(tokenId, refundData, eventFacet);
+    const populatedTx = await addRefundDeadline(tokenId, refundData, ticketControllerFacet);
     populatedTx.from = moderatorWallet.address;
     const tx = await moderatorWallet.sendTransaction(populatedTx);
     await tx.wait();
@@ -458,19 +457,19 @@ describe("Moderator tests", function () {
   });
 
   it("Should clip ticket only once", async () => {
-    const populatedTx = await clipTicket(tokenId, 1, eventFacet);
+    const populatedTx = await clipTicket(tokenId, 1, ticketControllerFacet);
     populatedTx.from = moderatorWallet.address;
     const tx = await moderatorWallet.sendTransaction(populatedTx);
     await tx.wait();
 
-    const populatedTx2 = await clipTicket(tokenId, 1, eventFacet);
+    const populatedTx2 = await clipTicket(tokenId, 1, ticketControllerFacet);
     populatedTx2.from = moderatorWallet.address;
 
     await expect(moderatorWallet.sendTransaction(populatedTx2)).to.be.revertedWith(errorMessages.callReverted);
   });
 
   it("Should listen for new Events", async () => {
-    listenForNewEvent(spyFunc, eventFacet);
+    listeners.listenForNewEvent(spyFunc, eventFacet);
     const maxTicketPerClient = 10;
     const startDate = DATES.EVENT_START_DATE;
     const endDate = DATES.EVENT_END_DATE;
@@ -490,7 +489,7 @@ describe("Moderator tests", function () {
   });
 
   it("Should listen for event update", async () => {
-    listenForEventUpdate(spyFunc, eventFacet);
+    listeners.listenForEventUpdate(spyFunc, eventFacet);
     const currMockedMetadata = JSON.parse(JSON.stringify(mockedMetadata));
     currMockedMetadata.name = "Updated Name";
     currMockedMetadata.description = "Updated description";
@@ -506,7 +505,7 @@ describe("Moderator tests", function () {
   });
 
   it("Should listen for role granted", async () => {
-    listenForRoleGrant(spyFunc, eventFacet);
+    listeners.listenForRoleGrant(spyFunc, eventFacet);
     const address = EXAMPLE_ADDRESS;
     const populatedTx = await setEventCashier(tokenId, address, eventFacet);
     const tx = await wallet.sendTransaction(populatedTx);
@@ -517,7 +516,7 @@ describe("Moderator tests", function () {
   });
 
   it("Should listen for role revoked", async () => {
-    listenForRoleRevoke(spyFunc, eventFacet);
+    listeners.listenForRoleRevoke(spyFunc, eventFacet);
 
     const populatedTx = await removeTeamMember(tokenId, `0x${"0".repeat(addressLength)}`, EXAMPLE_ADDRESS, eventFacet);
     const tx = await wallet.sendTransaction(populatedTx);

@@ -7,6 +7,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.17.0] - 2022-11-11
+
+### Changed
+
+- Extract listeners to listeners.js
+- Extract documentation to ./docs/listeners.md
+
+### Added
+
+- listenForBoughtTicket
+- listenForRefundedTicket
+- listenForLockedTicked
+- listenForUnlockedTicket
+- listenForTicketTransfer
+- listenForTicketApproval
+- listenForTicketApprovalForAll
+- listenForTicketConsecutiveTransfer
+- listenForTicketConsumed
+- listenForBatchMetadataUpdate
+- listenForRefund
+- listenForNewEventCashier
+- listenForNewCategory
+- listenForCategoryUpdate
+- listenForCategoryDelete
+- listenForCategoryTicketsAdded
+- listenForCategoryTicketsRemoved
+- listenForCategorySellChanged
+- listenForAllCategorySellChanged
+- listenForCategorySaleDatesUpdate
+- listenForNewEventRefundDate
+- listenForRefundWithdraw
+- listenForEventWithdraw
+- listenForClipedTicket
+- listenForBookedTickets
+- listenForNewTicketInvitation
+
 ## [0.16.4] - 2022-11-10
 
 ### Fixed

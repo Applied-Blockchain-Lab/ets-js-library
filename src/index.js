@@ -12,7 +12,8 @@ import {
   makeGatewayUrl,
 } from "#ipfs.utils";
 import { ETS_SERVER_URL, NET_RPC_URL, NET_RPC_URL_ID, TOKEN_NAME, NET_LABEL } from "#config";
-import { eventsContract, ticketsContract } from "#contract";
+import { eventsContract, ticketControllerContract, ticketsContract } from "#contract";
+import * as listeners from "./listeners.js";
 
 export async function createEvent(nftStorageApiKey, metadata, contractData, contract = eventsContract) {
   try {
@@ -169,58 +170,6 @@ export async function fetchAllEventIds(contract = eventsContract) {
   return allEventIds;
 }
 
-export function listenForNewEvent(callback, contract = eventsContract) {
-  contract.on("EventCreated", async (eventId, metadataUri) => {
-    const url = createGatewayUrl(metadataUri);
-    const eventMetadata = await axios.get(url);
-
-    const membersData = await getEventMembers(eventId);
-
-    const data = {
-      eventId,
-      metadataUri,
-      eventMetadata: eventMetadata.data,
-    };
-
-    await callback(data, membersData);
-  });
-}
-
-export function listenForEventUpdate(callback, contract = eventsContract) {
-  contract.on("MetadataUpdate", async (contractNftEventId) => {
-    // Fetch Event NFT metadata
-    const eventsMetadata = await fetchSingleEventMetadata(contractNftEventId);
-
-    const data = {
-      eventId: ethers.BigNumber.from(contractNftEventId).toNumber(),
-      eventMetadata: eventsMetadata[0],
-    };
-
-    await callback(data);
-  });
-}
-
-export function listenForRoleGrant(callback, contract = eventsContract) {
-  listenForRole("RoleGranted", contract, callback);
-}
-
-export function listenForRoleRevoke(callback, contract = eventsContract) {
-  listenForRole("RoleRevoked", contract, callback);
-}
-
-function listenForRole(contractEventName, contract, callback) {
-  contract.on(contractEventName, async (contractNftEventId, role, account, sender) => {
-    const data = {
-      eventId: contractNftEventId,
-      role,
-      account,
-      sender,
-    };
-
-    await callback(data);
-  });
-}
-
 export function createGatewayUrl(url) {
   try {
     const gatewayUrl = makeGatewayUrl(url);
@@ -371,7 +320,7 @@ export async function buyTicketsFromMultipleEvents(
   priceData,
   place,
   ticketsMetadata,
-  contract = eventsContract,
+  contract = ticketControllerContract,
 ) {
   try {
     const value = calculateTotalValue(priceData);
@@ -394,7 +343,7 @@ export async function buyTicketsFromSingleEvent(
   priceData,
   place,
   ticketsMetadata,
-  contract = eventsContract,
+  contract = ticketControllerContract,
 ) {
   try {
     const value = calculateTotalValue(priceData);
@@ -425,7 +374,7 @@ function calculateTotalValue(priceData) {
   return value;
 }
 
-export async function addRefundDeadline(eventId, refundData, contract = eventsContract) {
+export async function addRefundDeadline(eventId, refundData, contract = ticketControllerContract) {
   try {
     const tx = await contract.populateTransaction.addRefundDeadline(eventId, refundData);
     return tx;
@@ -434,7 +383,7 @@ export async function addRefundDeadline(eventId, refundData, contract = eventsCo
   }
 }
 
-export async function returnTicket(ticketParams, contract = eventsContract) {
+export async function returnTicket(ticketParams, contract = ticketControllerContract) {
   try {
     const tx = await contract.populateTransaction.returnTicket(ticketParams);
     return tx;
@@ -443,7 +392,7 @@ export async function returnTicket(ticketParams, contract = eventsContract) {
   }
 }
 
-export async function withdrawRefund(eventId, ticketId, contract = eventsContract) {
+export async function withdrawRefund(eventId, ticketId, contract = ticketControllerContract) {
   try {
     const tx = await contract.populateTransaction.withdrawRefund(eventId, ticketId);
     return tx;
@@ -452,7 +401,7 @@ export async function withdrawRefund(eventId, ticketId, contract = eventsContrac
   }
 }
 
-export async function withdrawContractBalance(eventId, contract = eventsContract) {
+export async function withdrawContractBalance(eventId, contract = ticketControllerContract) {
   try {
     const tx = await contract.populateTransaction.withdrawContractBalance(eventId);
     return tx;
@@ -461,7 +410,7 @@ export async function withdrawContractBalance(eventId, contract = eventsContract
   }
 }
 
-export async function clipTicket(eventId, ticketId, contract = eventsContract) {
+export async function clipTicket(eventId, ticketId, contract = ticketControllerContract) {
   try {
     const tx = await contract.populateTransaction.clipTicket(eventId, ticketId);
     return tx;
@@ -476,7 +425,7 @@ export async function bookTickets(
   categoryData,
   place,
   ticketsMetadata,
-  contract = eventsContract,
+  contract = ticketControllerContract,
 ) {
   try {
     const ticketUris = await uploadArrayToIpfs(nftStorageApiKey, ticketsMetadata);
@@ -487,7 +436,7 @@ export async function bookTickets(
   }
 }
 
-export async function sendInvitation(eventId, ticketIds, accounts, contract = eventsContract) {
+export async function sendInvitation(eventId, ticketIds, accounts, contract = ticketControllerContract) {
   try {
     const tx = await contract.populateTransaction.sendInvitation(eventId, ticketIds, accounts);
     return tx;
@@ -496,7 +445,7 @@ export async function sendInvitation(eventId, ticketIds, accounts, contract = ev
   }
 }
 
-export async function getAddressTicketIdsByEvent(eventId, address, contract = eventsContract) {
+export async function getAddressTicketIdsByEvent(eventId, address, contract = ticketControllerContract) {
   try {
     const signer = new ethers.VoidSigner(address, contract.provider);
     const tickets = await contract.connect(signer).getAddressTicketIdsByEvent(eventId);
@@ -512,4 +461,4 @@ export async function fetchTicketOwnerOf(ticketId, contract = ticketsContract) {
   return account;
 }
 
-export { NET_RPC_URL, NET_RPC_URL_ID, TOKEN_NAME, NET_LABEL };
+export { NET_RPC_URL, NET_RPC_URL_ID, TOKEN_NAME, NET_LABEL, listeners };
