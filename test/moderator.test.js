@@ -471,12 +471,12 @@ describe("Moderator tests", function () {
       },
       {
         row: 1,
-        seat: 3,
+        seat: 4,
         account: EXAMPLE_ADDRESS,
       },
       {
         row: 1,
-        seat: 4,
+        seat: 5,
         account: "0x0000000000000000000000000000000000000000",
       },
     ];
