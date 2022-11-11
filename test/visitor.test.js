@@ -151,7 +151,6 @@ describe("Visitor tests", () => {
       priceData,
       place,
       ticketsMetadata,
-      // eventFacet,
       ticketControllerFacet,
     );
     populatedTx.from = visitorWallet.address;
@@ -230,7 +229,6 @@ describe("Visitor tests", () => {
       priceData,
       place,
       ticketsMetadata,
-      // eventFacet,
       ticketControllerFacet,
     );
     populatedTx.from = visitorWallet.address;
@@ -270,7 +268,6 @@ describe("Visitor tests", () => {
       priceData,
       place,
       ticketsMetadata,
-      // eventFacet,
       ticketControllerFacet,
     );
     populatedTx.from = visitorWallet.address;
@@ -308,7 +305,6 @@ describe("Visitor tests", () => {
       priceData,
       place,
       ticketsMetadata,
-      // eventFacet,
       ticketControllerFacet,
     );
     populatedTx.from = visitorWallet.address;
@@ -422,7 +418,6 @@ describe("Visitor tests", () => {
       priceData,
       place,
       ticketsMetadata,
-      // eventFacet,
       ticketControllerFacet,
     );
     populatedTx.from = visitorWallet.address;
@@ -476,7 +471,6 @@ describe("Visitor tests", () => {
       priceData,
       place,
       ticketsMetadata,
-      // eventFacet,
       ticketControllerFacet,
     );
     populatedTx.from = visitorWallet.address;
@@ -532,7 +526,6 @@ describe("Visitor tests", () => {
       priceData,
       place,
       ticketsMetadata,
-      // eventFacet,
       ticketControllerFacet,
     );
     populatedTx.from = visitorWallet.address;
