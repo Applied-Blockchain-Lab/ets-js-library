@@ -19,6 +19,8 @@ import {
   getAddressTicketIdsByEvent,
   addRefundDeadline,
   clipTicket,
+  bookTickets,
+  sendInvitation,
 } from "../src/index.js";
 import {
   NFT_STORAGE_API_KEY,
@@ -400,9 +402,6 @@ describe("Moderator tests", function () {
     const tx1 = await moderatorWallet.sendTransaction(populatedTx1);
     await tx1.wait();
 
-    const categories = await fetchCategoriesByEventId(tokenId, eventFacet);
-    expect(categories.length).to.equal(1);
-
     const categoryId = 2;
 
     const priceData = [
@@ -454,6 +453,57 @@ describe("Moderator tests", function () {
 
     const event = await eventFacet.fetchEventById(tokenId);
     expect(event.refundData.length).to.equal(1);
+  });
+
+  it("Should book tickets", async () => {
+    const categoryData = [
+      {
+        categoryId: 2,
+        ticketAmount: 2,
+      },
+    ];
+
+    const place = [
+      {
+        row: 1,
+        seat: 3,
+        account: EXAMPLE_ADDRESS,
+      },
+      {
+        row: 1,
+        seat: 4,
+        account: "0x0000000000000000000000000000000000000000",
+      },
+    ];
+    mockedTicketMetadata.image = imageBlob;
+    const ticketsMetadata = [mockedTicketMetadata, mockedTicketMetadata];
+
+    const populatedTx = await bookTickets(
+      NFT_STORAGE_API_KEY,
+      tokenId,
+      categoryData,
+      place,
+      ticketsMetadata,
+      ticketControllerFacet,
+    );
+    populatedTx.from = moderatorWallet.address;
+    const tx = await moderatorWallet.sendTransaction(populatedTx);
+    await tx.wait();
+
+    const tickets = await getAddressTicketIdsByEvent(tokenId, ticketControllerFacet.address, ticketControllerFacet);
+    expect(tickets.length).to.equal(1); // buddy ignore:line
+  });
+
+  it("Should send invitation", async () => {
+    const ticketIds = [3]; // buddy ignore:line
+    const accounts = [EXAMPLE_ADDRESS];
+
+    const populatedTx = await sendInvitation(tokenId, ticketIds, accounts, ticketControllerFacet);
+    const tx = await moderatorWallet.sendTransaction(populatedTx);
+    await tx.wait();
+
+    const tickets = await getAddressTicketIdsByEvent(tokenId, EXAMPLE_ADDRESS, ticketControllerFacet);
+    expect(tickets.length).to.equal(2); // buddy ignore:line
   });
 
   it("Should clip ticket only once", async () => {
