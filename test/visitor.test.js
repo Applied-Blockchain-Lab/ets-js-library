@@ -1,4 +1,5 @@
 import {
+  addRefundDeadline,
   buyTicketsFromMultipleEvents,
   buyTicketsFromSingleEvent,
   createTicketCategory,
@@ -6,6 +7,8 @@ import {
   fetchCountriesFromServer,
   fetchPlacesFromServer,
   getAddressTicketIdsByEvent,
+  returnTicket,
+  withdrawRefund,
 } from "../src/index.js";
 import axios from "axios";
 import MockAdapter from "axios-mock-adapter";
@@ -27,6 +30,7 @@ describe("Visitor tests", () => {
   let mock;
   let diamondAddress;
   let eventFacet;
+  let ticketControllerFacet;
   let firstEventTokenId;
   let secondEventTokenId;
   let imageBlob;
@@ -36,9 +40,10 @@ describe("Visitor tests", () => {
 
   before(async () => {
     mock = new MockAdapter(axios);
-    ({ diamondAddress, eventFacet, imageBlob, signers, wallet } = await testSetUp(
+    ({ diamondAddress, eventFacet, ticketControllerFacet, imageBlob, signers, wallet } = await testSetUp(
       diamondAddress,
       eventFacet,
+      ticketControllerFacet,
       imageBlob,
       signers,
       wallet,
@@ -146,7 +151,8 @@ describe("Visitor tests", () => {
       priceData,
       place,
       ticketsMetadata,
-      eventFacet,
+      // eventFacet,
+      ticketControllerFacet,
     );
     populatedTx.from = visitorWallet.address;
     const tx = await visitorWallet.sendTransaction(populatedTx);
@@ -224,7 +230,8 @@ describe("Visitor tests", () => {
       priceData,
       place,
       ticketsMetadata,
-      eventFacet,
+      // eventFacet,
+      ticketControllerFacet,
     );
     populatedTx.from = visitorWallet.address;
     await expect(visitorWallet.sendTransaction(populatedTx)).to.be.revertedWith(
@@ -263,7 +270,8 @@ describe("Visitor tests", () => {
       priceData,
       place,
       ticketsMetadata,
-      eventFacet,
+      // eventFacet,
+      ticketControllerFacet,
     );
     populatedTx.from = visitorWallet.address;
     await expect(visitorWallet.sendTransaction(populatedTx)).to.be.revertedWith(errorMessages.placeIsTaken);
@@ -300,7 +308,8 @@ describe("Visitor tests", () => {
       priceData,
       place,
       ticketsMetadata,
-      eventFacet,
+      // eventFacet,
+      ticketControllerFacet,
     );
     populatedTx.from = visitorWallet.address;
     await expect(visitorWallet.sendTransaction(populatedTx)).to.be.revertedWith(errorMessages.parametersLengthNotEqual);
@@ -413,7 +422,8 @@ describe("Visitor tests", () => {
       priceData,
       place,
       ticketsMetadata,
-      eventFacet,
+      // eventFacet,
+      ticketControllerFacet,
     );
     populatedTx.from = visitorWallet.address;
     await expect(visitorWallet.sendTransaction(populatedTx)).to.be.revertedWith(errorMessages.placeIsTaken);
@@ -466,7 +476,8 @@ describe("Visitor tests", () => {
       priceData,
       place,
       ticketsMetadata,
-      eventFacet,
+      // eventFacet,
+      ticketControllerFacet,
     );
     populatedTx.from = visitorWallet.address;
     await expect(visitorWallet.sendTransaction(populatedTx)).to.be.revertedWith(
@@ -521,9 +532,39 @@ describe("Visitor tests", () => {
       priceData,
       place,
       ticketsMetadata,
-      eventFacet,
+      // eventFacet,
+      ticketControllerFacet,
     );
     populatedTx.from = visitorWallet.address;
     await expect(visitorWallet.sendTransaction(populatedTx)).to.be.revertedWith(errorMessages.parametersLengthNotEqual);
+  });
+
+  it("Should revert add refund date when visitor calls it", async () => {
+    const refundData = { date: DATES.EVENT_END_DATE, percentage: 100 };
+
+    const populatedTx = await addRefundDeadline(firstEventTokenId, refundData, eventFacet);
+    populatedTx.from = visitorWallet.address;
+    await expect(visitorWallet.sendTransaction(populatedTx)).to.be.revertedWith(errorMessages.callerIsNotAdmin);
+  });
+
+  it("Should withdraw the refund", async () => {
+    const ticketParams = { eventId: 1, categoryId: 1, ticketId: 1 };
+
+    const populatedReturnTicketTx = await returnTicket(ticketParams, ticketControllerFacet);
+    const returnTicketTx = await wallet.sendTransaction(populatedReturnTicketTx);
+    await returnTicketTx.wait();
+
+    const walletBalanceBefore = await visitorWallet.getBalance();
+    console.log("walletBalanceBefore", walletBalanceBefore.toString());
+
+    const populatedTx = await withdrawRefund(ticketParams.eventId, ticketParams.ticketId, ticketControllerFacet);
+    populatedTx.from = visitorWallet.address;
+    const tx = await visitorWallet.sendTransaction(populatedTx);
+    await tx.wait();
+
+    const walletBalanceAfterRefund = await visitorWallet.getBalance();
+    console.log("Wallet balance after withdraw refund: ", walletBalanceAfterRefund.toString());
+
+    expect(walletBalanceAfterRefund).to.be.gt(walletBalanceBefore);
   });
 });
