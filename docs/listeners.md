@@ -15,6 +15,8 @@ function callback(data, membersData) {
 
 listeners.listenForNewEvent(callback);
 ```
+#### Emitted by:
+- createEvent()
 
 ### Listen for event update (Everyone)
 
@@ -31,6 +33,8 @@ function callback(data) {
 
 listeners.listenForEventUpdate(callback);
 ```
+#### Emitted by:
+- updateEvent()
 
 ### Listen for Role Granted (Everyone)
 
@@ -47,6 +51,9 @@ function callback(data) {
 
 listeners.listenForRoleGrant(callback);
 ```
+#### Emitted by:
+- createEvent()
+- addTeamMember()
 
 ### Listen for Role Revoked (Everyone)
 
@@ -63,6 +70,8 @@ function callback(data) {
 
 listeners.listenForRoleRevoke(callback);
 ```
+#### Emitted by:
+- removeTeamMember()
 
 ### Listen for Bought ticket (Everyone)
 
@@ -79,6 +88,9 @@ function callback(data) {
 
 listeners.listenForBoughtTicket(callback);
 ```
+#### Emitted by:
+- buyTicketsFromMultipleEvents()
+- buyTicketsFromSingleEvent()
 
 ### Listen for Refunded ticket (Everyone)
 
@@ -95,6 +107,9 @@ function callback(data) {
 
 listeners.listenForRefundedTicket(callback);
 ```
+#### Emitted by:
+- returnTicket()
+
 
 ### Listen for Locked ticket (Everyone)
 
@@ -113,6 +128,9 @@ function callback(data) {
 
 listeners.listenForLockedTicked(callback);
 ```
+#### Emitted by:
+- sendInvitation()
+- bookTickets()
 
 ### Listen for Unlocked ticket (Everyone)
 
@@ -131,6 +149,11 @@ function callback(data) {
 
 listeners.listenForUnlockedTicket(callback);
 ```
+#### Emitted by:
+- buyTicketsFromMultipleEvents()
+- buyTicketsFromSingleEvent()
+- returnTicket()
+- bookTickets()
 
 ### Listen for Ticket transfer (Everyone)
 
@@ -147,6 +170,10 @@ function callback(data) {
 
 listeners.listenForTicketTransfer(callback);
 ```
+#### Emitted by:
+- buyTicketsFromMultipleEvents()
+- buyTicketsFromSingleEvent()
+- removeEvent()
 
 ### Listen for Ticket approval (Everyone)
 
@@ -163,6 +190,8 @@ function callback(data) {
 
 listeners.listenForTicketApproval(callback);
 ```
+#### Emitted by:
+Can not be emitted by functions in this library.
 
 ### Listen for Ticket approval for all (Everyone)
 
@@ -179,6 +208,8 @@ function callback(data) {
 
 listeners.listenForTicketApprovalForAll(callback);
 ```
+#### Emitted by:
+Can not be emitted by functions in this library.
 
 ### Listen for Ticket consecutive transfer (Everyone)
 
@@ -197,6 +228,8 @@ function callback(data) {
 
 listeners.listenForTicketConsecutiveTransfer(callback);
 ```
+#### Emitted by:
+Can not be emitted by functions in this library.
 
 ### Listen for Ticket consumed (Everyone)
 
@@ -213,6 +246,8 @@ function callback(data) {
 
 listeners.listenForTicketConsumed(callback);
 ```
+#### Emitted by:
+- clipTicket()
 
 ### Listen for batch metadata update (Everyone)
 
@@ -229,6 +264,8 @@ function callback(data) {
 
 listeners.listenForBatchMetadataUpdate(callback);
 ```
+#### Emitted by:
+Can not be emitted by functions in this library.
 
 ### Listen for refund (Everyone)
 
@@ -245,6 +282,8 @@ function callback(data) {
 
 listeners.listenForRefund(callback);
 ```
+#### Emitted by:
+Can not be emitted by functions in this library.
 
 ### Listen for new event Cashier (Everyone)
 
@@ -261,6 +300,8 @@ function callback(data) {
 
 listeners.listenForNewEventCashier(callback);
 ```
+#### Emitted by:
+- setEventCashier()
 
 ### Listen for new category (Everyone)
 
@@ -277,6 +318,8 @@ function callback(data) {
 
 listeners.listenForNewCategory(callback);
 ```
+#### Emitted by:
+- createTicketCategory()
 
 ### Listen for new category update (Everyone)
 
@@ -293,6 +336,8 @@ function callback(data) {
 
 listeners.listenForCategoryUpdate(callback);
 ```
+#### Emitted by:
+- updateCategory()
 
 ### Listen for category delete (Everyone)
 
@@ -309,6 +354,8 @@ function callback(data) {
 
 listeners.listenForCategoryDelete(callback);
 ```
+#### Emitted by:
+- removeCategory()
 
 ### Listen for category tickets added (Everyone)
 
@@ -325,6 +372,8 @@ function callback(data) {
 
 listeners.listenForCategoryTicketsAdded(callback);
 ```
+#### Emitted by:
+- addCategoryTicketsCount()
 
 ### Listen for category tickets removed (Everyone)
 
@@ -341,6 +390,8 @@ function callback(data) {
 
 listeners.listenForCategoryTicketsRemoved(callback);
 ```
+#### Emitted by:
+- removeCategoryTicketsCount()
 
 ### Listen for category sell changed (Everyone)
 
@@ -359,6 +410,8 @@ function callback(data) {
 
 listeners.listenForCategorySellChanged(callback);
 ```
+#### Emitted by:
+- manageCategorySelling()
 
 ### Listen for all categories sell changed (Everyone)
 
@@ -377,6 +430,8 @@ function callback(data) {
 
 listeners.listenForAllCategorySellChanged(callback);
 ```
+#### Emitted by:
+- manageAllCategorySelling()
 
 ### Listen for category sale dates update (Everyone)
 
@@ -393,6 +448,8 @@ function callback(data) {
 
 listeners.listenForCategorySaleDatesUpdate(callback);
 ```
+#### Emitted by:
+- updateCategorySaleDates()
 
 ### Listen for new event refund date (Everyone)
 
@@ -409,6 +466,8 @@ function callback(data) {
 
 listeners.listenForNewEventRefundDate(callback);
 ```
+#### Emitted by:
+- addRefundDeadline()
 
 ### Listen for refund withdraw (Everyone)
 
@@ -425,6 +484,8 @@ function callback(data) {
 
 listeners.listenForRefundWithdraw(callback);
 ```
+#### Emitted by:
+- withdrawRefund()
 
 ### Listen for event withdraw (Everyone)
 
@@ -441,6 +502,8 @@ function callback(data) {
 
 listeners.listenForEventWithdraw(callback);
 ```
+#### Emitted by:
+- withdrawContractBalance()
 
 ### Listen for cliped ticket (Everyone)
 
@@ -457,6 +520,8 @@ function callback(data) {
 
 listeners.listenForClipedTicket(callback);
 ```
+#### Emitted by:
+- clipTicket()
 
 ### Listen for booked tickets (Everyone)
 
@@ -473,6 +538,8 @@ function callback(data) {
 
 listeners.listenForBookedTickets(callback);
 ```
+#### Emitted by:
+- bookTickets()
 
 ### Listen for new ticket invitation (Everyone)
 
@@ -489,3 +556,5 @@ function callback(data) {
 
 listeners.listenForNewTicketInvitation(callback);
 ```
+#### Emitted by:
+- sendInvitation()
