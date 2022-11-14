@@ -877,12 +877,12 @@ const categoryData = [
   {
    categoryId: 1,
    ticketAmount: 1,
-   account: "0x...", 
+   account: "0x...",
   },
   {
    categoryId: 2,
    ticketAmount: 1
-   account: "0x..." 
+   account: "0x..."
   }
 ];
 

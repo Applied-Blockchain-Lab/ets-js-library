@@ -1,6 +1,6 @@
 /* eslint-disable no-useless-catch */
 
-import { ethers } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import axios from "axios";
 import {
   uploadDataToIpfs,
@@ -365,10 +365,10 @@ export async function buyTicketsFromSingleEvent(
 }
 
 function calculateTotalValue(priceData) {
-  let value = 0;
+  let value = BigNumber.from(0);
 
   for (let i = 0; i < priceData.length; i++) {
-    value += priceData[i].amount * priceData[i].price;
+    value = value.add(priceData[i].price.mul(priceData[i].amount));
   }
 
   return value;

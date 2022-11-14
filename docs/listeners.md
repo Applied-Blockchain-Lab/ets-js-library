@@ -112,7 +112,9 @@ listeners.listenForRefundedTicket(callback);
 
 
 ### Listen for Locked ticket (Everyone)
-*If a ticket is locked it cannot be transferred.
+
+\*If a ticket is locked it cannot be transferred.
+
 1. Import listeners from the library.
 2. Create a callback function.
 3. Supply callback function to listeners.listenForLockedTicked as parameter.
@@ -131,7 +133,9 @@ listeners.listenForLockedTicked(callback);
 - bookTickets()
 
 ### Listen for Unlocked ticket (Everyone)
-*If a ticket is unlocked it can be transferred.
+
+\*If a ticket is unlocked it can be transferred.
+
 1. Import listeners from the library.
 2. Create a callback function.
 3. Supply callback function to listeners.listenForUnlockedTicket as parameter.
@@ -208,7 +212,9 @@ listeners.listenForTicketApprovalForAll(callback);
 Can not be emitted by functions in this library.
 
 ### Listen for Ticket consecutive transfer (Everyone)
-*Transfer of multiple tickets at once.
+
+\*Transfer of multiple tickets at once.
+
 1. Import listeners from the library.
 2. Create a callback function.
 3. Supply callback function to listeners.listenForTicketConsecutiveTransfer as parameter.
@@ -388,7 +394,9 @@ listeners.listenForCategoryTicketsRemoved(callback);
 - removeCategoryTicketsCount()
 
 ### Listen for category sell changed (Everyone)
-*Stop/Start the sale of tickets for a category.
+
+\*Stop/Start the sale of tickets for a category.
+
 1. Import listeners from the library.
 2. Create a callback function.
 3. Supply callback function to listeners.listenForCategorySellChanged as parameter.
@@ -406,7 +414,9 @@ listeners.listenForCategorySellChanged(callback);
 - manageCategorySelling()
 
 ### Listen for all categories sell changed (Everyone)
-*Stop/Start the sale of tickets for all categories.
+
+\*Stop/Start the sale of tickets for all categories.
+
 1. Import listeners from the library.
 2. Create a callback function.
 3. Supply callback function to listeners.listenForAllCategorySellChanged as parameter.

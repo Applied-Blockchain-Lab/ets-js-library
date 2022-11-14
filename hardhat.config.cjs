@@ -22,4 +22,7 @@ module.exports = {
   docgen: {
     pages: "files",
   },
+  mocha: {
+    timeout: 200000,
+  },
 };
