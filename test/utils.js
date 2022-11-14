@@ -19,7 +19,7 @@ async function testSetUp() {
   return { eventFacet, ticketControllerFacet, ticketFacet, imageBlob, signers, wallet };
 }
 
-async function mockedCreateEvent(maxTicketPerClient, startDate, endDate, eventFacet, wallet, tokenId) {
+async function mockedCreateEvent(maxTicketPerClient, startDate, endDate, eventFacet, wallet) {
   const populatedTx = await createEvent(
     NFT_STORAGE_API_KEY,
     mockedMetadata,
@@ -31,7 +31,7 @@ async function mockedCreateEvent(maxTicketPerClient, startDate, endDate, eventFa
   const eventTxResponse = await eventTx.wait();
   const tokenIdInHex = eventTxResponse.logs[0].data.slice(2, 66); // buddy ignore:line
   const radix = 16;
-  tokenId = parseInt(tokenIdInHex, radix);
+  const tokenId = parseInt(tokenIdInHex, radix);
   console.log("New event: ", tokenId);
   return tokenId;
 }

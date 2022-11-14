@@ -8,6 +8,7 @@ import {
   fetchOwnedEvents,
   fetchEvents,
   setEventCashier,
+  addRefundDeadline,
 } from "../src/index.js";
 import {
   NFT_STORAGE_API_KEY,
@@ -24,6 +25,7 @@ import { mockedCreateEvent, testSetUp } from "./utils.js";
 describe("Organizer tests", function () {
   let diamondAddress;
   let eventFacet;
+  let ticketControllerFacet;
   let tokenId;
   let imageBlob;
   let wallet;
@@ -31,9 +33,10 @@ describe("Organizer tests", function () {
   const addressLength = 64;
 
   before(async function () {
-    ({ diamondAddress, eventFacet, imageBlob, signers, wallet } = await testSetUp(
+    ({ diamondAddress, eventFacet, ticketControllerFacet, imageBlob, signers, wallet } = await testSetUp(
       diamondAddress,
       eventFacet,
+      ticketControllerFacet,
       imageBlob,
       signers,
       wallet,
@@ -143,6 +146,17 @@ describe("Organizer tests", function () {
 
     expect(members[expectedMemberIndex].account).to.equal(address);
     expect(members[expectedMemberIndex].role).to.equal(CASHIER_ROLE);
+  });
+
+  it("Should add refund date", async () => {
+    const refundData = { date: DATES.EVENT_END_DATE, percentage: 100 };
+
+    const populatedTx = await addRefundDeadline(tokenId, refundData, ticketControllerFacet);
+    const tx = await wallet.sendTransaction(populatedTx);
+    await tx.wait();
+
+    const event = await eventFacet.fetchEventById(tokenId);
+    expect(event.refundData.length).to.equal(1);
   });
 
   it("Should call remove event method from smart contract", async () => {

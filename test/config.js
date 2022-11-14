@@ -98,12 +98,16 @@ const mockedTicketMetadata = {
 const errorMessages = {
   eventDoesNotExist: "Event: Event does not exist",
   callerIsNotAdmin: "Event: Caller is not an admin",
+  callerIsNotAdminOrModerator: "Event: Caller is not an admin or moderator",
   categoryStartDateIsIncorrect: "Event: Category start date is incorrect",
   categoryEndDateIsIncorrect: "Event: Category end date is incorrect",
   categoryDoesNotExist: "Event: Category does not exist",
   callReverted: "Event: Contract call reverted",
   callerIsNotAdminModOrRec: "Event: Caller is not an admin, moderator or receptionist",
   wrongClipDate: "Event: Wrong date for ticket clipping",
+  parametersLengthNotEqual: "Event: Parameters length not eq",
+  categoryIsFromAnotherEvent: "Event: This category is for another event",
+  placeIsTaken: "Event: Place is taken",
 };
 
 const DATES = {
