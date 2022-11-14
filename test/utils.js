@@ -1,20 +1,23 @@
 import eventSchema from "../config/EventFacet.json" assert { type: "json" };
 import ticketControllerSchema from "../config/EventTicketControllerFacet.json" assert { type: "json" };
+import ticketFacetSchema from "#contract.config/TicketFacet.json" assert { type: "json" };
 import { deployEventDiamond } from "../tasks/deployEventDiamond.js";
 import fetch from "@web-std/fetch";
 import { createEvent } from "../src/index.js";
 import { mockedMetadata, NFT_STORAGE_API_KEY } from "./config.js";
 
-async function testSetUp(diamondAddress, eventFacet, ticketControllerFacet, imageBlob, signers, wallet) {
-  diamondAddress = await deployEventDiamond();
+async function testSetUp(diamondAddress, eventFacet, ticketControllerFacet, ticketFacet, imageBlob, signers, wallet) {
+  const { eventDiamondAddress, ticketDiamondAddress } = await deployEventDiamond();
+  diamondAddress = eventDiamondAddress;
 
   eventFacet = await ethers.getContractAt(eventSchema.abi, diamondAddress);
   ticketControllerFacet = await ethers.getContractAt(ticketControllerSchema.abi, diamondAddress);
+  ticketFacet = await ethers.getContractAt(ticketFacetSchema.abi, ticketDiamondAddress);
   const image = await fetch("https://www.blackseachain.com/assets/img/hero-section/hero-image-compressed.png");
   imageBlob = await image.blob();
   signers = await ethers.getSigners();
   wallet = signers[0];
-  return { diamondAddress, eventFacet, ticketControllerFacet, imageBlob, signers, wallet };
+  return { diamondAddress, eventFacet, ticketControllerFacet, ticketFacet, imageBlob, signers, wallet };
 }
 
 async function mockedCreateEvent(maxTicketPerClient, startDate, endDate, eventFacet, wallet, tokenId) {

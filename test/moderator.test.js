@@ -41,6 +41,7 @@ describe("Moderator tests", function () {
   let diamondAddress;
   let eventFacet;
   let ticketControllerFacet;
+  let ticketFacet;
   let tokenId;
   let imageBlob;
   let wallet;
@@ -58,10 +59,11 @@ describe("Moderator tests", function () {
   }
 
   before(async function () {
-    ({ diamondAddress, eventFacet, ticketControllerFacet, imageBlob, signers, wallet } = await testSetUp(
+    ({ diamondAddress, eventFacet, ticketControllerFacet, ticketFacet, imageBlob, signers, wallet } = await testSetUp(
       diamondAddress,
       eventFacet,
       ticketControllerFacet,
+      ticketFacet,
       imageBlob,
       signers,
       wallet,
@@ -459,7 +461,7 @@ describe("Moderator tests", function () {
     const categoryData = [
       {
         categoryId: 2,
-        ticketAmount: 2,
+        ticketAmount: 3,
       },
     ];
 
@@ -477,7 +479,7 @@ describe("Moderator tests", function () {
       {
         row: 1,
         seat: 5,
-        account: "0x0000000000000000000000000000000000000000",
+        account: ethers.constants.AddressZero,
       },
     ];
     mockedTicketMetadata.image = imageBlob;
@@ -496,20 +498,22 @@ describe("Moderator tests", function () {
     const tx = await moderatorWallet.sendTransaction(populatedTx);
     await tx.wait();
 
-    const tickets = await getAddressTicketIdsByEvent(tokenId, ticketControllerFacet.address, ticketControllerFacet);
+    const tickets = await getAddressTicketIdsByEvent(tokenId, EXAMPLE_ADDRESS, ticketControllerFacet);
     expect(tickets.length).to.equal(2); // buddy ignore:line
   });
 
   it("Should send invitation", async () => {
-    const ticketIds = [4]; // buddy ignore:line
+    const ticketId = 4;
+    const ticketIds = [ticketId];
     const accounts = [EXAMPLE_ADDRESS];
 
     const populatedTx = await sendInvitation(tokenId, ticketIds, accounts, ticketControllerFacet);
+    populatedTx.from = moderatorWallet.address;
     const tx = await moderatorWallet.sendTransaction(populatedTx);
     await tx.wait();
 
-    const tickets = await getAddressTicketIdsByEvent(tokenId, EXAMPLE_ADDRESS, ticketControllerFacet);
-    expect(tickets.length).to.equal(3); // buddy ignore:line
+    const ownerOfBookedTicket = await ticketFacet.ownerOf(ticketId);
+    expect(ownerOfBookedTicket.toLowerCase()).to.equal(EXAMPLE_ADDRESS.toLowerCase());
   });
 
   it("Should clip ticket only once", async () => {

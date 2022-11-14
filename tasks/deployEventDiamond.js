@@ -92,5 +92,5 @@ export async function deployEventDiamond() {
   }
 
   // console.log("Completed diamond cut");
-  return eventDiamond.address;
+  return { eventDiamondAddress: eventDiamond.address, ticketDiamondAddress };
 }
