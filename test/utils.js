@@ -1,23 +1,25 @@
 import eventSchema from "../config/EventFacet.json" assert { type: "json" };
 import ticketControllerSchema from "../config/EventTicketControllerFacet.json" assert { type: "json" };
+import ticketFacetSchema from "../config/TicketFacet.json" assert { type: "json" };
 import { deployEventDiamond } from "../tasks/deployEventDiamond.js";
 import fetch from "@web-std/fetch";
 import { createEvent } from "../src/index.js";
 import { mockedMetadata, NFT_STORAGE_API_KEY } from "./config.js";
 
-async function testSetUp(diamondAddress, eventFacet, ticketControllerFacet, imageBlob, signers, wallet) {
-  diamondAddress = await deployEventDiamond();
+async function testSetUp() {
+  const { eventDiamondAddress, ticketDiamondAddress } = await deployEventDiamond();
 
-  eventFacet = await ethers.getContractAt(eventSchema.abi, diamondAddress);
-  ticketControllerFacet = await ethers.getContractAt(ticketControllerSchema.abi, diamondAddress);
+  const eventFacet = await ethers.getContractAt(eventSchema.abi, eventDiamondAddress);
+  const ticketControllerFacet = await ethers.getContractAt(ticketControllerSchema.abi, eventDiamondAddress);
+  const ticketFacet = await ethers.getContractAt(ticketFacetSchema.abi, ticketDiamondAddress);
   const image = await fetch("https://www.blackseachain.com/assets/img/hero-section/hero-image-compressed.png");
-  imageBlob = await image.blob();
-  signers = await ethers.getSigners();
-  wallet = signers[0];
-  return { diamondAddress, eventFacet, ticketControllerFacet, imageBlob, signers, wallet };
+  const imageBlob = await image.blob();
+  const signers = await ethers.getSigners();
+  const wallet = signers[0];
+  return { eventFacet, ticketControllerFacet, ticketFacet, imageBlob, signers, wallet };
 }
 
-async function mockedCreateEvent(maxTicketPerClient, startDate, endDate, eventFacet, wallet, tokenId) {
+async function mockedCreateEvent(maxTicketPerClient, startDate, endDate, eventFacet, wallet) {
   const populatedTx = await createEvent(
     NFT_STORAGE_API_KEY,
     mockedMetadata,
@@ -29,7 +31,7 @@ async function mockedCreateEvent(maxTicketPerClient, startDate, endDate, eventFa
   const eventTxResponse = await eventTx.wait();
   const tokenIdInHex = eventTxResponse.logs[0].data.slice(2, 66); // buddy ignore:line
   const radix = 16;
-  tokenId = parseInt(tokenIdInHex, radix);
+  const tokenId = parseInt(tokenIdInHex, radix);
   console.log("New event: ", tokenId);
   return tokenId;
 }

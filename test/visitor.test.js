@@ -4,6 +4,7 @@ import {
   buyTicketsFromSingleEvent,
   createTicketCategory,
   fetchAllEventsFromServer,
+  fetchCategoriesByEventId,
   fetchCountriesFromServer,
   fetchPlacesFromServer,
   getAddressTicketIdsByEvent,
@@ -27,8 +28,11 @@ import { expect } from "chai";
 import { mockedCreateEvent, testSetUp } from "./utils.js";
 
 describe("Visitor tests", () => {
+  const maxTicketPerClient = 10;
+  const startDate = DATES.EVENT_START_DATE;
+  const endDate = DATES.EVENT_END_DATE;
+
   let mock;
-  let diamondAddress;
   let eventFacet;
   let ticketControllerFacet;
   let firstEventTokenId;
@@ -40,37 +44,14 @@ describe("Visitor tests", () => {
 
   before(async () => {
     mock = new MockAdapter(axios);
-    ({ diamondAddress, eventFacet, ticketControllerFacet, imageBlob, signers, wallet } = await testSetUp(
-      diamondAddress,
-      eventFacet,
-      ticketControllerFacet,
-      imageBlob,
-      signers,
-      wallet,
-    ));
+    ({ eventFacet, ticketControllerFacet, imageBlob, signers, wallet } = await testSetUp());
     visitorWallet = signers[1];
 
-    const maxTicketPerClient = 10;
-    const startDate = DATES.EVENT_START_DATE;
-    const endDate = DATES.EVENT_END_DATE;
     mockedMetadata.image = imageBlob;
+    mockedCategoryMetadata.image = imageBlob;
 
-    firstEventTokenId = await mockedCreateEvent(
-      maxTicketPerClient,
-      startDate,
-      endDate,
-      eventFacet,
-      wallet,
-      firstEventTokenId,
-    );
-    secondEventTokenId = await mockedCreateEvent(
-      maxTicketPerClient + 1,
-      startDate,
-      endDate,
-      eventFacet,
-      wallet,
-      secondEventTokenId,
-    );
+    firstEventTokenId = await mockedCreateEvent(maxTicketPerClient, startDate, endDate, eventFacet, wallet);
+    secondEventTokenId = await mockedCreateEvent(maxTicketPerClient + 1, startDate, endDate, eventFacet, wallet);
     // create ticket category
     const populatedTx = await createTicketCategory(
       NFT_STORAGE_API_KEY,
@@ -158,7 +139,7 @@ describe("Visitor tests", () => {
     const tx = await visitorWallet.sendTransaction(populatedTx);
     await tx.wait();
 
-    const tickets = await getAddressTicketIdsByEvent(firstEventTokenId, visitorWallet.address, eventFacet);
+    const tickets = await getAddressTicketIdsByEvent(firstEventTokenId, visitorWallet.address, ticketControllerFacet);
     expect(tickets.length).to.equal(place.length);
   });
 
@@ -193,7 +174,7 @@ describe("Visitor tests", () => {
       priceData,
       place,
       ticketsMetadata,
-      eventFacet,
+      ticketControllerFacet,
     );
     populatedTx.from = visitorWallet.address;
     await expect(visitorWallet.sendTransaction(populatedTx)).to.be.revertedWith(errorMessages.placeIsTaken);
@@ -362,16 +343,16 @@ describe("Visitor tests", () => {
       priceData,
       place,
       ticketsMetadata,
-      eventFacet,
+      ticketControllerFacet,
     );
     populatedTx.from = visitorWallet.address;
     const tx = await visitorWallet.sendTransaction(populatedTx);
     await tx.wait();
 
-    const tickets = await getAddressTicketIdsByEvent(firstEventTokenId, visitorWallet.address, eventFacet);
+    const tickets = await getAddressTicketIdsByEvent(firstEventTokenId, visitorWallet.address, ticketControllerFacet);
     expect(tickets.length).to.equal(4); // buddy ignore:line
 
-    const tickets2 = await getAddressTicketIdsByEvent(secondEventTokenId, visitorWallet.address, eventFacet);
+    const tickets2 = await getAddressTicketIdsByEvent(secondEventTokenId, visitorWallet.address, ticketControllerFacet);
     expect(tickets2.length).to.equal(1); // buddy ignore:line
   });
 
@@ -542,13 +523,62 @@ describe("Visitor tests", () => {
   it("Should revert add refund date when visitor calls it", async () => {
     const refundData = { date: DATES.EVENT_END_DATE, percentage: 100 };
 
-    const populatedTx = await addRefundDeadline(firstEventTokenId, refundData, eventFacet);
+    const populatedTx = await addRefundDeadline(firstEventTokenId, refundData, ticketControllerFacet);
     populatedTx.from = visitorWallet.address;
-    await expect(visitorWallet.sendTransaction(populatedTx)).to.be.revertedWith(errorMessages.callerIsNotAdmin);
+    await expect(visitorWallet.sendTransaction(populatedTx)).to.be.revertedWith(
+      errorMessages.callerIsNotAdminOrModerator,
+    );
   });
 
   it("Should withdraw the refund", async () => {
-    const ticketParams = { eventId: 1, categoryId: 1, ticketId: 1 };
+    let populatedTx;
+    let res;
+    const refundData = { date: DATES.EVENT_END_DATE, percentage: 100 };
+
+    populatedTx = await addRefundDeadline(firstEventTokenId, refundData, ticketControllerFacet);
+    res = await wallet.sendTransaction(populatedTx);
+    await res.wait();
+
+    const priceData = [
+      {
+        amount: 2,
+        price: 10,
+      },
+    ];
+
+    const place = [
+      {
+        row: 1,
+        seat: 1,
+      },
+      {
+        row: 1,
+        seat: 2,
+      },
+    ];
+
+    mockedTicketMetadata.image = imageBlob;
+
+    const ticketsMetadata = [mockedTicketMetadata, mockedTicketMetadata];
+
+    populatedTx = await buyTicketsFromSingleEvent(
+      NFT_STORAGE_API_KEY,
+      firstEventTokenId,
+      1,
+      priceData,
+      place,
+      ticketsMetadata,
+      // eventFacet,
+      ticketControllerFacet,
+    );
+    populatedTx.from = visitorWallet.address;
+    res = await visitorWallet.sendTransaction(populatedTx);
+    await res.wait();
+
+    const ticketParams = { eventId: firstEventTokenId, categoryId: 1, ticketId: 1 };
+
+    const cats = await fetchCategoriesByEventId(firstEventTokenId, eventFacet);
+    console.log(cats);
 
     const populatedReturnTicketTx = await returnTicket(ticketParams, ticketControllerFacet);
     const returnTicketTx = await wallet.sendTransaction(populatedReturnTicketTx);
@@ -557,7 +587,7 @@ describe("Visitor tests", () => {
     const walletBalanceBefore = await visitorWallet.getBalance();
     console.log("walletBalanceBefore", walletBalanceBefore.toString());
 
-    const populatedTx = await withdrawRefund(ticketParams.eventId, ticketParams.ticketId, ticketControllerFacet);
+    populatedTx = await withdrawRefund(ticketParams.eventId, ticketParams.ticketId, ticketControllerFacet);
     populatedTx.from = visitorWallet.address;
     const tx = await visitorWallet.sendTransaction(populatedTx);
     await tx.wait();
