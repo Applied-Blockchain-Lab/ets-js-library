@@ -54,7 +54,7 @@ describe("Moderator tests", function () {
     if (spyFunc.callCount === 0) {
       setTimeout(checkFunctionInvocation, 100); // buddy ignore:line
     } else {
-      expect(spyFunc.callCount).to.equal(1);
+      expect(spyFunc.callCount).to.be.at.least(1);
     }
   }
 
@@ -247,6 +247,7 @@ describe("Moderator tests", function () {
   });
 
   it("Should stop the sale of tickets for category", async () => {
+    listeners.listenForCategorySellChanged(spyFunc, eventFacet);
     const categoriesBefore = await fetchCategoriesByEventId(tokenId, eventFacet);
     const value = false;
     const categoryId = categoriesBefore[0].id;
@@ -254,6 +255,8 @@ describe("Moderator tests", function () {
     populatedTx.from = moderatorWallet.address;
     const tx = await moderatorWallet.sendTransaction(populatedTx);
     await tx.wait();
+    checkFunctionInvocation();
+    spyFunc.resetHistory();
     const categoriesAfter = await fetchCategoriesByEventId(tokenId, eventFacet);
 
     expect(categoriesBefore[0].areTicketsBuyable).to.not.equal(categoriesAfter[0].areTicketsBuyable);
@@ -315,11 +318,15 @@ describe("Moderator tests", function () {
   });
 
   it("Should stop the sale of tickets for all categories", async () => {
+    listeners.listenForAllCategorySellChanged(spyFunc, eventFacet);
     const value = false;
     const populatedTx = await manageAllCategorySelling(tokenId, value, eventFacet);
     populatedTx.from = moderatorWallet.address;
     const tx = await moderatorWallet.sendTransaction(populatedTx);
     await tx.wait();
+
+    checkFunctionInvocation();
+    spyFunc.resetHistory();
 
     const event = await fetchEvent(tokenId, eventFacet);
 
@@ -409,7 +416,7 @@ describe("Moderator tests", function () {
     const priceData = [
       {
         amount: 2,
-        price: 500000,
+        price: ethers.utils.parseUnits("10", "ether"),
       },
     ];
 
@@ -485,6 +492,8 @@ describe("Moderator tests", function () {
     mockedTicketMetadata.image = imageBlob;
     const ticketsMetadata = [mockedTicketMetadata, mockedTicketMetadata, mockedTicketMetadata];
 
+    listeners.listenForBookedTickets(spyFunc, ticketControllerFacet);
+
     const populatedTx = await bookTickets(
       NFT_STORAGE_API_KEY,
       tokenId,
@@ -498,11 +507,16 @@ describe("Moderator tests", function () {
     const tx = await moderatorWallet.sendTransaction(populatedTx);
     await tx.wait();
 
+    checkFunctionInvocation();
+    spyFunc.resetHistory();
+
     const tickets = await getAddressTicketIdsByEvent(tokenId, EXAMPLE_ADDRESS, ticketControllerFacet);
     expect(tickets.length).to.equal(2); // buddy ignore:line
   });
 
-  it("Should send invitation", async () => {
+  it("Should send invitation and emit event", async () => {
+    listeners.listenForLockedTicked(spyFunc, ticketFacet);
+
     const ticketId = 4;
     const ticketIds = [ticketId];
     const accounts = [EXAMPLE_ADDRESS];
@@ -512,15 +526,23 @@ describe("Moderator tests", function () {
     const tx = await moderatorWallet.sendTransaction(populatedTx);
     await tx.wait();
 
+    checkFunctionInvocation();
+    spyFunc.resetHistory();
+
     const ownerOfBookedTicket = await ticketFacet.ownerOf(ticketId);
     expect(ownerOfBookedTicket.toLowerCase()).to.equal(EXAMPLE_ADDRESS.toLowerCase());
   });
 
-  it("Should clip ticket only once", async () => {
+  it("Should clip ticket only once and test the listener", async () => {
+    listeners.listenForTicketConsumed(spyFunc, ticketFacet);
+
     const populatedTx = await clipTicket(tokenId, 1, ticketControllerFacet);
     populatedTx.from = moderatorWallet.address;
     const tx = await moderatorWallet.sendTransaction(populatedTx);
     await tx.wait();
+
+    checkFunctionInvocation();
+    spyFunc.resetHistory();
 
     const populatedTx2 = await clipTicket(tokenId, 1, ticketControllerFacet);
     populatedTx2.from = moderatorWallet.address;
