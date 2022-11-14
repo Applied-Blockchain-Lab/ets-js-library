@@ -541,23 +541,22 @@ describe("Visitor tests", () => {
     const priceData = [
       {
         amount: 2,
-        price: 10,
+        price: ethers.utils.parseUnits("10", "ether"),
       },
     ];
 
     const place = [
       {
-        row: 1,
-        seat: 1,
+        row: 4,
+        seat: 5,
       },
       {
-        row: 1,
-        seat: 2,
+        row: 4,
+        seat: 6,
       },
     ];
 
     mockedTicketMetadata.image = imageBlob;
-
     const ticketsMetadata = [mockedTicketMetadata, mockedTicketMetadata];
 
     populatedTx = await buyTicketsFromSingleEvent(
@@ -567,9 +566,9 @@ describe("Visitor tests", () => {
       priceData,
       place,
       ticketsMetadata,
-      // eventFacet,
       ticketControllerFacet,
     );
+
     populatedTx.from = visitorWallet.address;
     res = await visitorWallet.sendTransaction(populatedTx);
     await res.wait();
@@ -579,10 +578,9 @@ describe("Visitor tests", () => {
     const populatedReturnTicketTx = await returnTicket(ticketParams, ticketControllerFacet);
     populatedReturnTicketTx.from = visitorWallet.address;
     const returnTicketTx = await visitorWallet.sendTransaction(populatedReturnTicketTx);
-    await returnTicketTx.wait();
+    res = await returnTicketTx.wait();
 
     const walletBalanceBefore = await visitorWallet.getBalance();
-    console.log(walletBalanceBefore);
 
     populatedTx = await withdrawRefund(ticketParams.eventId, ticketParams.ticketId, ticketControllerFacet);
     populatedTx.from = visitorWallet.address;
@@ -590,18 +588,13 @@ describe("Visitor tests", () => {
     res = await tx.wait();
 
     const walletBalanceAfterRefund = await visitorWallet.getBalance();
-    console.log(walletBalanceAfterRefund);
-    console.log(walletBalanceBefore.sub(walletBalanceAfterRefund));
 
     const gasUsed = res.gasUsed;
     const gasFees = res.effectiveGasPrice.mul(gasUsed);
 
-    console.log(gasFees);
-
     const bps = refundData.percentage * 100;
     const refundPrice = ethers.utils.parseUnits("10", "ether").mul(bps).div(10000); // buddy ignore:line
 
-    console.log("r", refundPrice);
     expect(walletBalanceAfterRefund).to.equal(walletBalanceBefore.add(refundPrice).sub(gasFees));
   });
 });

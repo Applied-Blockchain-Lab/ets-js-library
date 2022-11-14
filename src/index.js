@@ -365,13 +365,13 @@ export async function buyTicketsFromSingleEvent(
 }
 
 function calculateTotalValue(priceData) {
-  let value = 0;
+  let value = BigNumber.from(0);
 
   for (let i = 0; i < priceData.length; i++) {
-    value += priceData[i].amount * priceData[i].price;
+    value = value.add(priceData[i].price.mul(priceData[i].amount));
   }
 
-  return BigNumber.from(value);
+  return value;
 }
 
 export async function addRefundDeadline(eventId, refundData, contract = ticketControllerContract) {

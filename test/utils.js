@@ -1,6 +1,6 @@
 import eventSchema from "../config/EventFacet.json" assert { type: "json" };
 import ticketControllerSchema from "../config/EventTicketControllerFacet.json" assert { type: "json" };
-import ticketFacetSchema from "../config/TicketFacet.json" assert { type: "json" };
+import ticketFacetSchema from "#contract.config/TicketFacet.json" assert { type: "json" };
 import { deployEventDiamond } from "../tasks/deployEventDiamond.js";
 import fetch from "@web-std/fetch";
 import { createEvent } from "../src/index.js";
