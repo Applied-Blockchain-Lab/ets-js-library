@@ -187,7 +187,7 @@ function callback(data) {
 listeners.listenForTicketApproval(callback);
 ```
 #### Emitted by:
-Can not be emmitted by functions in this library.
+Can not be emitted by functions in this library.
 
 ### Listen for Ticket approval for all (Everyone)
 
@@ -205,7 +205,7 @@ function callback(data) {
 listeners.listenForTicketApprovalForAll(callback);
 ```
 #### Emitted by:
-Can not be emmitted by functions in this library.
+Can not be emitted by functions in this library.
 
 ### Listen for Ticket consecutive transfer (Everyone)
 *Transfer of multiple tickets at once.
@@ -223,7 +223,7 @@ function callback(data) {
 listeners.listenForTicketConsecutiveTransfer(callback);
 ```
 #### Emitted by:
-Can not be emmitted by functions in this library.
+Can not be emitted by functions in this library.
 
 ### Listen for Ticket consumed (Everyone)
 
@@ -259,7 +259,7 @@ function callback(data) {
 listeners.listenForBatchMetadataUpdate(callback);
 ```
 #### Emitted by:
-Can not be emmitted by functions in this library.
+Can not be emitted by functions in this library.
 
 ### Listen for refund (Everyone)
 
@@ -277,7 +277,7 @@ function callback(data) {
 listeners.listenForRefund(callback);
 ```
 #### Emitted by:
-Can not be emmitted by functions in this library.
+Can not be emitted by functions in this library.
 
 ### Listen for new event Cashier (Everyone)
 
