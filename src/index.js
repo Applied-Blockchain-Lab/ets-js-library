@@ -1,6 +1,6 @@
 /* eslint-disable no-useless-catch */
 
-import { ethers } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import axios from "axios";
 import {
   uploadDataToIpfs,
@@ -371,7 +371,7 @@ function calculateTotalValue(priceData) {
     value += priceData[i].amount * priceData[i].price;
   }
 
-  return value;
+  return BigNumber.from(value);
 }
 
 export async function addRefundDeadline(eventId, refundData, contract = ticketControllerContract) {

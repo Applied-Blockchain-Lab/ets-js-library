@@ -4,7 +4,6 @@ import {
   buyTicketsFromSingleEvent,
   createTicketCategory,
   fetchAllEventsFromServer,
-  fetchCategoriesByEventId,
   fetchCountriesFromServer,
   fetchPlacesFromServer,
   getAddressTicketIdsByEvent,
@@ -533,7 +532,7 @@ describe("Visitor tests", () => {
   it("Should withdraw the refund", async () => {
     let populatedTx;
     let res;
-    const refundData = { date: DATES.EVENT_END_DATE, percentage: 100 };
+    const refundData = { date: DATES.EVENT_END_DATE, percentage: 20 };
 
     populatedTx = await addRefundDeadline(firstEventTokenId, refundData, ticketControllerFacet);
     res = await wallet.sendTransaction(populatedTx);
@@ -577,24 +576,32 @@ describe("Visitor tests", () => {
 
     const ticketParams = { eventId: firstEventTokenId, categoryId: 1, ticketId: 1 };
 
-    const cats = await fetchCategoriesByEventId(firstEventTokenId, eventFacet);
-    console.log(cats);
-
     const populatedReturnTicketTx = await returnTicket(ticketParams, ticketControllerFacet);
-    const returnTicketTx = await wallet.sendTransaction(populatedReturnTicketTx);
+    populatedReturnTicketTx.from = visitorWallet.address;
+    const returnTicketTx = await visitorWallet.sendTransaction(populatedReturnTicketTx);
     await returnTicketTx.wait();
 
     const walletBalanceBefore = await visitorWallet.getBalance();
-    console.log("walletBalanceBefore", walletBalanceBefore.toString());
+    console.log(walletBalanceBefore);
 
     populatedTx = await withdrawRefund(ticketParams.eventId, ticketParams.ticketId, ticketControllerFacet);
     populatedTx.from = visitorWallet.address;
     const tx = await visitorWallet.sendTransaction(populatedTx);
-    await tx.wait();
+    res = await tx.wait();
 
     const walletBalanceAfterRefund = await visitorWallet.getBalance();
-    console.log("Wallet balance after withdraw refund: ", walletBalanceAfterRefund.toString());
+    console.log(walletBalanceAfterRefund);
+    console.log(walletBalanceBefore.sub(walletBalanceAfterRefund));
 
-    expect(walletBalanceAfterRefund).to.be.gt(walletBalanceBefore);
+    const gasUsed = res.gasUsed;
+    const gasFees = res.effectiveGasPrice.mul(gasUsed);
+
+    console.log(gasFees);
+
+    const bps = refundData.percentage * 100;
+    const refundPrice = ethers.utils.parseUnits("10", "ether").mul(bps).div(10000); // buddy ignore:line
+
+    console.log("r", refundPrice);
+    expect(walletBalanceAfterRefund).to.equal(walletBalanceBefore.add(refundPrice).sub(gasFees));
   });
 });
