@@ -180,6 +180,46 @@ describe("Moderator tests", function () {
     expect(categoriesAfterUpdate[0].cid).to.not.equal(categories[0].cid);
   });
 
+  it.skip("Should revert update ticket category when start sale date is earlier than start date of event", async () => {
+    const categories = await fetchCategoriesByEventId(tokenId, eventFacet);
+    const categoryId = categories[0].id;
+    mockedCategoryMetadata.saleStartDate = DATES.EARLY_SALE_START_DATE;
+    mockedCategoryMetadata.saleEndDate = DATES.EVENT_END_DATE;
+    const populatedTx = await updateCategory(
+      NFT_STORAGE_API_KEY,
+      tokenId,
+      categoryId,
+      mockedCategoryMetadata,
+      mockedContractData,
+      eventFacet,
+    );
+    populatedTx.from = moderatorWallet.address;
+
+    await expect(moderatorWallet.sendTransaction(populatedTx)).to.be.revertedWith(
+      errorMessages.categoryStartDateIsIncorrect,
+    );
+  });
+
+  it.skip("Should revert update ticket category when the end sale date is after end date of the event", async () => {
+    const categories = await fetchCategoriesByEventId(tokenId, eventFacet);
+    const categoryId = categories[0].id;
+    mockedCategoryMetadata.saleStartDate = DATES.EVENT_START_DATE;
+    mockedCategoryMetadata.saleEndDate = DATES.LATE_SALE_END_DATE;
+    const populatedTx = await updateCategory(
+      NFT_STORAGE_API_KEY,
+      tokenId,
+      categoryId,
+      mockedCategoryMetadata,
+      mockedContractData,
+      eventFacet,
+    );
+    populatedTx.from = moderatorWallet.address;
+
+    await expect(moderatorWallet.sendTransaction(populatedTx)).to.be.revertedWith(
+      errorMessages.categoryEndDateIsIncorrect,
+    );
+  });
+
   it("Should add more tickets to category", async () => {
     const categoriesBefore = await fetchCategoriesByEventId(tokenId, eventFacet);
     const moreTickets = 20;
