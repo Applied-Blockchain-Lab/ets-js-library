@@ -456,18 +456,6 @@ describe("Moderator tests", function () {
     expect(event.refundData.length).to.equal(1);
   });
 
-  it("Should clip ticket only once", async () => {
-    const populatedTx = await clipTicket(tokenId, 1, ticketControllerFacet);
-    populatedTx.from = moderatorWallet.address;
-    const tx = await moderatorWallet.sendTransaction(populatedTx);
-    await tx.wait();
-
-    const populatedTx2 = await clipTicket(tokenId, 1, ticketControllerFacet);
-    populatedTx2.from = moderatorWallet.address;
-
-    await expect(moderatorWallet.sendTransaction(populatedTx2)).to.be.revertedWith(errorMessages.callReverted);
-  });
-
   it("Should listen for new Events", async () => {
     listeners.listenForNewEvent(spyFunc, eventFacet);
     const maxTicketPerClient = 10;
@@ -545,5 +533,293 @@ describe("Moderator tests", function () {
     populatedTx.from = moderatorWallet.address;
 
     await expect(moderatorWallet.sendTransaction(populatedTx)).to.be.revertedWith(errorMessages.callerIsNotAdmin);
+  });
+});
+
+describe("Clip ticket", function () {
+  let eventFacet, ticketControllerFacet, imageBlob, signers, wallet, moderatorWallet;
+
+  before(async () => {
+    ({ eventFacet, ticketControllerFacet, imageBlob, signers, wallet } = await testSetUp());
+
+    moderatorWallet = signers[1];
+  });
+
+  it("Should revert clip ticket when there is not such ticket", async () => {
+    // Create event
+    const maxTicketPerClient = 10;
+    const startDate = DATES.EVENT_START_DATE;
+    const endDate = DATES.EVENT_END_DATE;
+
+    mockedMetadata.image = imageBlob;
+    mockedCategoryMetadata.image = imageBlob;
+
+    let tokenIdParam;
+    const tokenId = await mockedCreateEvent(maxTicketPerClient, startDate, endDate, eventFacet, wallet, tokenIdParam);
+
+    // Grant moderator role
+    const moderatorRole = utils.keccak256(utils.toUtf8Bytes("MODERATOR_ROLE"));
+    const moderatorAddress = await moderatorWallet.getAddress();
+    const addTeamMemberTx = await addTeamMember(tokenId, moderatorRole, moderatorAddress, eventFacet);
+    const tx = await wallet.sendTransaction(addTeamMemberTx);
+    await tx.wait();
+
+    // Create category
+    const populatedTx1 = await createTicketCategory(
+      NFT_STORAGE_API_KEY,
+      tokenId,
+      mockedCategoryMetadata,
+      mockedContractData,
+      eventFacet,
+    );
+    populatedTx1.from = moderatorWallet.address;
+    const tx2 = await moderatorWallet.sendTransaction(populatedTx1);
+    await tx2.wait();
+
+    const populatedTx = await clipTicket(tokenId, 1, ticketControllerFacet);
+    populatedTx.from = moderatorWallet.address;
+
+    await expect(moderatorWallet.sendTransaction(populatedTx)).to.be.revertedWith(errorMessages.callReverted);
+  });
+
+  it("Should revert clip ticket when the caller does not have a required role", async () => {
+    // Create event
+    const maxTicketPerClient = 10;
+    const startDate = DATES.EVENT_START_DATE;
+    const endDate = DATES.EVENT_END_DATE;
+
+    mockedMetadata.image = imageBlob;
+    mockedCategoryMetadata.image = imageBlob;
+
+    let tokenIdParam;
+    const tokenId = await mockedCreateEvent(maxTicketPerClient, startDate, endDate, eventFacet, wallet, tokenIdParam);
+
+    // Grant moderator role
+    const moderatorRole = utils.keccak256(utils.toUtf8Bytes("MODERATOR_ROLE"));
+    const moderatorAddress = await moderatorWallet.getAddress();
+    const addTeamMemberTx = await addTeamMember(tokenId, moderatorRole, moderatorAddress, eventFacet);
+    const txMember = await wallet.sendTransaction(addTeamMemberTx);
+    await txMember.wait();
+
+    // Create category
+    const populatedTx1 = await createTicketCategory(
+      NFT_STORAGE_API_KEY,
+      tokenId,
+      mockedCategoryMetadata,
+      mockedContractData,
+      eventFacet,
+    );
+    populatedTx1.from = moderatorWallet.address;
+    const tx = await moderatorWallet.sendTransaction(populatedTx1);
+    await tx.wait();
+
+    // Buy ticket
+    const categoryId = 2;
+    const priceData = [
+      {
+        amount: 2,
+        price: 500000,
+      },
+    ];
+
+    const place = [
+      {
+        row: 1,
+        seat: 1,
+      },
+      {
+        row: 1,
+        seat: 2,
+      },
+    ];
+
+    mockedTicketMetadata.image = imageBlob;
+
+    const ticketsMetadata = [mockedTicketMetadata, mockedTicketMetadata];
+
+    const populatedTx2 = await buyTicketsFromSingleEvent(
+      NFT_STORAGE_API_KEY,
+      tokenId,
+      categoryId,
+      priceData,
+      place,
+      ticketsMetadata,
+      ticketControllerFacet,
+    );
+    populatedTx2.from = moderatorWallet.address;
+    const tx2 = await moderatorWallet.sendTransaction(populatedTx2);
+    await tx2.wait();
+
+    // Try to clip a ticket
+    const ticketId = 1;
+    const SIGNER_ARRAY_INDEX = 2;
+    const populatedTx3 = await clipTicket(tokenId, ticketId, ticketControllerFacet);
+    populatedTx3.from = signers[SIGNER_ARRAY_INDEX].address;
+
+    await expect(signers[SIGNER_ARRAY_INDEX].sendTransaction(populatedTx3)).to.be.revertedWith(
+      errorMessages.callerIsNotAdminModOrRec,
+    );
+  });
+
+  it("Should revert clip ticket if the event has not started", async () => {
+    // Create event
+    const maxTicketPerClient = 10;
+    const startDate = DATES.EVENT_START_DATE + 100000; // buddy ignore:line
+    const endDate = DATES.EVENT_END_DATE;
+
+    mockedMetadata.image = imageBlob;
+    mockedCategoryMetadata.image = imageBlob;
+
+    let tokenIdParam;
+    const tokenId = await mockedCreateEvent(maxTicketPerClient, startDate, endDate, eventFacet, wallet, tokenIdParam);
+
+    // Grant moderator role
+    const moderatorRole = utils.keccak256(utils.toUtf8Bytes("MODERATOR_ROLE"));
+    const moderatorAddress = await moderatorWallet.getAddress();
+    const addTeamMemberTx = await addTeamMember(tokenId, moderatorRole, moderatorAddress, eventFacet);
+    const txMember = await wallet.sendTransaction(addTeamMemberTx);
+    await txMember.wait();
+
+    // Create category
+    mockedContractData.saleStartDate = startDate;
+    const populatedTx1 = await createTicketCategory(
+      NFT_STORAGE_API_KEY,
+      tokenId,
+      mockedCategoryMetadata,
+      mockedContractData,
+      eventFacet,
+    );
+    populatedTx1.from = moderatorWallet.address;
+    const tx = await moderatorWallet.sendTransaction(populatedTx1);
+    await tx.wait();
+
+    // Try to clip a ticket
+    const ticketId = 1;
+    const populatedTx3 = await clipTicket(tokenId, ticketId, ticketControllerFacet);
+    populatedTx3.from = moderatorWallet.address;
+    await expect(moderatorWallet.sendTransaction(populatedTx3)).to.be.revertedWith(errorMessages.wrongClipDate);
+  });
+
+  it("Should revert clip ticket if the event has finished", async () => {
+    // Create event
+    const maxTicketPerClient = 10;
+    const startDate = DATES.EVENT_START_DATE;
+    const endDate = startDate + 5; // buddy ignore:line
+
+    mockedMetadata.image = imageBlob;
+    mockedCategoryMetadata.image = imageBlob;
+
+    let tokenIdParam;
+    const tokenId = await mockedCreateEvent(maxTicketPerClient, startDate, endDate, eventFacet, wallet, tokenIdParam);
+
+    // Grant moderator role
+    const moderatorRole = utils.keccak256(utils.toUtf8Bytes("MODERATOR_ROLE"));
+    const moderatorAddress = await moderatorWallet.getAddress();
+    const addTeamMemberTx = await addTeamMember(tokenId, moderatorRole, moderatorAddress, eventFacet);
+    const txMember = await wallet.sendTransaction(addTeamMemberTx);
+    await txMember.wait();
+
+    // Create category
+    mockedContractData.saleEndDate = endDate;
+    const populatedTx1 = await createTicketCategory(
+      NFT_STORAGE_API_KEY,
+      tokenId,
+      mockedCategoryMetadata,
+      mockedContractData,
+      eventFacet,
+    );
+    populatedTx1.from = moderatorWallet.address;
+    const tx = await moderatorWallet.sendTransaction(populatedTx1);
+    await tx.wait();
+
+    const FIVE_SECONDS = 5000;
+    setTimeout(() => {}, FIVE_SECONDS);
+
+    // Try to clip a ticket
+    const ticketId = 1;
+    const populatedTx3 = await clipTicket(tokenId, ticketId, ticketControllerFacet);
+    populatedTx3.from = moderatorWallet.address;
+    await expect(moderatorWallet.sendTransaction(populatedTx3)).to.be.revertedWith(errorMessages.wrongClipDate);
+  });
+
+  it("Should clip ticket only once", async () => {
+    // Create event
+    const maxTicketPerClient = 10;
+    const startDate = DATES.EVENT_START_DATE;
+    const endDate = DATES.EVENT_END_DATE;
+
+    mockedMetadata.image = imageBlob;
+    mockedCategoryMetadata.image = imageBlob;
+
+    let tokenIdParam;
+    const tokenId = await mockedCreateEvent(maxTicketPerClient, startDate, endDate, eventFacet, wallet, tokenIdParam);
+
+    // Grant moderator role
+    const moderatorRole = utils.keccak256(utils.toUtf8Bytes("MODERATOR_ROLE"));
+    const moderatorAddress = await moderatorWallet.getAddress();
+    const addTeamMemberTx = await addTeamMember(tokenId, moderatorRole, moderatorAddress, eventFacet);
+    const txMember = await wallet.sendTransaction(addTeamMemberTx);
+    await txMember.wait();
+
+    // Create category
+    mockedContractData.saleStartDate = DATES.EVENT_START_DATE + 10; // buddy ignore:line
+    mockedContractData.saleEndDate = DATES.EVENT_END_DATE - 10; // buddy ignore:line
+    const populatedTx1 = await createTicketCategory(
+      NFT_STORAGE_API_KEY,
+      tokenId,
+      mockedCategoryMetadata,
+      mockedContractData,
+      eventFacet,
+    );
+    populatedTx1.from = moderatorWallet.address;
+    const txCategory = await moderatorWallet.sendTransaction(populatedTx1);
+    await txCategory.wait();
+
+    // Buy ticket
+    const categoryId = 5;
+    const priceData = [
+      {
+        amount: 2,
+        price: 500000,
+      },
+    ];
+
+    const place = [
+      {
+        row: 1,
+        seat: 1,
+      },
+      {
+        row: 1,
+        seat: 2,
+      },
+    ];
+
+    mockedTicketMetadata.image = imageBlob;
+
+    const ticketsMetadata = [mockedTicketMetadata, mockedTicketMetadata];
+
+    const populatedTx2 = await buyTicketsFromSingleEvent(
+      NFT_STORAGE_API_KEY,
+      tokenId,
+      categoryId,
+      priceData,
+      place,
+      ticketsMetadata,
+      ticketControllerFacet,
+    );
+    populatedTx2.from = moderatorWallet.address;
+    const tx2 = await moderatorWallet.sendTransaction(populatedTx2);
+    await tx2.wait();
+
+    const populatedTx = await clipTicket(tokenId, 1, ticketControllerFacet);
+    populatedTx.from = moderatorWallet.address;
+    const tx = await moderatorWallet.sendTransaction(populatedTx);
+    await tx.wait();
+
+    const populatedTx2Clip = await clipTicket(tokenId, 1, ticketControllerFacet);
+    populatedTx2Clip.from = moderatorWallet.address;
+
+    await expect(moderatorWallet.sendTransaction(populatedTx2Clip)).to.be.revertedWith(errorMessages.callReverted);
   });
 });

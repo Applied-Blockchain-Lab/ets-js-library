@@ -102,6 +102,8 @@ const errorMessages = {
   categoryEndDateIsIncorrect: "Event: Category end date is incorrect",
   categoryDoesNotExist: "Event: Category does not exist",
   callReverted: "Event: Contract call reverted",
+  callerIsNotAdminModOrRec: "Event: Caller is not an admin, moderator or receptionist",
+  wrongClipDate: "Event: Wrong date for ticket clipping",
 };
 
 const DATES = {
