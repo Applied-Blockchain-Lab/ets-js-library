@@ -1,13 +1,21 @@
 import {
+  addCategoryTicketsCount,
   addRefundDeadline,
   buyTicketsFromMultipleEvents,
   buyTicketsFromSingleEvent,
+  clipTicket,
   createTicketCategory,
   fetchAllEventsFromServer,
+  fetchCategoriesByEventId,
   fetchCountriesFromServer,
   fetchPlacesFromServer,
   getAddressTicketIdsByEvent,
+  listeners,
+  removeCategory,
+  removeCategoryTicketsCount,
   returnTicket,
+  sendInvitation,
+  setEventCashier,
   withdrawRefund,
 } from "../src/index.js";
 import axios from "axios";
@@ -21,10 +29,12 @@ import {
   mockedCategoryMetadata,
   mockedContractData,
   errorMessages,
+  EXAMPLE_ADDRESS,
 } from "./config.js";
 import { StatusCodes } from "http-status-codes";
 import { expect } from "chai";
 import { mockedCreateEvent, testSetUp } from "./utils.js";
+import { spy } from "sinon";
 
 describe("Visitor tests", () => {
   const maxTicketPerClient = 10;
@@ -40,6 +50,15 @@ describe("Visitor tests", () => {
   let wallet;
   let visitorWallet;
   let signers;
+  const spyFunc = spy();
+
+  function checkFunctionInvocation() {
+    if (spyFunc.callCount === 0) {
+      setTimeout(checkFunctionInvocation, 100); // buddy ignore:line
+    } else {
+      expect(spyFunc.callCount).to.equal(1);
+    }
+  }
 
   before(async () => {
     mock = new MockAdapter(axios);
@@ -131,7 +150,6 @@ describe("Visitor tests", () => {
       priceData,
       place,
       ticketsMetadata,
-      // eventFacet,
       ticketControllerFacet,
     );
     populatedTx.from = visitorWallet.address;
@@ -210,7 +228,6 @@ describe("Visitor tests", () => {
       priceData,
       place,
       ticketsMetadata,
-      // eventFacet,
       ticketControllerFacet,
     );
     populatedTx.from = visitorWallet.address;
@@ -250,7 +267,6 @@ describe("Visitor tests", () => {
       priceData,
       place,
       ticketsMetadata,
-      // eventFacet,
       ticketControllerFacet,
     );
     populatedTx.from = visitorWallet.address;
@@ -288,7 +304,6 @@ describe("Visitor tests", () => {
       priceData,
       place,
       ticketsMetadata,
-      // eventFacet,
       ticketControllerFacet,
     );
     populatedTx.from = visitorWallet.address;
@@ -402,7 +417,6 @@ describe("Visitor tests", () => {
       priceData,
       place,
       ticketsMetadata,
-      // eventFacet,
       ticketControllerFacet,
     );
     populatedTx.from = visitorWallet.address;
@@ -456,7 +470,6 @@ describe("Visitor tests", () => {
       priceData,
       place,
       ticketsMetadata,
-      // eventFacet,
       ticketControllerFacet,
     );
     populatedTx.from = visitorWallet.address;
@@ -512,7 +525,6 @@ describe("Visitor tests", () => {
       priceData,
       place,
       ticketsMetadata,
-      // eventFacet,
       ticketControllerFacet,
     );
     populatedTx.from = visitorWallet.address;
@@ -596,5 +608,304 @@ describe("Visitor tests", () => {
     const refundPrice = ethers.utils.parseUnits("10", "ether").mul(bps).div(10000); // buddy ignore:line
 
     expect(walletBalanceAfterRefund).to.equal(walletBalanceBefore.add(refundPrice).sub(gasFees));
+  });
+
+  it("Should listen for bought ticket", async () => {
+    listeners.listenForBoughtTicket(spyFunc, ticketControllerFacet);
+
+    const categoryId = 1;
+    const priceData = [
+      {
+        amount: 1,
+        price: 10,
+      },
+    ];
+
+    const place = [
+      {
+        row: 1,
+        seat: 5,
+      },
+    ];
+
+    mockedTicketMetadata.image = imageBlob;
+    const ticketsMetadata = [mockedTicketMetadata];
+
+    const populatedTx = await buyTicketsFromSingleEvent(
+      NFT_STORAGE_API_KEY,
+      firstEventTokenId,
+      categoryId,
+      priceData,
+      place,
+      ticketsMetadata,
+      ticketControllerFacet,
+    );
+    populatedTx.from = visitorWallet.address;
+    const tx = await visitorWallet.sendTransaction(populatedTx);
+    await tx.wait();
+
+    checkFunctionInvocation();
+    spyFunc.resetHistory();
+  });
+
+  it("Should listen for refunded ticket", async () => {
+    listeners.listenForRefundedTicket(spyFunc, ticketControllerFacet);
+
+    const ticketParams = { eventId: firstEventTokenId, categoryId: 1, ticketId: 1 };
+
+    const populatedReturnTicketTx = await returnTicket(ticketParams, ticketControllerFacet);
+    const returnTicketTx = await wallet.sendTransaction(populatedReturnTicketTx);
+    await returnTicketTx.wait();
+
+    checkFunctionInvocation();
+    spyFunc.resetHistory();
+  });
+
+  it("Should listen for locked ticket", async () => {
+    listeners.listenForLockedTicked(spyFunc, ticketControllerFacet);
+
+    ///
+
+    checkFunctionInvocation();
+    spyFunc.resetHistory();
+  });
+
+  it("Should listen for unlocked ticket", async () => {
+    listeners.listenForUnlockedTicket(spyFunc, ticketControllerFacet);
+
+    ///
+
+    checkFunctionInvocation();
+    spyFunc.resetHistory();
+  });
+
+  it("Should listen for ticket transfer", async () => {
+    listeners.listenForTicketApproval(spyFunc, ticketControllerFacet);
+
+    ///
+
+    checkFunctionInvocation();
+    spyFunc.resetHistory();
+  });
+
+  it("Should listen for ticket approval", async () => {
+    listeners.listenForTicketApproval(spyFunc, ticketControllerFacet);
+
+    ///
+
+    checkFunctionInvocation();
+    spyFunc.resetHistory();
+  });
+
+  it("Should listen for ticket approval for all", async () => {
+    listeners.listenForTicketApprovalForAll(spyFunc, ticketControllerFacet);
+
+    ///
+
+    checkFunctionInvocation();
+    spyFunc.resetHistory();
+  });
+
+  it("Should listen for ticket consecutive transfer", async () => {
+    listeners.listenForTicketConsecutiveTransfer(spyFunc, ticketControllerFacet);
+
+    ///
+
+    checkFunctionInvocation();
+    spyFunc.resetHistory();
+  });
+
+  it("Should listen for ticket consumed", async () => {
+    listeners.listenForTicketConsumed(spyFunc, ticketControllerFacet);
+
+    ///
+
+    checkFunctionInvocation();
+    spyFunc.resetHistory();
+  });
+
+  it("Should listen for refund", async () => {
+    listeners.listenForRefund(spyFunc, ticketControllerFacet);
+
+    ///
+
+    checkFunctionInvocation();
+    spyFunc.resetHistory();
+  });
+
+  it("Should listen for new event Cashier", async () => {
+    listeners.listenForNewEventCashier(spyFunc, ticketControllerFacet);
+
+    const address = EXAMPLE_ADDRESS;
+    const populatedTx = await setEventCashier(firstEventTokenId, address, eventFacet);
+    const tx = await wallet.sendTransaction(populatedTx);
+    await tx.wait();
+
+    checkFunctionInvocation();
+    spyFunc.resetHistory();
+  });
+
+  it("Should listen for new category", async () => {
+    listeners.listenForNewCategory(spyFunc, ticketControllerFacet);
+
+    ///
+    mockedContractData.saleStartDate = DATES.EVENT_START_DATE;
+    mockedContractData.saleEndDate = DATES.EVENT_END_DATE;
+    const populatedTx1 = await createTicketCategory(
+      NFT_STORAGE_API_KEY,
+      firstEventTokenId,
+      mockedCategoryMetadata,
+      mockedContractData,
+      eventFacet,
+    );
+    const tx1 = await wallet.sendTransaction(populatedTx1);
+    await tx1.wait();
+
+    checkFunctionInvocation();
+    spyFunc.resetHistory();
+  });
+
+  it("Should listen for new category update", async () => {
+    listeners.listenForCategoryUpdate(spyFunc, ticketControllerFacet);
+
+    ///
+
+    checkFunctionInvocation();
+    spyFunc.resetHistory();
+  });
+
+  it("Should listen for category deletion", async () => {
+    listeners.listenForCategoryDelete(spyFunc, ticketControllerFacet);
+
+    const categories = await fetchCategoriesByEventId(firstEventTokenId, eventFacet);
+    const categoryId = categories[0].id;
+    const populatedTx = await removeCategory(firstEventTokenId, categoryId, eventFacet);
+    const tx = await wallet.sendTransaction(populatedTx);
+    await tx.wait();
+
+    checkFunctionInvocation();
+    spyFunc.resetHistory();
+  });
+
+  it("Should listen for category tickets added", async () => {
+    listeners.listenForCategoryTicketsAdded(spyFunc, ticketControllerFacet);
+
+    const categoriesBefore = await fetchCategoriesByEventId(secondEventTokenId, eventFacet);
+    const moreTickets = 20;
+    const categoryId = categoriesBefore[0].id;
+    const populatedTx = await addCategoryTicketsCount(secondEventTokenId, categoryId, moreTickets, eventFacet);
+    const tx = await wallet.sendTransaction(populatedTx);
+    await tx.wait();
+
+    checkFunctionInvocation();
+    spyFunc.resetHistory();
+  });
+
+  it("Should listen for category tickets removed", async () => {
+    listeners.listenForCategoryTicketsRemoved(spyFunc, ticketControllerFacet);
+
+    const categoriesBefore = await fetchCategoriesByEventId(secondEventTokenId, eventFacet);
+    const lessTickets = 20;
+    const categoryId = categoriesBefore[0].id;
+    const populatedTx = await removeCategoryTicketsCount(secondEventTokenId, categoryId, lessTickets, eventFacet);
+    const tx = await wallet.sendTransaction(populatedTx);
+    await tx.wait();
+
+    checkFunctionInvocation();
+    spyFunc.resetHistory();
+  });
+
+  it("Should listen for category sell changed", async () => {
+    listeners.listenForCategorySellChanged(spyFunc, ticketControllerFacet);
+
+    ///
+
+    checkFunctionInvocation();
+    spyFunc.resetHistory();
+  });
+
+  it("Should listen for all categories sell changed", async () => {
+    listeners.listenForAllCategorySellChanged(spyFunc, ticketControllerFacet);
+
+    ///
+
+    checkFunctionInvocation();
+    spyFunc.resetHistory();
+  });
+
+  it("Should listen for category sale dates update", async () => {
+    listeners.listenForCategorySaleDatesUpdate(spyFunc, ticketControllerFacet);
+
+    ///
+
+    checkFunctionInvocation();
+    spyFunc.resetHistory();
+  });
+
+  it("Should listen for new event refund date", async () => {
+    listeners.listenForNewEventRefundDate(spyFunc, ticketControllerFacet);
+
+    ///
+    const refundData = { date: DATES.EVENT_END_DATE, percentage: 100 };
+
+    const populatedTx = await addRefundDeadline(firstEventTokenId, refundData, ticketControllerFacet);
+    const tx = await wallet.sendTransaction(populatedTx);
+    await tx.wait();
+
+    checkFunctionInvocation();
+    spyFunc.resetHistory();
+  });
+
+  it("Should listen for refund withdraw", async () => {
+    listeners.listenForRefundWithdraw(spyFunc, ticketControllerFacet);
+
+    ///
+
+    checkFunctionInvocation();
+    spyFunc.resetHistory();
+  });
+
+  it("Should listen for event withdraw", async () => {
+    listeners.listenForEventWithdraw(spyFunc, ticketControllerFacet);
+
+    ///
+
+    checkFunctionInvocation();
+    spyFunc.resetHistory();
+  });
+
+  it("Should listen for clipped tickets", async () => {
+    listeners.listenForClipedTicket(spyFunc, ticketControllerFacet);
+
+    const populatedTx = await clipTicket(firstEventTokenId, 1, ticketControllerFacet);
+    const tx = await wallet.sendTransaction(populatedTx);
+    await tx.wait();
+
+    checkFunctionInvocation();
+    spyFunc.resetHistory();
+  });
+
+  it("Should listen for booked tickets", async () => {
+    listeners.listenForBookedTickets(spyFunc, ticketControllerFacet);
+
+    ///
+
+    checkFunctionInvocation();
+    spyFunc.resetHistory();
+  });
+
+  it("Should listen for new ticket invitation", async () => {
+    listeners.listenForNewTicketInvitation(spyFunc, ticketControllerFacet);
+
+    ///
+    const ticketIds = [4]; // buddy ignore:line
+    const accounts = [EXAMPLE_ADDRESS];
+
+    const populatedTx = await sendInvitation(firstEventTokenId, ticketIds, accounts, ticketControllerFacet);
+    const tx = await wallet.sendTransaction(populatedTx);
+    await tx.wait();
+
+    checkFunctionInvocation();
+    spyFunc.resetHistory();
   });
 });
