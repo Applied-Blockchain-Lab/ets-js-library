@@ -14,7 +14,6 @@ import {
   removeCategory,
   removeCategoryTicketsCount,
   returnTicket,
-  sendInvitation,
   setEventCashier,
   withdrawRefund,
 } from "../src/index.js";
@@ -43,6 +42,7 @@ describe("Visitor tests", () => {
 
   let mock;
   let eventFacet;
+  let ticketFacet;
   let ticketControllerFacet;
   let firstEventTokenId;
   let secondEventTokenId;
@@ -56,13 +56,13 @@ describe("Visitor tests", () => {
     if (spyFunc.callCount === 0) {
       setTimeout(checkFunctionInvocation, 100); // buddy ignore:line
     } else {
-      expect(spyFunc.callCount).to.equal(1);
+      expect(spyFunc.callCount).to.be.at.least(1);
     }
   }
 
   before(async () => {
     mock = new MockAdapter(axios);
-    ({ eventFacet, ticketControllerFacet, imageBlob, signers, wallet } = await testSetUp());
+    ({ eventFacet, ticketControllerFacet, ticketFacet, imageBlob, signers, wallet } = await testSetUp());
     visitorWallet = signers[1];
 
     mockedMetadata.image = imageBlob;
@@ -120,11 +120,13 @@ describe("Visitor tests", () => {
   });
 
   it("Should buy multiple tickets from a category from one event", async () => {
+    listeners.listenForBoughtTicket(spyFunc, ticketControllerFacet);
+
     const categoryId = 1;
     const priceData = [
       {
         amount: 2,
-        price: 10,
+        price: ethers.utils.parseUnits("10", "ether"),
       },
     ];
 
@@ -156,6 +158,9 @@ describe("Visitor tests", () => {
     const tx = await visitorWallet.sendTransaction(populatedTx);
     await tx.wait();
 
+    checkFunctionInvocation();
+    spyFunc.resetHistory();
+
     const tickets = await getAddressTicketIdsByEvent(firstEventTokenId, visitorWallet.address, ticketControllerFacet);
     expect(tickets.length).to.equal(place.length);
   });
@@ -165,7 +170,7 @@ describe("Visitor tests", () => {
     const priceData = [
       {
         amount: 2,
-        price: 10,
+        price: ethers.utils.parseUnits("10", "ether"),
       },
     ];
 
@@ -202,7 +207,7 @@ describe("Visitor tests", () => {
     const priceData = [
       {
         amount: 2,
-        price: 10,
+        price: ethers.utils.parseUnits("10", "ether"),
       },
     ];
 
@@ -241,7 +246,7 @@ describe("Visitor tests", () => {
     const priceData = [
       {
         amount: 2,
-        price: 12,
+        price: ethers.utils.parseUnits("12", "ether"),
       },
     ];
 
@@ -278,7 +283,7 @@ describe("Visitor tests", () => {
     const priceData = [
       {
         amount: 2,
-        price: 10,
+        price: ethers.utils.parseUnits("10", "ether"),
       },
     ];
 
@@ -311,6 +316,7 @@ describe("Visitor tests", () => {
   });
 
   it("Should buy multiple tickets from multiple events and categories", async () => {
+    listeners.listenForUnlockedTicket(spyFunc, ticketFacet);
     const categoriesId = [1, 2]; // buddy ignore:line
     const eventCategoryData = [
       {
@@ -326,11 +332,11 @@ describe("Visitor tests", () => {
     const priceData = [
       {
         amount: 2,
-        price: 10,
+        price: ethers.utils.parseUnits("10", "ether"),
       },
       {
         amount: 1,
-        price: 10,
+        price: ethers.utils.parseUnits("10", "ether"),
       },
     ];
 
@@ -363,6 +369,9 @@ describe("Visitor tests", () => {
     const tx = await visitorWallet.sendTransaction(populatedTx);
     await tx.wait();
 
+    checkFunctionInvocation();
+    spyFunc.resetHistory();
+
     const tickets = await getAddressTicketIdsByEvent(firstEventTokenId, visitorWallet.address, ticketControllerFacet);
     expect(tickets.length).to.equal(4); // buddy ignore:line
 
@@ -386,11 +395,11 @@ describe("Visitor tests", () => {
     const priceData = [
       {
         amount: 2,
-        price: 10,
+        price: ethers.utils.parseUnits("10", "ether"),
       },
       {
         amount: 1,
-        price: 10,
+        price: ethers.utils.parseUnits("10", "ether"),
       },
     ];
 
@@ -439,11 +448,11 @@ describe("Visitor tests", () => {
     const priceData = [
       {
         amount: 2,
-        price: 10,
+        price: ethers.utils.parseUnits("10", "ether"),
       },
       {
         amount: 1,
-        price: 10,
+        price: ethers.utils.parseUnits("10", "ether"),
       },
     ];
 
@@ -494,11 +503,11 @@ describe("Visitor tests", () => {
     const priceData = [
       {
         amount: 2,
-        price: 10,
+        price: ethers.utils.parseUnits("10", "ether"),
       },
       {
         amount: 1,
-        price: 10,
+        price: ethers.utils.parseUnits("10", "ether"),
       },
     ];
 
@@ -541,7 +550,10 @@ describe("Visitor tests", () => {
     );
   });
 
-  it("Should withdraw the refund", async () => {
+  it("Should withdraw the refund and test the listeners", async () => {
+    listeners.listenForRefundedTicket(spyFunc, ticketControllerFacet);
+    listeners.listenForRefundWithdraw(spyFunc, ticketControllerFacet);
+
     let populatedTx;
     let res;
     const refundData = { date: DATES.EVENT_END_DATE, percentage: 20 };
@@ -585,12 +597,15 @@ describe("Visitor tests", () => {
     res = await visitorWallet.sendTransaction(populatedTx);
     await res.wait();
 
-    const ticketParams = { eventId: firstEventTokenId, categoryId: 1, ticketId: 1 };
+    const ticketParams = { eventId: firstEventTokenId, categoryId: 1, ticketId: 6 };
 
     const populatedReturnTicketTx = await returnTicket(ticketParams, ticketControllerFacet);
     populatedReturnTicketTx.from = visitorWallet.address;
     const returnTicketTx = await visitorWallet.sendTransaction(populatedReturnTicketTx);
     res = await returnTicketTx.wait();
+
+    checkFunctionInvocation();
+    spyFunc.resetHistory();
 
     const walletBalanceBefore = await visitorWallet.getBalance();
 
@@ -598,6 +613,9 @@ describe("Visitor tests", () => {
     populatedTx.from = visitorWallet.address;
     const tx = await visitorWallet.sendTransaction(populatedTx);
     res = await tx.wait();
+
+    checkFunctionInvocation();
+    spyFunc.resetHistory();
 
     const walletBalanceAfterRefund = await visitorWallet.getBalance();
 
@@ -610,131 +628,8 @@ describe("Visitor tests", () => {
     expect(walletBalanceAfterRefund).to.equal(walletBalanceBefore.add(refundPrice).sub(gasFees));
   });
 
-  it("Should listen for bought ticket", async () => {
-    listeners.listenForBoughtTicket(spyFunc, ticketControllerFacet);
-
-    const categoryId = 1;
-    const priceData = [
-      {
-        amount: 1,
-        price: 10,
-      },
-    ];
-
-    const place = [
-      {
-        row: 1,
-        seat: 5,
-      },
-    ];
-
-    mockedTicketMetadata.image = imageBlob;
-    const ticketsMetadata = [mockedTicketMetadata];
-
-    const populatedTx = await buyTicketsFromSingleEvent(
-      NFT_STORAGE_API_KEY,
-      firstEventTokenId,
-      categoryId,
-      priceData,
-      place,
-      ticketsMetadata,
-      ticketControllerFacet,
-    );
-    populatedTx.from = visitorWallet.address;
-    const tx = await visitorWallet.sendTransaction(populatedTx);
-    await tx.wait();
-
-    checkFunctionInvocation();
-    spyFunc.resetHistory();
-  });
-
-  it("Should listen for refunded ticket", async () => {
-    listeners.listenForRefundedTicket(spyFunc, ticketControllerFacet);
-
-    const ticketParams = { eventId: firstEventTokenId, categoryId: 1, ticketId: 1 };
-
-    const populatedReturnTicketTx = await returnTicket(ticketParams, ticketControllerFacet);
-    const returnTicketTx = await wallet.sendTransaction(populatedReturnTicketTx);
-    await returnTicketTx.wait();
-
-    checkFunctionInvocation();
-    spyFunc.resetHistory();
-  });
-
-  it("Should listen for locked ticket", async () => {
-    listeners.listenForLockedTicked(spyFunc, ticketControllerFacet);
-
-    ///
-
-    checkFunctionInvocation();
-    spyFunc.resetHistory();
-  });
-
-  it("Should listen for unlocked ticket", async () => {
-    listeners.listenForUnlockedTicket(spyFunc, ticketControllerFacet);
-
-    ///
-
-    checkFunctionInvocation();
-    spyFunc.resetHistory();
-  });
-
-  it("Should listen for ticket transfer", async () => {
-    listeners.listenForTicketApproval(spyFunc, ticketControllerFacet);
-
-    ///
-
-    checkFunctionInvocation();
-    spyFunc.resetHistory();
-  });
-
-  it("Should listen for ticket approval", async () => {
-    listeners.listenForTicketApproval(spyFunc, ticketControllerFacet);
-
-    ///
-
-    checkFunctionInvocation();
-    spyFunc.resetHistory();
-  });
-
-  it("Should listen for ticket approval for all", async () => {
-    listeners.listenForTicketApprovalForAll(spyFunc, ticketControllerFacet);
-
-    ///
-
-    checkFunctionInvocation();
-    spyFunc.resetHistory();
-  });
-
-  it("Should listen for ticket consecutive transfer", async () => {
-    listeners.listenForTicketConsecutiveTransfer(spyFunc, ticketControllerFacet);
-
-    ///
-
-    checkFunctionInvocation();
-    spyFunc.resetHistory();
-  });
-
-  it("Should listen for ticket consumed", async () => {
-    listeners.listenForTicketConsumed(spyFunc, ticketControllerFacet);
-
-    ///
-
-    checkFunctionInvocation();
-    spyFunc.resetHistory();
-  });
-
-  it("Should listen for refund", async () => {
-    listeners.listenForRefund(spyFunc, ticketControllerFacet);
-
-    ///
-
-    checkFunctionInvocation();
-    spyFunc.resetHistory();
-  });
-
   it("Should listen for new event Cashier", async () => {
-    listeners.listenForNewEventCashier(spyFunc, ticketControllerFacet);
+    listeners.listenForNewEventCashier(spyFunc, eventFacet);
 
     const address = EXAMPLE_ADDRESS;
     const populatedTx = await setEventCashier(firstEventTokenId, address, eventFacet);
@@ -746,7 +641,7 @@ describe("Visitor tests", () => {
   });
 
   it("Should listen for new category", async () => {
-    listeners.listenForNewCategory(spyFunc, ticketControllerFacet);
+    listeners.listenForNewCategory(spyFunc, eventFacet);
 
     ///
     mockedContractData.saleStartDate = DATES.EVENT_START_DATE;
@@ -766,7 +661,7 @@ describe("Visitor tests", () => {
   });
 
   it("Should listen for new category update", async () => {
-    listeners.listenForCategoryUpdate(spyFunc, ticketControllerFacet);
+    listeners.listenForCategoryUpdate(spyFunc, eventFacet);
 
     ///
 
@@ -775,10 +670,10 @@ describe("Visitor tests", () => {
   });
 
   it("Should listen for category deletion", async () => {
-    listeners.listenForCategoryDelete(spyFunc, ticketControllerFacet);
+    listeners.listenForCategoryDelete(spyFunc, eventFacet);
 
     const categories = await fetchCategoriesByEventId(firstEventTokenId, eventFacet);
-    const categoryId = categories[0].id;
+    const categoryId = categories[1].id;
     const populatedTx = await removeCategory(firstEventTokenId, categoryId, eventFacet);
     const tx = await wallet.sendTransaction(populatedTx);
     await tx.wait();
@@ -788,7 +683,7 @@ describe("Visitor tests", () => {
   });
 
   it("Should listen for category tickets added", async () => {
-    listeners.listenForCategoryTicketsAdded(spyFunc, ticketControllerFacet);
+    listeners.listenForCategoryTicketsAdded(spyFunc, eventFacet);
 
     const categoriesBefore = await fetchCategoriesByEventId(secondEventTokenId, eventFacet);
     const moreTickets = 20;
@@ -802,7 +697,7 @@ describe("Visitor tests", () => {
   });
 
   it("Should listen for category tickets removed", async () => {
-    listeners.listenForCategoryTicketsRemoved(spyFunc, ticketControllerFacet);
+    listeners.listenForCategoryTicketsRemoved(spyFunc, eventFacet);
 
     const categoriesBefore = await fetchCategoriesByEventId(secondEventTokenId, eventFacet);
     const lessTickets = 20;
@@ -815,8 +710,8 @@ describe("Visitor tests", () => {
     spyFunc.resetHistory();
   });
 
-  it("Should listen for category sell changed", async () => {
-    listeners.listenForCategorySellChanged(spyFunc, ticketControllerFacet);
+  it.skip("Should listen for category sell changed", async () => {
+    listeners.listenForCategorySellChanged(spyFunc, eventFacet);
 
     ///
 
@@ -824,8 +719,8 @@ describe("Visitor tests", () => {
     spyFunc.resetHistory();
   });
 
-  it("Should listen for all categories sell changed", async () => {
-    listeners.listenForAllCategorySellChanged(spyFunc, ticketControllerFacet);
+  it.skip("Should listen for all categories sell changed", async () => {
+    listeners.listenForAllCategorySellChanged(spyFunc, eventFacet);
 
     ///
 
@@ -833,8 +728,9 @@ describe("Visitor tests", () => {
     spyFunc.resetHistory();
   });
 
-  it("Should listen for category sale dates update", async () => {
-    listeners.listenForCategorySaleDatesUpdate(spyFunc, ticketControllerFacet);
+  // Not implemented updateCategorySaleDates
+  it.skip("Should listen for category sale dates update", async () => {
+    listeners.listenForCategorySaleDatesUpdate(spyFunc, eventFacet);
 
     ///
 
@@ -856,16 +752,8 @@ describe("Visitor tests", () => {
     spyFunc.resetHistory();
   });
 
-  it("Should listen for refund withdraw", async () => {
-    listeners.listenForRefundWithdraw(spyFunc, ticketControllerFacet);
-
-    ///
-
-    checkFunctionInvocation();
-    spyFunc.resetHistory();
-  });
-
-  it("Should listen for event withdraw", async () => {
+  // Not implemented withdrawContractBalance
+  it.skip("Should listen for event withdraw", async () => {
     listeners.listenForEventWithdraw(spyFunc, ticketControllerFacet);
 
     ///
@@ -878,30 +766,6 @@ describe("Visitor tests", () => {
     listeners.listenForClipedTicket(spyFunc, ticketControllerFacet);
 
     const populatedTx = await clipTicket(firstEventTokenId, 1, ticketControllerFacet);
-    const tx = await wallet.sendTransaction(populatedTx);
-    await tx.wait();
-
-    checkFunctionInvocation();
-    spyFunc.resetHistory();
-  });
-
-  it("Should listen for booked tickets", async () => {
-    listeners.listenForBookedTickets(spyFunc, ticketControllerFacet);
-
-    ///
-
-    checkFunctionInvocation();
-    spyFunc.resetHistory();
-  });
-
-  it("Should listen for new ticket invitation", async () => {
-    listeners.listenForNewTicketInvitation(spyFunc, ticketControllerFacet);
-
-    ///
-    const ticketIds = [4]; // buddy ignore:line
-    const accounts = [EXAMPLE_ADDRESS];
-
-    const populatedTx = await sendInvitation(firstEventTokenId, ticketIds, accounts, ticketControllerFacet);
     const tx = await wallet.sendTransaction(populatedTx);
     await tx.wait();
 

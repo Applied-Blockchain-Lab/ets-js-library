@@ -172,7 +172,7 @@ export function listenForBatchMetadataUpdate(callback, contract = eventsContract
 }
 
 export function listenForRefund(callback, contract = eventsContract) {
-  contract.on("Refund", async (_sender, _tokenId) => {
+  contract.on("RefundWithdraw", async (_sender, _tokenId) => {
     const data = {
       account: _sender,
       ticketContractId: _tokenId,
