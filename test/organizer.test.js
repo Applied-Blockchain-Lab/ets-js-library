@@ -9,18 +9,14 @@ import {
   fetchEvents,
   setEventCashier,
   addRefundDeadline,
+  withdrawContractBalance,
+  listeners,
 } from "../src/index.js";
-import {
-  NFT_STORAGE_API_KEY,
-  EXAMPLE_ADDRESS,
-  mockedMetadata,
-  errorMessages,
-  DATES,
-  SECOND_EXAMPLE_ADDRESS,
-} from "./config.js";
+import { NFT_STORAGE_API_KEY, EXAMPLE_ADDRESS, mockedMetadata, errorMessages, DATES } from "./config.js";
 import { expect } from "chai";
 import { utils } from "ethers";
 import { mockedCreateEvent, testSetUp } from "./utils.js";
+import { spy } from "sinon";
 
 describe("Organizer tests", function () {
   let diamondAddress;
@@ -31,6 +27,15 @@ describe("Organizer tests", function () {
   let wallet;
   let signers;
   const addressLength = 64;
+  const spyFunc = spy();
+
+  function checkFunctionInvocation() {
+    if (spyFunc.callCount === 0) {
+      setTimeout(checkFunctionInvocation, 100); // buddy ignore:line
+    } else {
+      expect(spyFunc.callCount).to.be.at.least(1);
+    }
+  }
 
   before(async function () {
     ({ diamondAddress, eventFacet, ticketControllerFacet, imageBlob, signers, wallet } = await testSetUp(
@@ -136,7 +141,7 @@ describe("Organizer tests", function () {
 
   it("Should set event cashier", async () => {
     const CASHIER_ROLE = utils.keccak256(utils.toUtf8Bytes("CASHIER_ROLE"));
-    const address = SECOND_EXAMPLE_ADDRESS;
+    const address = signers[1].address;
     const populatedTx = await setEventCashier(tokenId, address, eventFacet);
     const tx = await wallet.sendTransaction(populatedTx);
     await tx.wait();
@@ -146,6 +151,25 @@ describe("Organizer tests", function () {
 
     expect(members[expectedMemberIndex].account).to.equal(address);
     expect(members[expectedMemberIndex].role).to.equal(CASHIER_ROLE);
+  });
+
+  // check if balance is withdrawn
+  it("Should withdraw the balance of event by cashier and listen for it", async () => {
+    listeners.listenForEventWithdraw(spyFunc, ticketControllerFacet);
+
+    const populatedTx = await withdrawContractBalance(tokenId, ticketControllerFacet);
+    const cashierWallet = signers[1];
+    populatedTx.from = cashierWallet.address;
+    const tx = await cashierWallet.sendTransaction(populatedTx);
+    await tx.wait();
+
+    checkFunctionInvocation();
+    spyFunc.resetHistory();
+  });
+
+  it.skip("Should revert withdraw the balance of event by non cashier", async () => {
+    const populatedTx = await withdrawContractBalance(tokenId, ticketControllerFacet);
+    await expect(wallet.sendTransaction(populatedTx)).to.be.revertedWith(errorMessages.placeIsTaken);
   });
 
   it("Should add refund date", async () => {

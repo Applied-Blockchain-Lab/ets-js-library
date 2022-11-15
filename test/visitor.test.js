@@ -15,6 +15,8 @@ import {
   removeCategoryTicketsCount,
   returnTicket,
   setEventCashier,
+  updateCategory,
+  updateCategorySaleDates,
   withdrawRefund,
 } from "../src/index.js";
 import axios from "axios";
@@ -643,7 +645,6 @@ describe("Visitor tests", () => {
   it("Should listen for new category", async () => {
     listeners.listenForNewCategory(spyFunc, eventFacet);
 
-    ///
     mockedContractData.saleStartDate = DATES.EVENT_START_DATE;
     mockedContractData.saleEndDate = DATES.EVENT_END_DATE;
     const populatedTx1 = await createTicketCategory(
@@ -663,7 +664,20 @@ describe("Visitor tests", () => {
   it("Should listen for new category update", async () => {
     listeners.listenForCategoryUpdate(spyFunc, eventFacet);
 
-    ///
+    const categories = await fetchCategoriesByEventId(firstEventTokenId, eventFacet);
+    const categoryId = categories[0].id;
+    mockedCategoryMetadata.name = "Updated category name";
+    const populatedTx = await updateCategory(
+      NFT_STORAGE_API_KEY,
+      firstEventTokenId,
+      categoryId,
+      mockedCategoryMetadata,
+      mockedContractData,
+      eventFacet,
+    );
+
+    const tx = await wallet.sendTransaction(populatedTx);
+    await tx.wait();
 
     checkFunctionInvocation();
     spyFunc.resetHistory();
@@ -710,53 +724,39 @@ describe("Visitor tests", () => {
     spyFunc.resetHistory();
   });
 
-  it.skip("Should listen for category sell changed", async () => {
-    listeners.listenForCategorySellChanged(spyFunc, eventFacet);
-
-    ///
-
-    checkFunctionInvocation();
-    spyFunc.resetHistory();
-  });
-
-  it.skip("Should listen for all categories sell changed", async () => {
-    listeners.listenForAllCategorySellChanged(spyFunc, eventFacet);
-
-    ///
-
-    checkFunctionInvocation();
-    spyFunc.resetHistory();
-  });
-
-  // Not implemented updateCategorySaleDates
-  it.skip("Should listen for category sale dates update", async () => {
+  it("Should listen for category sale dates update and update sale date", async () => {
     listeners.listenForCategorySaleDatesUpdate(spyFunc, eventFacet);
 
-    ///
-
-    checkFunctionInvocation();
-    spyFunc.resetHistory();
-  });
-
-  it("Should listen for new event refund date", async () => {
-    listeners.listenForNewEventRefundDate(spyFunc, ticketControllerFacet);
-
-    ///
-    const refundData = { date: DATES.EVENT_END_DATE, percentage: 100 };
-
-    const populatedTx = await addRefundDeadline(firstEventTokenId, refundData, ticketControllerFacet);
+    const categories = await fetchCategoriesByEventId(secondEventTokenId, eventFacet);
+    const categoryId = categories[0].id;
+    mockedCategoryMetadata.name = "Updated category name";
+    const saleStartDate = DATES.EVENT_START_DATE + 100;
+    const saleEndDate = DATES.EVENT_END_DATE - 100;
+    const populatedTx = await updateCategorySaleDates(
+      secondEventTokenId,
+      categoryId,
+      saleStartDate,
+      saleEndDate,
+      eventFacet,
+    );
     const tx = await wallet.sendTransaction(populatedTx);
     await tx.wait();
 
     checkFunctionInvocation();
     spyFunc.resetHistory();
+
+    const categoriesAfter = await fetchCategoriesByEventId(secondEventTokenId, eventFacet);
+    expect(categoriesAfter[0].saleStartDate).to.equal(saleStartDate);
+    expect(categoriesAfter[0].saleEndDate).to.equal(saleEndDate);
   });
 
-  // Not implemented withdrawContractBalance
-  it.skip("Should listen for event withdraw", async () => {
-    listeners.listenForEventWithdraw(spyFunc, ticketControllerFacet);
+  it("Should listen for new event refund date", async () => {
+    listeners.listenForNewEventRefundDate(spyFunc, ticketControllerFacet);
 
-    ///
+    const refundData = { date: DATES.EVENT_END_DATE, percentage: 100 };
+    const populatedTx = await addRefundDeadline(firstEventTokenId, refundData, ticketControllerFacet);
+    const tx = await wallet.sendTransaction(populatedTx);
+    await tx.wait();
 
     checkFunctionInvocation();
     spyFunc.resetHistory();
