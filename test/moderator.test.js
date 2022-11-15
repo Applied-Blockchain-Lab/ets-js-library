@@ -695,7 +695,7 @@ describe("Clip ticket", function () {
     const priceData = [
       {
         amount: 2,
-        price: 500000,
+        price: ethers.utils.parseUnits("10", "ether"),
       },
     ];
 
@@ -857,7 +857,7 @@ describe("Clip ticket", function () {
     const priceData = [
       {
         amount: 2,
-        price: 500000,
+        price: ethers.utils.parseUnits("10", "ether"),
       },
     ];
 
