@@ -706,15 +706,15 @@ const transaction = await updateCategorySaleDates(eventId, categoryId, saleStart
 //You need to sign and send the transaction after this.
 ```
 
-### Buy multiple tickets from multiple events and categories (Everyone)
+### Buy tickets (Everyone)
 
 1. Create an api token from [nft.storage](https://nft.storage/)
-2. Import buyTicketsFromMultipleEvents function from the library.
-3. Execute buyTicketsFromMultipleEvents function.
+2. Import buyTickets function from the library.
+3. Execute buyTickets function.
 4. Sign and send the transaction anyway you like.
 
 ```js
-import { buyTicketsFromMultipleEvents } from "ets-js-library";
+import { buyTickets } from "ets-js-library";
 
 const key = "API key for NFT.storage";
 
@@ -763,59 +763,7 @@ const ticketsMetadata = [{
 ...
 ];
 
-const transaction = await buyTicketsFromMultipleEvents(key, eventCategoryData, priceData, place, ticketsMetadata);
-//You need to sign and send the transaction after this.
-```
-
-### Buy multiple tickets from a category from one event (Everyone)
-
-1. Create an api token from [nft.storage](https://nft.storage/)
-2. Import buyTicketsFromSingleEvent function from the library.
-3. Execute buyTicketsFromSingleEvent function.
-4. Sign and send the transaction anyway you like.
-
-```js
-import { buyTicketsFromSingleEvent } from "ets-js-library";
-
-const eventId = "id of event";
-const categoryId = "id of category";
-const key = "API key for NFT.storage";
-
-const priceData = [
-  {
-    amount: "Amount of tickets to buy",
-    price: "Price of a single ticket",
-  },
-  {
-    amount: "Amount of tickets to buy",
-    price: "Price of a single ticket",
-  },
-];
-
-const place = [
-  {
-    row: "Row number of seat",
-    seat: "Seat position on row",
-  },
-  {
-    row: "Row number of seat",
-    seat: "Seat position on row",
-  },
-];
-
-const ticketsMetadata = [{
-  name: "ticket",
-  description: "ticket for event",
-  image: "Blob or File Object",
-  properties: {
-    note: "Note from buyer",
-    returnReason: "",
-  },
-},
-...
-];
-
-const transaction = await buyTicketsFromSingleEvent(key, eventId, categoryId, priceData, place, ticketMetadata);
+const transaction = await buyTickets(key, eventCategoryData, priceData, place, ticketsMetadata);
 //You need to sign and send the transaction after this.
 ```
 
