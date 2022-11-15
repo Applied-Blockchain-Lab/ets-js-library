@@ -21,6 +21,7 @@ import {
   clipTicket,
   bookTickets,
   sendInvitation,
+  withdrawContractBalance,
 } from "../src/index.js";
 import {
   NFT_STORAGE_API_KEY,
@@ -494,6 +495,40 @@ describe("Moderator tests", function () {
 
     const tickets = await getAddressTicketIdsByEvent(tokenId, moderatorWallet.address, ticketControllerFacet);
     expect(tickets.length).to.equal(place.length);
+  });
+
+  // check if balance is withdrawn
+  it("Should withdraw the balance of event by cashier and listen for it", async () => {
+    const cashierWallet = signers[1];
+    const cashierAddress = cashierWallet.address;
+    const cashierBalanceBefore = await cashierWallet.getBalance();
+    const populatedSetCashierTx = await setEventCashier(tokenId, cashierAddress, eventFacet);
+    const setEventCashierTX = await wallet.sendTransaction(populatedSetCashierTx);
+    await setEventCashierTX.wait();
+
+    listeners.listenForEventWithdraw(spyFunc, ticketControllerFacet);
+
+    const populatedTx = await withdrawContractBalance(tokenId, ticketControllerFacet);
+    populatedTx.from = cashierWallet.address;
+    const tx = await cashierWallet.sendTransaction(populatedTx);
+    const res = await tx.wait();
+
+    checkFunctionInvocation();
+    spyFunc.resetHistory();
+
+    const gasUsed = res.gasUsed;
+    const gasFees = res.effectiveGasPrice.mul(gasUsed);
+
+    const cashierBalanceAfter = await cashierWallet.getBalance();
+    expect(cashierBalanceAfter).to.be.gt(cashierBalanceBefore);
+    expect(cashierBalanceAfter).to.be.equal(
+      cashierBalanceBefore.add(ethers.utils.parseUnits("20", "ether").sub(gasFees)),
+    );
+  });
+
+  it.skip("Should revert withdraw the balance of event by non cashier", async () => {
+    const populatedTx = await withdrawContractBalance(tokenId, ticketControllerFacet);
+    await expect(wallet.sendTransaction(populatedTx)).to.be.revertedWith(errorMessages.placeIsTaken);
   });
 
   it("Should add refund date", async () => {
