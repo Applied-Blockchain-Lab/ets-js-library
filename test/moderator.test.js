@@ -15,7 +15,7 @@ import {
   removeTeamMember,
   addTeamMember,
   removeEvent,
-  buyTicketsFromSingleEvent,
+  buyTickets,
   getAddressTicketIdsByEvent,
   addRefundDeadline,
   clipTicket,
@@ -451,7 +451,12 @@ describe("Moderator tests", function () {
     const tx1 = await moderatorWallet.sendTransaction(populatedTx1);
     await tx1.wait();
 
-    const categoryId = 2;
+    const eventCategoryData = [
+      {
+        eventId: tokenId,
+        categoryId: 2,
+      },
+    ];
 
     const priceData = [
       {
@@ -475,10 +480,9 @@ describe("Moderator tests", function () {
 
     const ticketsMetadata = [mockedTicketMetadata, mockedTicketMetadata];
 
-    const populatedTx = await buyTicketsFromSingleEvent(
+    const populatedTx = await buyTickets(
       NFT_STORAGE_API_KEY,
-      tokenId,
-      categoryId,
+      eventCategoryData,
       priceData,
       place,
       ticketsMetadata,
@@ -731,7 +735,12 @@ describe("Clip ticket", function () {
     await tx.wait();
 
     // Buy ticket
-    const categoryId = 2;
+    const eventCategoryData = [
+      {
+        eventId: tokenId,
+        categoryId: 2,
+      },
+    ];
     const priceData = [
       {
         amount: 2,
@@ -754,10 +763,9 @@ describe("Clip ticket", function () {
 
     const ticketsMetadata = [mockedTicketMetadata, mockedTicketMetadata];
 
-    const populatedTx2 = await buyTicketsFromSingleEvent(
+    const populatedTx2 = await buyTickets(
       NFT_STORAGE_API_KEY,
-      tokenId,
-      categoryId,
+      eventCategoryData,
       priceData,
       place,
       ticketsMetadata,
@@ -893,7 +901,12 @@ describe("Clip ticket", function () {
     await txCategory.wait();
 
     // Buy ticket
-    const categoryId = 5;
+    const eventCategoryData = [
+      {
+        eventId: tokenId,
+        categoryId: 5,
+      },
+    ];
     const priceData = [
       {
         amount: 2,
@@ -916,10 +929,9 @@ describe("Clip ticket", function () {
 
     const ticketsMetadata = [mockedTicketMetadata, mockedTicketMetadata];
 
-    const populatedTx2 = await buyTicketsFromSingleEvent(
+    const populatedTx2 = await buyTickets(
       NFT_STORAGE_API_KEY,
-      tokenId,
-      categoryId,
+      eventCategoryData,
       priceData,
       place,
       ticketsMetadata,

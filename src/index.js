@@ -314,7 +314,7 @@ export async function updateCategorySaleDates(
   }
 }
 
-export async function buyTicketsFromMultipleEvents(
+export async function buyTickets(
   nftStorageApiKey,
   eventCategoryData,
   priceData,
@@ -322,45 +322,31 @@ export async function buyTicketsFromMultipleEvents(
   ticketsMetadata,
   contract = ticketControllerContract,
 ) {
-  try {
-    const value = calculateTotalValue(priceData);
-    const ticketUris = await uploadArrayToIpfs(nftStorageApiKey, ticketsMetadata);
-    const buyTicketsFuncSig = "buyTickets((uint256,uint256)[],(uint256,uint256)[],(uint256,uint256)[],string[])";
+  const buyTicketsFromSingleEvent = "buyTickets(uint256,uint256,(uint256,uint256)[],(uint256,uint256)[],string[])";
+  const buyTicketsFromMultipleEvents =
+    "buyTickets((uint256,uint256)[],(uint256,uint256)[],(uint256,uint256)[],string[])";
+  const value = calculateTotalValue(priceData);
+  const ticketUris = await uploadArrayToIpfs(nftStorageApiKey, ticketsMetadata);
 
-    const tx = await contract.populateTransaction[buyTicketsFuncSig](eventCategoryData, priceData, place, ticketUris, {
-      value,
-    });
-    return tx;
-  } catch (error) {
-    throw error;
-  }
-}
-
-export async function buyTicketsFromSingleEvent(
-  nftStorageApiKey,
-  eventId,
-  categoryId,
-  priceData,
-  place,
-  ticketsMetadata,
-  contract = ticketControllerContract,
-) {
-  try {
-    const value = calculateTotalValue(priceData);
-    const ticketUris = await uploadArrayToIpfs(nftStorageApiKey, ticketsMetadata);
-    const buyTicketsFuncSig = "buyTickets(uint256,uint256,(uint256,uint256)[],(uint256,uint256)[],string[])";
-
-    const tx = await contract.populateTransaction[buyTicketsFuncSig](
-      eventId,
-      categoryId,
+  if (eventCategoryData.length === 1) {
+    const tx = await contract.populateTransaction[buyTicketsFromSingleEvent](
+      eventCategoryData[0].eventId,
+      eventCategoryData[0].categoryId,
       priceData,
       place,
       ticketUris,
       { value },
     );
     return tx;
-  } catch (error) {
-    throw error;
+  } else {
+    const tx = await contract.populateTransaction[buyTicketsFromMultipleEvents](
+      eventCategoryData,
+      priceData,
+      place,
+      ticketUris,
+      { value },
+    );
+    return tx;
   }
 }
 

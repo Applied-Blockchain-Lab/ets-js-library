@@ -1,8 +1,7 @@
 import {
   addCategoryTicketsCount,
   addRefundDeadline,
-  buyTicketsFromMultipleEvents,
-  buyTicketsFromSingleEvent,
+  buyTickets,
   clipTicket,
   createTicketCategory,
   fetchAllEventsFromServer,
@@ -124,7 +123,13 @@ describe("Visitor tests", () => {
   it("Should buy multiple tickets from a category from one event", async () => {
     listeners.listenForBoughtTicket(spyFunc, ticketControllerFacet);
 
-    const categoryId = 1;
+    const eventCategoryData = [
+      {
+        eventId: firstEventTokenId,
+        categoryId: 1,
+      },
+    ];
+
     const priceData = [
       {
         amount: 2,
@@ -147,10 +152,9 @@ describe("Visitor tests", () => {
 
     const ticketsMetadata = [mockedTicketMetadata, mockedTicketMetadata];
 
-    const populatedTx = await buyTicketsFromSingleEvent(
+    const populatedTx = await buyTickets(
       NFT_STORAGE_API_KEY,
-      firstEventTokenId,
-      categoryId,
+      eventCategoryData,
       priceData,
       place,
       ticketsMetadata,
@@ -168,7 +172,12 @@ describe("Visitor tests", () => {
   });
 
   it("Should revert buy multiple tickets from a category from one event when place is taken", async () => {
-    const categoryId = 1;
+    const eventCategoryData = [
+      {
+        eventId: firstEventTokenId,
+        categoryId: 1,
+      },
+    ];
     const priceData = [
       {
         amount: 2,
@@ -191,10 +200,9 @@ describe("Visitor tests", () => {
 
     const ticketsMetadata = [mockedTicketMetadata, mockedTicketMetadata];
 
-    const populatedTx = await buyTicketsFromSingleEvent(
+    const populatedTx = await buyTickets(
       NFT_STORAGE_API_KEY,
-      firstEventTokenId,
-      categoryId,
+      eventCategoryData,
       priceData,
       place,
       ticketsMetadata,
@@ -205,7 +213,13 @@ describe("Visitor tests", () => {
   });
 
   it("Should revert buy multiple tickets from a category from one event with category of another event", async () => {
-    const categoryId = 2;
+    const eventCategoryData = [
+      {
+        eventId: firstEventTokenId,
+        categoryId: 2,
+      },
+    ];
+
     const priceData = [
       {
         amount: 2,
@@ -228,10 +242,9 @@ describe("Visitor tests", () => {
 
     const ticketsMetadata = [mockedTicketMetadata, mockedTicketMetadata];
 
-    const populatedTx = await buyTicketsFromSingleEvent(
+    const populatedTx = await buyTickets(
       NFT_STORAGE_API_KEY,
-      firstEventTokenId,
-      categoryId,
+      eventCategoryData,
       priceData,
       place,
       ticketsMetadata,
@@ -244,7 +257,13 @@ describe("Visitor tests", () => {
   });
 
   it.skip("Should revert buy multiple tickets from a category from one event with diff priceData length", async () => {
-    const categoryId = 1;
+    const eventCategoryData = [
+      {
+        eventId: firstEventTokenId,
+        categoryId: 1,
+      },
+    ];
+
     const priceData = [
       {
         amount: 2,
@@ -267,10 +286,9 @@ describe("Visitor tests", () => {
 
     const ticketsMetadata = [mockedTicketMetadata, mockedTicketMetadata];
 
-    const populatedTx = await buyTicketsFromSingleEvent(
+    const populatedTx = await buyTickets(
       NFT_STORAGE_API_KEY,
-      firstEventTokenId,
-      categoryId,
+      eventCategoryData,
       priceData,
       place,
       ticketsMetadata,
@@ -281,7 +299,13 @@ describe("Visitor tests", () => {
   });
 
   it("Should revert buy multiple tickets from one event when params length isn't equal to tickets wanted", async () => {
-    const categoryId = 1;
+    const eventCategoryData = [
+      {
+        eventId: firstEventTokenId,
+        categoryId: 1,
+      },
+    ];
+
     const priceData = [
       {
         amount: 2,
@@ -304,10 +328,9 @@ describe("Visitor tests", () => {
 
     const ticketsMetadata = [mockedTicketMetadata];
 
-    const populatedTx = await buyTicketsFromSingleEvent(
+    const populatedTx = await buyTickets(
       NFT_STORAGE_API_KEY,
-      firstEventTokenId,
-      categoryId,
+      eventCategoryData,
       priceData,
       place,
       ticketsMetadata,
@@ -359,7 +382,7 @@ describe("Visitor tests", () => {
 
     const ticketsMetadata = [mockedTicketMetadata, mockedTicketMetadata, mockedTicketMetadata];
 
-    const populatedTx = await buyTicketsFromMultipleEvents(
+    const populatedTx = await buyTickets(
       NFT_STORAGE_API_KEY,
       eventCategoryData,
       priceData,
@@ -422,7 +445,7 @@ describe("Visitor tests", () => {
 
     const ticketsMetadata = [mockedTicketMetadata, mockedTicketMetadata, mockedTicketMetadata];
 
-    const populatedTx = await buyTicketsFromMultipleEvents(
+    const populatedTx = await buyTickets(
       NFT_STORAGE_API_KEY,
       eventCategoryData,
       priceData,
@@ -475,7 +498,7 @@ describe("Visitor tests", () => {
 
     const ticketsMetadata = [mockedTicketMetadata, mockedTicketMetadata, mockedTicketMetadata];
 
-    const populatedTx = await buyTicketsFromMultipleEvents(
+    const populatedTx = await buyTickets(
       NFT_STORAGE_API_KEY,
       eventCategoryData,
       priceData,
@@ -530,7 +553,7 @@ describe("Visitor tests", () => {
 
     const ticketsMetadata = [mockedTicketMetadata, mockedTicketMetadata];
 
-    const populatedTx = await buyTicketsFromMultipleEvents(
+    const populatedTx = await buyTickets(
       NFT_STORAGE_API_KEY,
       eventCategoryData,
       priceData,
@@ -564,6 +587,13 @@ describe("Visitor tests", () => {
     res = await wallet.sendTransaction(populatedTx);
     await res.wait();
 
+    const eventCategoryData = [
+      {
+        eventId: firstEventTokenId,
+        categoryId: 1,
+      },
+    ];
+
     const priceData = [
       {
         amount: 2,
@@ -585,10 +615,9 @@ describe("Visitor tests", () => {
     mockedTicketMetadata.image = imageBlob;
     const ticketsMetadata = [mockedTicketMetadata, mockedTicketMetadata];
 
-    populatedTx = await buyTicketsFromSingleEvent(
+    populatedTx = await buyTickets(
       NFT_STORAGE_API_KEY,
-      firstEventTokenId,
-      1,
+      eventCategoryData,
       priceData,
       place,
       ticketsMetadata,

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.18.0] - 2022-11-15
+
+### Changed
+
+- Use singe buyTickets function
+
 ## [0.17.0] - 2022-11-11
 
 ### Changed
