@@ -663,6 +663,49 @@ const categories = [
 ];
 ```
 
+Return data:
+
+```js
+const categories = [
+  {
+  id: 1,
+  cid: "ipfs://bafyreia6fhgdn7y2ygvmkgjqgqrnikshfgqohw5k3ophortlmgz77egtlm/metadata.json",
+  ticketIds: [1,2,3],
+  ticketPrice: 10,
+  ticketsCount: 10,
+  saleStartDate: 1666666666, //unix timestamp
+  saleEndDate: 1666666666, //unix timestamp
+  eventId: 1,
+  discountsTicketsCount: [ 5, 2 ],
+  discountsPercentage: [ 10, 5 ],
+  downPayment: {
+    price: 2,
+    finalAmountDate: 1666666666 // unix timestamp
+  }
+  areTicketsBuyable: true,
+  }
+  ...
+];
+```
+
+### Update category sale dates (Admin or Moderator)
+
+1. Import updateCategorySaleDates function from the library.
+2. Execute updateCategorySaleDates function.
+3. Sign and send the transaction anyway you like.
+
+```js
+import { updateCategorySaleDates } from "ets-js-library";
+
+const eventId = "Id of event";
+const categoryId = "Id of category"; 
+const saleStartDate = 1666666666; //unix timestamp
+const saleEndDate = 1666666666; //unix timestamp
+
+const transaction = await updateCategorySaleDates(eventId, categoryId, saleStartDate, saleEndDate);
+//You need to sign and send the transaction after this.
+```
+
 ### Buy multiple tickets from multiple events and categories (Everyone)
 
 1. Create an api token from [nft.storage](https://nft.storage/)
