@@ -9,6 +9,7 @@ import ticketDiamondLoupeSchema from "../config/TicketDiamondLoupeFacet.json" as
 import ticketOwnershipSchema from "../config/TicketOwnershipFacet.json" assert { type: "json" };
 import ticketFacetSchema from "../config/TicketFacet.json" assert { type: "json" };
 import iDiamondCutSchema from "../config/IDiamondCut.json" assert { type: "json" };
+import ticketMarketplaceSchema from "../config/TicketMarketplaceFacet.json" assert { type: "json" };
 
 export async function deployTicketDiamond() {
   const accounts = await ethers.getSigners();
@@ -70,6 +71,19 @@ export async function deployTicketDiamond() {
     facetAddress: ticketOwnershipFacet.address,
     action: 0,
     functionSelectors: getSelectors(ticketOwnershipFacet),
+  });
+
+  const TicketMarketplaceFacet = await ethers.getContractFactory(
+    ticketMarketplaceSchema.abi,
+    ticketMarketplaceSchema.bytecode,
+  );
+  const ticketMarketplaceFacet = await TicketMarketplaceFacet.deploy();
+  await ticketMarketplaceFacet.deployed();
+
+  cut.push({
+    facetAddress: ticketMarketplaceFacet.address,
+    action: 0,
+    functionSelectors: getSelectors(ticketMarketplaceFacet),
   });
 
   const TicketFacet = await ethers.getContractFactory(ticketFacetSchema.abi, ticketFacetSchema.bytecode);

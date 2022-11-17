@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.20.0] - 2022-11-17
+
+### Added
+
+- Utils library
+- Public upload data to IPFS functions
+
+### Changed
+
+- Ticket contract deploy task
+- Tests utils
+- Public create functions - IPFS url is passed as function argument
+- Updated README
+
 ## [0.18.0] - 2022-11-15
 
 ### Changed
