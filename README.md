@@ -32,6 +32,65 @@ Check listeners docs:[docs/listeners.md](https://github.com/Applied-Blockchain-L
 
 ## Available functionalities in format _Action name (who has the right)_
 
+### Upload single data to IPFS with nft.storage (Everyone)
+
+1. Create an api token from [nft.storage](https://nft.storage/)
+2. Create metadata either for event, category or ticket.
+
+```js
+import { uploadDataToIpfsNftStorage } from "ets-js-library";
+
+const key = "API key for NFT.storage";
+
+const metadata = {
+  name: "Event1",
+  description: "Event1 Description",
+  image: "Blob or File Object",
+  properties: {
+    websiteUrl: "https://event1.com",
+    location: {
+      country: "Country1",
+      city: "Place1",
+      address: "Address1",
+      coordinates: {
+        latitude: "00.000",
+        longitude: "00.000",
+      },
+    },
+    contacts: "Contacts",
+    status: "upcoming",
+    tags: ["tag1", "tag2"],
+  },
+};
+
+const ipfsUrl = await uploadDataToIpfsNftStorage(key, metadata);
+```
+
+### Upload multiple data to IPFS with nft.storage (Everyone)
+
+1. Create an api token from [nft.storage](https://nft.storage/)
+2. Create multiple metadatas in array for tickets.
+
+```js
+import { uploadArrayToIpfsNftStorage } from "ets-js-library";
+
+const key = "API key for NFT.storage";
+
+const ticketsMetadata = [{
+  name: "ticket",
+  description: "ticket for event",
+  image: "Blob or File Object",
+  properties: {
+    note: "Note from buyer",
+    returnReason: "",
+  },
+},
+...
+];
+
+const ipfsUrls = await uploadArrayToIpfsNftStorage(key, ticketsMetadata);
+```
+
 ### Create event (Everyone)
 
 1. Create an api token from [nft.storage](https://nft.storage/)
@@ -43,40 +102,19 @@ Check listeners docs:[docs/listeners.md](https://github.com/Applied-Blockchain-L
 ```js
 import { createEvent } from "ets-js-library";
 
-const metadata = {
-  name: "Event1",
-  description: "Event1 Description",
-  image: "Blob or File Object",
-  properties: {
-    websiteUrl: "https://event1.com",
-    location: {
-      country: "Country1",
-      city: "Place1",
-      address: "Address1",
-      coordinates: {
-        latitude: "00.000",
-        longitude: "00.000",
-      },
-    },
-    contacts: "Contacts",
-    status: "upcoming",
-    tags: ["tag1", "tag2"],
-  },
-};
-
 const contractData = {
   maxTicketPerClient: 5,
   startDate: 1666666666, // unix timestamp
   endDate: 1666666666, // unix timestamp
 };
 
-const key = "API key for NFT.storage";
+const ipfsUrl = "ipfs://bafyreiaoq6thpwbvnatxforotjs33hut7rcfzalysp7cozhh3kkgkfkhhy/metadata.json";
 
-const transaction = await createEvent(key, metadata, contractData);
+const transaction = await createEvent(ipfsUrl, contractData);
 //You need to sign and send the transaction after this.
 ```
 
-##### Possiblle error messages:
+##### Possible error messages:
 
 - ERC5007: Invalid endTime
 - ERC721: mint to the zero address
@@ -85,45 +123,26 @@ const transaction = await createEvent(key, metadata, contractData);
 
 ### Update event metadata (Admin or Moderator)
 
-1. Create an api token from [nft.storage](https://nft.storage/)
-2. Import updateEvent, getEventIpfsUri and deleteFromIpfs from the library.
-3. Create new metadata for the event.
-4. Execute getEventIpfsUri function. This will return the Uri of the current metadata.
-5. Execute updateEvent function. This will return an unsigned transaction.
-6. Sign and send the transaction anyway you like.
-7. If the transaction succeeds, you can safely delete the old metadata with deleteFromIpfs.
+1. Import updateEvent, getEventIpfsUri and deleteFromIpfs from the library.
+2. Create new metadata for the event.
+3. Execute getEventIpfsUri function. This will return the Uri of the current metadata.
+4. Execute updateEvent function. This will return an unsigned transaction.
+5. Sign and send the transaction anyway you like.
+6. If the transaction succeeds, you can safely delete the old metadata with deleteFromIpfs.
 
 ```js
 import { updateEvent, getEventIpfsUri, deleteFromIpfs } from "ets-js-library";
 
-const metadata = {
-  name: "Event1",
-  description: "Event1 Description",
-  image: "Blob or File Object",
-  properties: {
-    websiteUrl: "https://event1.com",
-    location: {
-      country: "Country1",
-      city: "Place1",
-      address: "Address1",
-      coordinates: {
-        latitude: "00.000",
-        longitude: "00.000",
-      },
-    },
-    contacts: "Contacts",
-    status: "upcoming",
-    tags: ["tag1", "tag2"],
-  },
-};
-
 const key = "API key for NFT.storage";
+
+const ipfsUrl = "ipfs://bafyreiaoq6thpwbvnatxforotjs33hut7rcfzalysp7cozhh3kkgkfkhhy/metadata.json";
+
 const eventId = "Id of event in smart contract";
 
 const metadataUri = await getEventIpfsUri(eventId);
 
 try {
-  const transaction = await updateEvent(key, eventId, metadata);
+  const transaction = await updateEvent(ipfsUrl, eventId, metadata);
 
   //You need to sign and send the transaction here.
   deleteFromIpfs(key, metadataUri);
@@ -132,7 +151,7 @@ try {
 }
 ```
 
-##### Possiblle error messages:
+##### Possible error messages:
 
 - Event: Event does not exist
 - Event: Caller is not an admin or moderator
@@ -164,7 +183,7 @@ try {
 }
 ```
 
-##### Possiblle error messages:
+##### Possible error messages:
 
 - Event: Event does not exist
 - Event: Caller is not an admin
@@ -213,7 +232,7 @@ const events = [
 ];
 ```
 
-##### Possiblle error messages:
+##### Possible error messages:
 
 - Event: Event does not exist
 
@@ -374,7 +393,7 @@ const transaction = await addTeamMember(eventId, role, address);
 //You need to sign and send the transaction after this.
 ```
 
-##### Possiblle error messages:
+##### Possible error messages:
 
 - Event: Event does not exist
 - Event: Caller is not an admin
@@ -400,7 +419,7 @@ const transaction = await removeTeamMember(eventId, role, address);
 //You need to sign and send the transaction after this.
 ```
 
-##### Possiblle error messages:
+##### Possible error messages:
 
 - Event: Event does not exist
 - Event: Caller is not an admin
@@ -439,7 +458,7 @@ const members = [
 ];
 ```
 
-##### Possiblle error messages:
+##### Possible error messages:
 
 - Event: Event does not exist
 
@@ -476,36 +495,22 @@ const transaction = await setEventCashier(eventId, address);
 //You need to sign and send the transaction after this.
 ```
 
-##### Possiblle error messages:
+##### Possible error messages:
 
 - Event: Event does not exist
 - Event: Caller is not an admin
 
 ### Create ticket category (Admin or Moderator)
 
-1. Create an api token from [nft.storage](https://nft.storage/)
-2. Import createTicketCategory function from the library.
-3. Create metadata for the new category.
-4. Execute createTicketCategory function. This will return an unsigned transaction.
-5. Sign and send the transaction anyway you like.
+1. Import createTicketCategory function from the library.
+2. Create metadata for the new category.
+3. Execute createTicketCategory function. This will return an unsigned transaction.
+4. Sign and send the transaction anyway you like.
 
 ```js
 import { createTicketCategory } from "ets-js-library";
 
-const metadata = {
-  name: "Category1",
-  description: "Category1 Description",
-  image: "null",
-  properties: {
-    ticketTypesCount: {
-      type: "semi_fungible or non_fungible",
-      places: 10,
-    },
-    design: {
-      color: "color",
-    },
-  },
-};
+const ipfsUrl = "ipfs://bafyreiaoq6thpwbvnatxforotjs33hut7rcfzalysp7cozhh3kkgkfkhhy/metadata.json";
 
 const contractData = {
   saleStartDate: 1666666666, // unix timestamp
@@ -520,14 +525,13 @@ const contractData = {
   },
 };
 
-const key = "API key for NFT.storage";
 const eventId = "Id of event";
 
-const transaction = await createTicketCategory(key, eventId, metadata, contractData);
+const transaction = await createTicketCategory(ipfsUrl, eventId, contractData);
 //You need to sign and send the transaction after this.
 ```
 
-##### Possiblle error messages:
+##### Possible error messages:
 
 - Event: Event does not exist
 - Event: Caller is not an admin or moderator
@@ -535,29 +539,15 @@ const transaction = await createTicketCategory(key, eventId, metadata, contractD
 
 ### Update category (Admin or Moderator)
 
-1. Create an api token from [nft.storage](https://nft.storage/)
-2. Import updateCategory from the library.
-3. Create new metadata and contractData for the category.
-4. Execute updateCategory function. This will return an unsigned transaction.
-5. Sign and send the transaction anyway you like.
+1. Import updateCategory from the library.
+2. Create new metadata and contractData for the category.
+3. Execute updateCategory function. This will return an unsigned transaction.
+4. Sign and send the transaction anyway you like.
 
 ```js
 import { updateCategory } from "ets-js-library";
 
-const metadata = {
-  name: "Category1",
-  description: "Category1 Description",
-  image: "null",
-  properties: {
-    ticketTypesCount: {
-      type: "semi_fungible or non_fungible",
-      places: 10,
-    },
-    design: {
-      color: "color",
-    },
-  },
-};
+const ipfsUrl = "ipfs://bafyreiaoq6thpwbvnatxforotjs33hut7rcfzalysp7cozhh3kkgkfkhhy/metadata.json";
 
 const contractData = {
   saleStartDate: 1666666666, // unix timestamp
@@ -572,15 +562,14 @@ const contractData = {
   },
 };
 
-const key = "API key for NFT.storage";
 const eventId = "Id of event";
 const categoryId = "Id of category";
 
-const transaction = await updateCategory(key, eventId, categoryId, metadata, contractData);
+const transaction = await updateCategory(ipfsUrl, eventId, categoryId, contractData);
 //You need to sign and send the transaction after this.
 ```
 
-##### Possiblle error messages:
+##### Possible error messages:
 
 - Event: Event does not exist
 - Event: Category does not exist
@@ -612,7 +601,7 @@ try {
 }
 ```
 
-##### Possiblle error messages:
+##### Possible error messages:
 
 - Event: Event does not exist
 - Event: Category does not exist
@@ -637,7 +626,7 @@ const transaction = await addCategoryTicketsCount(eventId, categoryId, moreTicke
 //You need to sign and send the transaction after this.
 ```
 
-##### Possiblle error messages:
+##### Possible error messages:
 
 - Event: Event does not exist
 - Event: Category does not exist
@@ -661,7 +650,7 @@ const transaction = await removeCategoryTicketsCount(eventId, categoryId, lessTi
 //You need to sign and send the transaction after this.
 ```
 
-##### Possiblle error messages:
+##### Possible error messages:
 
 - Event: Event does not exist
 - Event: Category does not exist
@@ -689,7 +678,7 @@ const transaction = await manageCategorySelling(eventId, categoryId, value);
 //You need to sign and send the transaction after this.
 ```
 
-##### Possiblle error messages:
+##### Possible error messages:
 
 - Event: Event does not exist
 - Event: Category does not exist
@@ -714,7 +703,7 @@ const transaction = await manageAllCategorySelling(eventId, value);
 //You need to sign and send the transaction after this.
 ```
 
-##### Possiblle error messages:
+##### Possible error messages:
 
 - Event: Event does not exist
 - Event: Caller is not an admin or moderator
@@ -782,7 +771,7 @@ const categories = [
 ];
 ```
 
-##### Possiblle error messages:
+##### Possible error messages:
 
 - Event: Event does not exist
 
@@ -804,7 +793,7 @@ const transaction = await updateCategorySaleDates(eventId, categoryId, saleStart
 //You need to sign and send the transaction after this.
 ```
 
-##### Possiblle error messages:
+##### Possible error messages:
 
 - Event: Event does not exist
 - Event: Category does not exist
@@ -813,15 +802,12 @@ const transaction = await updateCategorySaleDates(eventId, categoryId, saleStart
 
 ### Buy tickets (Everyone)
 
-1. Create an api token from [nft.storage](https://nft.storage/)
-2. Import buyTickets function from the library.
-3. Execute buyTickets function.
-4. Sign and send the transaction anyway you like.
+1. Import buyTickets function from the library.
+2. Execute buyTickets function.
+3. Sign and send the transaction anyway you like.
 
 ```js
 import { buyTickets } from "ets-js-library";
-
-const key = "API key for NFT.storage";
 
 const eventCategoryData = [
   {
@@ -856,23 +842,13 @@ const place = [
   },
 ];
 
-const ticketsMetadata = [{
-  name: "ticket",
-  description: "ticket for event",
-  image: "Blob or File Object",
-  properties: {
-    note: "Note from buyer",
-    returnReason: "",
-  },
-},
-...
-];
+const ipfsUrls = ["ipfs://bafyreiaoq6thpwbvnatxforotjs33hut7rcfzalysp7cozhh3kkgkfkhhy/metadata.json", ...];
 
-const transaction = await buyTickets(key, eventCategoryData, priceData, place, ticketsMetadata);
+const transaction = await buyTickets(ipfsUrls, eventCategoryData, priceData, place);
 //You need to sign and send the transaction after this.
 ```
 
-##### Possiblle error messages:
+##### Possible error messages:
 
 - Event: Parameters length not eq
 - Event: Event does not exist
@@ -905,7 +881,7 @@ const transaction = await addRefundDeadline(eventId, refundData);
 //You need to sign and send the transaction after this.
 ```
 
-##### Possiblle error messages:
+##### Possible error messages:
 
 - Event: Event does not exist
 - Event: Caller is not an admin or moderator
@@ -927,7 +903,7 @@ const transaction = await returnTicket(ticketParams);
 
 This function does not send the tokens immediately to the account, but saves the information in the contract, after which the user must get them through the [withdrawRefund](#withdrawrefund) function.
 
-##### Possiblle error messages:
+##### Possible error messages:
 
 - Event: Event does not exist
 - Event: Category does not exist
@@ -953,7 +929,7 @@ const transaction = await withdrawRefund(eventId, ticketId);
 //You need to sign and send the transaction after this.
 ```
 
-##### Possiblle error messages:
+##### Possible error messages:
 
 - Event: Event does not exist
 - Event: Can't refund for this event
@@ -975,7 +951,7 @@ const transaction = await withdrawContractBalance(eventId);
 //You need to sign and send the transaction after this.
 ```
 
-##### Possiblle error messages:
+##### Possible error messages:
 
 - Event: Event does not exist
 - Event: Only cashier can withdraw contract balance
@@ -997,7 +973,7 @@ const transaction = await clipTicket(eventId, ticketId);
 //You need to sign and send the transaction after this.
 ```
 
-##### Possiblle error messages:
+##### Possible error messages:
 
 - Event: Event does not exist
 - Event: Caller is not an admin, moderator or receptionist
@@ -1015,7 +991,6 @@ const transaction = await clipTicket(eventId, ticketId);
 import { bookTickets } from "ets-js-library";
 
 const eventId = "id of event";
-const key = "API key for NFT.storage";
 
 const categoryData = [
   {
@@ -1041,23 +1016,13 @@ const place = [
   },
 ];
 
-const ticketsMetadata = [{
-  name: "ticket",
-  description: "ticket for event",
-  image: "Blob or File Object",
-  properties: {
-    note: "Note from buyer"
-    returnReason: "",
-  },
-},
-...
-];
+const ipfsUrls = ["ipfs://bafyreiaoq6thpwbvnatxforotjs33hut7rcfzalysp7cozhh3kkgkfkhhy/metadata.json", ...];
 
-const transaction = await bookTickets(key, eventId, categoryData, place, ticketsMetadata);
+const transaction = await bookTickets(ipfsUrls, eventId, categoryData, place);
 //You need to sign and send the transaction after this.
 ```
 
-##### Possiblle error messages:
+##### Possible error messages:
 
 - Event: Event does not exist
 - Event: Caller is not an admin or moderator
@@ -1085,7 +1050,7 @@ const transaction = await sendInvitation(eventId, ticketIds, accounts);
 //You need to sign and send the transaction after this.
 ```
 
-##### Possiblle error messages:
+##### Possible error messages:
 
 - Event: Event does not exist
 - Event: Caller is not an admin or moderator
@@ -1106,7 +1071,7 @@ const address = "0x...";
 const tickets = await getAddressTicketIdsByEvent(eventId, address);
 ```
 
-##### Possiblle error messages:
+##### Possible error messages:
 
 - Event: Event does not exist
 
