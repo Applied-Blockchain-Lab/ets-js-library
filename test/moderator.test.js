@@ -526,9 +526,13 @@ describe("Moderator tests", function () {
     );
   });
 
-  it.skip("Should revert withdraw the balance of event by non cashier", async () => {
+  it("Should revert withdraw the balance of event by non cashier", async () => {
+    const signerIndex = 3;
+
     const populatedTx = await withdrawContractBalance(tokenId, ticketControllerFacet);
-    await expect(wallet.sendTransaction(populatedTx)).to.be.revertedWith(errorMessages.placeIsTaken);
+    populatedTx.from = signers[signerIndex].address;
+
+    await expect(signers[signerIndex].sendTransaction(populatedTx)).to.be.revertedWith(errorMessages.onlyCashier);
   });
 
   it("Should add refund date", async () => {
