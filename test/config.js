@@ -108,6 +108,7 @@ const errorMessages = {
   parametersLengthNotEqual: "Event: Parameters length not eq",
   categoryIsFromAnotherEvent: "Event: This category is for another event",
   placeIsTaken: "Event: Place is taken",
+  onlyCashier: "Event: Only cashier can withdraw contract balance",
 };
 
 const DATES = {

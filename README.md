@@ -766,7 +766,7 @@ const categories = [
 import { updateCategorySaleDates } from "ets-js-library";
 
 const eventId = "Id of event";
-const categoryId = "Id of category"; 
+const categoryId = "Id of category";
 const saleStartDate = 1666666666; //unix timestamp
 const saleEndDate = 1666666666; //unix timestamp
 
