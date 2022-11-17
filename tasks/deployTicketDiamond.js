@@ -9,7 +9,7 @@ import ticketDiamondLoupeSchema from "../config/TicketDiamondLoupeFacet.json" as
 import ticketOwnershipSchema from "../config/TicketOwnershipFacet.json" assert { type: "json" };
 import ticketFacetSchema from "../config/TicketFacet.json" assert { type: "json" };
 import iDiamondCutSchema from "../config/IDiamondCut.json" assert { type: "json" };
-import ticketMarketplaceSchema from "../config/TicketMarketplace.json" assert { type: "json" };
+import ticketMarketplaceSchema from "../config/TicketMarketplaceFacet.json" assert { type: "json" };
 
 export async function deployTicketDiamond() {
   const accounts = await ethers.getSigners();

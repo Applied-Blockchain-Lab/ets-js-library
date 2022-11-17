@@ -11,7 +11,7 @@ import {
   getIpfsUrl,
   makeGatewayUrl,
 } from "#ipfs.utils";
-import { calculateTotalValue } from "./utils/lib";
+import { calculateTotalValue } from "./utils/lib.js";
 import { ETS_SERVER_URL, NET_RPC_URL, NET_RPC_URL_ID, TOKEN_NAME, NET_LABEL } from "#config";
 import { eventsContract, ticketControllerContract, ticketsContract } from "#contract";
 import * as listeners from "./listeners.js";

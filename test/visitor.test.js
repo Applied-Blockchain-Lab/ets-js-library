@@ -20,20 +20,10 @@ import {
 } from "../src/index.js";
 import axios from "axios";
 import MockAdapter from "axios-mock-adapter";
-import {
-  DATES,
-  mockedEventParams,
-  mockedTicketMetadata,
-  mockedMetadata,
-  NFT_STORAGE_API_KEY,
-  mockedCategoryMetadata,
-  mockedContractData,
-  errorMessages,
-  EXAMPLE_ADDRESS,
-} from "./config.js";
+import { DATES, mockedEventParams, mockedContractData, errorMessages, EXAMPLE_ADDRESS } from "./config.js";
 import { StatusCodes } from "http-status-codes";
 import { expect } from "chai";
-import { mockedCreateEvent, testSetUp } from "./utils.js";
+import { mockedCreateEvent, testSetUp, categoryIpfsUrl, ticketIpfsUrl } from "./utils.js";
 import { spy } from "sinon";
 
 describe("Visitor tests", () => {
@@ -47,7 +37,6 @@ describe("Visitor tests", () => {
   let ticketControllerFacet;
   let firstEventTokenId;
   let secondEventTokenId;
-  let imageBlob;
   let wallet;
   let visitorWallet;
   let signers;
@@ -63,29 +52,19 @@ describe("Visitor tests", () => {
 
   before(async () => {
     mock = new MockAdapter(axios);
-    ({ eventFacet, ticketControllerFacet, ticketFacet, imageBlob, signers, wallet } = await testSetUp());
+    ({ eventFacet, ticketControllerFacet, ticketFacet, signers, wallet } = await testSetUp());
     visitorWallet = signers[1];
-
-    mockedMetadata.image = imageBlob;
-    mockedCategoryMetadata.image = imageBlob;
 
     firstEventTokenId = await mockedCreateEvent(maxTicketPerClient, startDate, endDate, eventFacet, wallet);
     secondEventTokenId = await mockedCreateEvent(maxTicketPerClient + 1, startDate, endDate, eventFacet, wallet);
     // create ticket category
-    const populatedTx = await createTicketCategory(
-      NFT_STORAGE_API_KEY,
-      firstEventTokenId,
-      mockedCategoryMetadata,
-      mockedContractData,
-      eventFacet,
-    );
+    const populatedTx = await createTicketCategory(categoryIpfsUrl, firstEventTokenId, mockedContractData, eventFacet);
     const tx = await wallet.sendTransaction(populatedTx);
     await tx.wait();
 
     const populatedTx2 = await createTicketCategory(
-      NFT_STORAGE_API_KEY,
+      categoryIpfsUrl,
       secondEventTokenId,
-      mockedCategoryMetadata,
       mockedContractData,
       eventFacet,
     );
@@ -148,16 +127,11 @@ describe("Visitor tests", () => {
       },
     ];
 
-    mockedTicketMetadata.image = imageBlob;
-
-    const ticketsMetadata = [mockedTicketMetadata, mockedTicketMetadata];
-
     const populatedTx = await buyTickets(
-      NFT_STORAGE_API_KEY,
+      [ticketIpfsUrl, ticketIpfsUrl],
       eventCategoryData,
       priceData,
       place,
-      ticketsMetadata,
       ticketControllerFacet,
     );
     populatedTx.from = visitorWallet.address;
@@ -196,16 +170,11 @@ describe("Visitor tests", () => {
       },
     ];
 
-    mockedTicketMetadata.image = imageBlob;
-
-    const ticketsMetadata = [mockedTicketMetadata, mockedTicketMetadata];
-
     const populatedTx = await buyTickets(
-      NFT_STORAGE_API_KEY,
+      [ticketIpfsUrl, ticketIpfsUrl],
       eventCategoryData,
       priceData,
       place,
-      ticketsMetadata,
       ticketControllerFacet,
     );
     populatedTx.from = visitorWallet.address;
@@ -238,16 +207,11 @@ describe("Visitor tests", () => {
       },
     ];
 
-    mockedTicketMetadata.image = imageBlob;
-
-    const ticketsMetadata = [mockedTicketMetadata, mockedTicketMetadata];
-
     const populatedTx = await buyTickets(
-      NFT_STORAGE_API_KEY,
+      [ticketIpfsUrl, ticketIpfsUrl],
       eventCategoryData,
       priceData,
       place,
-      ticketsMetadata,
       ticketControllerFacet,
     );
     populatedTx.from = visitorWallet.address;
@@ -282,16 +246,11 @@ describe("Visitor tests", () => {
       },
     ];
 
-    mockedTicketMetadata.image = imageBlob;
-
-    const ticketsMetadata = [mockedTicketMetadata, mockedTicketMetadata];
-
     const populatedTx = await buyTickets(
-      NFT_STORAGE_API_KEY,
+      [ticketIpfsUrl, ticketIpfsUrl],
       eventCategoryData,
       priceData,
       place,
-      ticketsMetadata,
       ticketControllerFacet,
     );
     populatedTx.from = visitorWallet.address;
@@ -324,18 +283,7 @@ describe("Visitor tests", () => {
       },
     ];
 
-    mockedTicketMetadata.image = imageBlob;
-
-    const ticketsMetadata = [mockedTicketMetadata];
-
-    const populatedTx = await buyTickets(
-      NFT_STORAGE_API_KEY,
-      eventCategoryData,
-      priceData,
-      place,
-      ticketsMetadata,
-      ticketControllerFacet,
-    );
+    const populatedTx = await buyTickets([ticketIpfsUrl], eventCategoryData, priceData, place, ticketControllerFacet);
     populatedTx.from = visitorWallet.address;
     await expect(visitorWallet.sendTransaction(populatedTx)).to.be.revertedWith(errorMessages.parametersLengthNotEqual);
   });
@@ -380,14 +328,11 @@ describe("Visitor tests", () => {
       },
     ];
 
-    const ticketsMetadata = [mockedTicketMetadata, mockedTicketMetadata, mockedTicketMetadata];
-
     const populatedTx = await buyTickets(
-      NFT_STORAGE_API_KEY,
+      [ticketIpfsUrl, ticketIpfsUrl, ticketIpfsUrl],
       eventCategoryData,
       priceData,
       place,
-      ticketsMetadata,
       ticketControllerFacet,
     );
     populatedTx.from = visitorWallet.address;
@@ -443,14 +388,11 @@ describe("Visitor tests", () => {
       },
     ];
 
-    const ticketsMetadata = [mockedTicketMetadata, mockedTicketMetadata, mockedTicketMetadata];
-
     const populatedTx = await buyTickets(
-      NFT_STORAGE_API_KEY,
+      [ticketIpfsUrl, ticketIpfsUrl, ticketIpfsUrl],
       eventCategoryData,
       priceData,
       place,
-      ticketsMetadata,
       ticketControllerFacet,
     );
     populatedTx.from = visitorWallet.address;
@@ -496,14 +438,11 @@ describe("Visitor tests", () => {
       },
     ];
 
-    const ticketsMetadata = [mockedTicketMetadata, mockedTicketMetadata, mockedTicketMetadata];
-
     const populatedTx = await buyTickets(
-      NFT_STORAGE_API_KEY,
+      [ticketIpfsUrl, ticketIpfsUrl, ticketIpfsUrl],
       eventCategoryData,
       priceData,
       place,
-      ticketsMetadata,
       ticketControllerFacet,
     );
     populatedTx.from = visitorWallet.address;
@@ -551,14 +490,11 @@ describe("Visitor tests", () => {
       },
     ];
 
-    const ticketsMetadata = [mockedTicketMetadata, mockedTicketMetadata];
-
     const populatedTx = await buyTickets(
-      NFT_STORAGE_API_KEY,
+      [ticketIpfsUrl, ticketIpfsUrl],
       eventCategoryData,
       priceData,
       place,
-      ticketsMetadata,
       ticketControllerFacet,
     );
     populatedTx.from = visitorWallet.address;
@@ -612,15 +548,11 @@ describe("Visitor tests", () => {
       },
     ];
 
-    mockedTicketMetadata.image = imageBlob;
-    const ticketsMetadata = [mockedTicketMetadata, mockedTicketMetadata];
-
     populatedTx = await buyTickets(
-      NFT_STORAGE_API_KEY,
+      [ticketIpfsUrl, ticketIpfsUrl],
       eventCategoryData,
       priceData,
       place,
-      ticketsMetadata,
       ticketControllerFacet,
     );
 
@@ -676,13 +608,7 @@ describe("Visitor tests", () => {
 
     mockedContractData.saleStartDate = DATES.EVENT_START_DATE;
     mockedContractData.saleEndDate = DATES.EVENT_END_DATE;
-    const populatedTx1 = await createTicketCategory(
-      NFT_STORAGE_API_KEY,
-      firstEventTokenId,
-      mockedCategoryMetadata,
-      mockedContractData,
-      eventFacet,
-    );
+    const populatedTx1 = await createTicketCategory(categoryIpfsUrl, firstEventTokenId, mockedContractData, eventFacet);
     const tx1 = await wallet.sendTransaction(populatedTx1);
     await tx1.wait();
 
@@ -695,12 +621,11 @@ describe("Visitor tests", () => {
 
     const categories = await fetchCategoriesByEventId(firstEventTokenId, eventFacet);
     const categoryId = categories[0].id;
-    mockedCategoryMetadata.name = "Updated category name";
+
     const populatedTx = await updateCategory(
-      NFT_STORAGE_API_KEY,
+      categoryIpfsUrl,
       firstEventTokenId,
       categoryId,
-      mockedCategoryMetadata,
       mockedContractData,
       eventFacet,
     );
@@ -758,7 +683,6 @@ describe("Visitor tests", () => {
 
     const categories = await fetchCategoriesByEventId(secondEventTokenId, eventFacet);
     const categoryId = categories[0].id;
-    mockedCategoryMetadata.name = "Updated category name";
     const saleStartDate = DATES.EVENT_START_DATE + 100;
     const saleEndDate = DATES.EVENT_END_DATE - 100;
     const populatedTx = await updateCategorySaleDates(

@@ -2,15 +2,13 @@ import {
   removeEvent,
   addTeamMember,
   removeTeamMember,
-  updateEvent,
   getEventMembers,
-  getEventIpfsUri,
   fetchOwnedEvents,
   fetchEvents,
   setEventCashier,
   addRefundDeadline,
 } from "../src/index.js";
-import { NFT_STORAGE_API_KEY, EXAMPLE_ADDRESS, mockedMetadata, errorMessages, DATES } from "./config.js";
+import { EXAMPLE_ADDRESS, errorMessages, DATES } from "./config.js";
 import { expect } from "chai";
 import { utils } from "ethers";
 import { mockedCreateEvent, testSetUp } from "./utils.js";
@@ -20,17 +18,15 @@ describe("Organizer tests", function () {
   let eventFacet;
   let ticketControllerFacet;
   let tokenId;
-  let imageBlob;
   let wallet;
   let signers;
   const addressLength = 64;
 
   before(async function () {
-    ({ diamondAddress, eventFacet, ticketControllerFacet, imageBlob, signers, wallet } = await testSetUp(
+    ({ diamondAddress, eventFacet, ticketControllerFacet, signers, wallet } = await testSetUp(
       diamondAddress,
       eventFacet,
       ticketControllerFacet,
-      imageBlob,
       signers,
       wallet,
     ));
@@ -38,7 +34,6 @@ describe("Organizer tests", function () {
     const maxTicketPerClient = 10;
     const startDate = DATES.EVENT_START_DATE;
     const endDate = DATES.EVENT_END_DATE;
-    mockedMetadata.image = imageBlob;
 
     tokenId = await mockedCreateEvent(maxTicketPerClient, startDate, endDate, eventFacet, wallet, tokenId);
   });
@@ -47,19 +42,6 @@ describe("Organizer tests", function () {
     const eventIds = [1];
     const events = await fetchEvents(eventIds, eventFacet);
     expect(events.length).to.equal(1);
-  });
-
-  it("Should call updateEventTokenUri method from smart contract", async () => {
-    const oldIpfsUrl = await getEventIpfsUri(tokenId, eventFacet);
-    mockedMetadata.name = "Updated Name";
-    mockedMetadata.description = "Updated description";
-
-    const populatedTx = await updateEvent(NFT_STORAGE_API_KEY, tokenId, mockedMetadata, eventFacet);
-    const tx = await wallet.sendTransaction(populatedTx);
-    await tx.wait();
-
-    const newIpfsUrl = await getEventIpfsUri(tokenId, eventFacet);
-    expect(oldIpfsUrl.toString()).to.not.equal(newIpfsUrl.toString());
   });
 
   it("Should call fetch events by id method from smart contract", async () => {

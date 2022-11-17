@@ -23,20 +23,18 @@ import {
   sendInvitation,
   withdrawContractBalance,
 } from "../src/index.js";
-import {
-  NFT_STORAGE_API_KEY,
-  mockedMetadata,
-  mockedCategoryMetadata,
-  mockedContractData,
-  mockedTicketMetadata,
-  EXAMPLE_ADDRESS,
-  errorMessages,
-  DATES,
-} from "./config.js";
+import { mockedContractData, EXAMPLE_ADDRESS, errorMessages, DATES } from "./config.js";
 import { expect } from "chai";
 import { utils } from "ethers";
 import { spy } from "sinon";
-import { mockedCreateEvent, testSetUp } from "./utils.js";
+import {
+  mockedCreateEvent,
+  testSetUp,
+  eventIpfsUrl,
+  categoryIpfsUrl,
+  ticketIpfsUrl,
+  updatedCategoryIpfsUrl,
+} from "./utils.js";
 
 describe("Moderator tests", function () {
   let diamondAddress;
@@ -44,7 +42,6 @@ describe("Moderator tests", function () {
   let ticketControllerFacet;
   let ticketFacet;
   let tokenId;
-  let imageBlob;
   let wallet;
   let moderatorWallet;
   let signers;
@@ -60,12 +57,11 @@ describe("Moderator tests", function () {
   }
 
   before(async function () {
-    ({ diamondAddress, eventFacet, ticketControllerFacet, ticketFacet, imageBlob, signers, wallet } = await testSetUp(
+    ({ diamondAddress, eventFacet, ticketControllerFacet, ticketFacet, signers, wallet } = await testSetUp(
       diamondAddress,
       eventFacet,
       ticketControllerFacet,
       ticketFacet,
-      imageBlob,
       signers,
       wallet,
     ));
@@ -74,9 +70,6 @@ describe("Moderator tests", function () {
     const maxTicketPerClient = 10;
     const startDate = DATES.EVENT_START_DATE;
     const endDate = DATES.EVENT_END_DATE;
-
-    mockedMetadata.image = imageBlob;
-    mockedCategoryMetadata.image = imageBlob;
 
     tokenId = await mockedCreateEvent(maxTicketPerClient, startDate, endDate, eventFacet, wallet, tokenId);
 
@@ -97,13 +90,7 @@ describe("Moderator tests", function () {
   });
 
   it("Should create ticket category", async () => {
-    const populatedTx = await createTicketCategory(
-      NFT_STORAGE_API_KEY,
-      tokenId,
-      mockedCategoryMetadata,
-      mockedContractData,
-      eventFacet,
-    );
+    const populatedTx = await createTicketCategory(categoryIpfsUrl, tokenId, mockedContractData, eventFacet);
     populatedTx.from = moderatorWallet.address;
     const tx = await moderatorWallet.sendTransaction(populatedTx);
     await tx.wait();
@@ -115,13 +102,7 @@ describe("Moderator tests", function () {
   it("Should revert create ticket category when the start sale date is earlier than start date of event", async () => {
     mockedContractData.saleStartDate = DATES.EARLY_SALE_START_DATE;
     mockedContractData.saleEndDate = DATES.EVENT_END_DATE;
-    const populatedTx = await createTicketCategory(
-      NFT_STORAGE_API_KEY,
-      tokenId,
-      mockedCategoryMetadata,
-      mockedContractData,
-      eventFacet,
-    );
+    const populatedTx = await createTicketCategory(categoryIpfsUrl, tokenId, mockedContractData, eventFacet);
     populatedTx.from = moderatorWallet.address;
 
     await expect(moderatorWallet.sendTransaction(populatedTx)).to.be.revertedWith(
@@ -132,13 +113,7 @@ describe("Moderator tests", function () {
   it("Should revert create ticket category when the end sale date is after the end date of the event", async () => {
     mockedContractData.saleStartDate = DATES.EVENT_START_DATE;
     mockedContractData.saleEndDate = DATES.LATE_SALE_END_DATE;
-    const populatedTx = await createTicketCategory(
-      NFT_STORAGE_API_KEY,
-      tokenId,
-      mockedCategoryMetadata,
-      mockedContractData,
-      eventFacet,
-    );
+    const populatedTx = await createTicketCategory(categoryIpfsUrl, tokenId, mockedContractData, eventFacet);
     populatedTx.from = moderatorWallet.address;
 
     await expect(moderatorWallet.sendTransaction(populatedTx)).to.be.revertedWith(
@@ -147,13 +122,7 @@ describe("Moderator tests", function () {
   });
 
   it("Should revert create ticket category when there is not an event", async () => {
-    const populatedTx = await createTicketCategory(
-      NFT_STORAGE_API_KEY,
-      tokenId + 1,
-      mockedCategoryMetadata,
-      mockedContractData,
-      eventFacet,
-    );
+    const populatedTx = await createTicketCategory(categoryIpfsUrl, tokenId + 1, mockedContractData, eventFacet);
     populatedTx.from = moderatorWallet.address;
 
     await expect(moderatorWallet.sendTransaction(populatedTx)).to.be.revertedWith(errorMessages.eventDoesNotExist);
@@ -162,12 +131,11 @@ describe("Moderator tests", function () {
   it("Should update ticket category", async () => {
     const categories = await fetchCategoriesByEventId(tokenId, eventFacet);
     const categoryId = categories[0].id;
-    mockedCategoryMetadata.name = "Updated category name";
+
     const populatedTx = await updateCategory(
-      NFT_STORAGE_API_KEY,
+      updatedCategoryIpfsUrl,
       tokenId,
       categoryId,
-      mockedCategoryMetadata,
       mockedContractData,
       eventFacet,
     );
@@ -184,16 +152,9 @@ describe("Moderator tests", function () {
   it.skip("Should revert update ticket category when start sale date is earlier than start date of event", async () => {
     const categories = await fetchCategoriesByEventId(tokenId, eventFacet);
     const categoryId = categories[0].id;
-    mockedCategoryMetadata.saleStartDate = DATES.EARLY_SALE_START_DATE;
-    mockedCategoryMetadata.saleEndDate = DATES.EVENT_END_DATE;
-    const populatedTx = await updateCategory(
-      NFT_STORAGE_API_KEY,
-      tokenId,
-      categoryId,
-      mockedCategoryMetadata,
-      mockedContractData,
-      eventFacet,
-    );
+    mockedContractData.saleStartDate = DATES.EARLY_SALE_START_DATE;
+    mockedContractData.saleEndDate = DATES.EVENT_END_DATE;
+    const populatedTx = await updateCategory(categoryIpfsUrl, tokenId, categoryId, mockedContractData, eventFacet);
     populatedTx.from = moderatorWallet.address;
 
     await expect(moderatorWallet.sendTransaction(populatedTx)).to.be.revertedWith(
@@ -204,16 +165,9 @@ describe("Moderator tests", function () {
   it.skip("Should revert update ticket category when the end sale date is after end date of the event", async () => {
     const categories = await fetchCategoriesByEventId(tokenId, eventFacet);
     const categoryId = categories[0].id;
-    mockedCategoryMetadata.saleStartDate = DATES.EVENT_START_DATE;
-    mockedCategoryMetadata.saleEndDate = DATES.LATE_SALE_END_DATE;
-    const populatedTx = await updateCategory(
-      NFT_STORAGE_API_KEY,
-      tokenId,
-      categoryId,
-      mockedCategoryMetadata,
-      mockedContractData,
-      eventFacet,
-    );
+    mockedContractData.saleStartDate = DATES.EVENT_START_DATE;
+    mockedContractData.saleEndDate = DATES.LATE_SALE_END_DATE;
+    const populatedTx = await updateCategory(categoryIpfsUrl, tokenId, categoryId, mockedContractData, eventFacet);
     populatedTx.from = moderatorWallet.address;
 
     await expect(moderatorWallet.sendTransaction(populatedTx)).to.be.revertedWith(
@@ -441,13 +395,7 @@ describe("Moderator tests", function () {
   it("Should buy tickets from single event", async () => {
     mockedContractData.saleStartDate = DATES.EVENT_START_DATE;
     mockedContractData.saleEndDate = DATES.EVENT_END_DATE;
-    const populatedTx1 = await createTicketCategory(
-      NFT_STORAGE_API_KEY,
-      tokenId,
-      mockedCategoryMetadata,
-      mockedContractData,
-      eventFacet,
-    );
+    const populatedTx1 = await createTicketCategory(categoryIpfsUrl, tokenId, mockedContractData, eventFacet);
     populatedTx1.from = moderatorWallet.address;
     const tx1 = await moderatorWallet.sendTransaction(populatedTx1);
     await tx1.wait();
@@ -477,16 +425,11 @@ describe("Moderator tests", function () {
       },
     ];
 
-    mockedTicketMetadata.image = imageBlob;
-
-    const ticketsMetadata = [mockedTicketMetadata, mockedTicketMetadata];
-
     const populatedTx = await buyTickets(
-      NFT_STORAGE_API_KEY,
+      [ticketIpfsUrl, ticketIpfsUrl],
       eventCategoryData,
       priceData,
       place,
-      ticketsMetadata,
       ticketControllerFacet,
     );
     populatedTx.from = moderatorWallet.address;
@@ -572,17 +515,14 @@ describe("Moderator tests", function () {
         account: ethers.constants.AddressZero,
       },
     ];
-    mockedTicketMetadata.image = imageBlob;
-    const ticketsMetadata = [mockedTicketMetadata, mockedTicketMetadata, mockedTicketMetadata];
 
     listeners.listenForBookedTickets(spyFunc, ticketControllerFacet);
 
     const populatedTx = await bookTickets(
-      NFT_STORAGE_API_KEY,
+      [ticketIpfsUrl, ticketIpfsUrl, ticketIpfsUrl],
       tokenId,
       categoryData,
       place,
-      ticketsMetadata,
       ticketControllerFacet,
     );
 
@@ -621,12 +561,7 @@ describe("Moderator tests", function () {
     const maxTicketPerClient = 10;
     const startDate = DATES.EVENT_START_DATE;
     const endDate = DATES.EVENT_END_DATE;
-    const populatedTx = await createEvent(
-      NFT_STORAGE_API_KEY,
-      mockedMetadata,
-      { maxTicketPerClient, startDate, endDate },
-      eventFacet,
-    );
+    const populatedTx = await createEvent(eventIpfsUrl, { maxTicketPerClient, startDate, endDate }, eventFacet);
     populatedTx.from = moderatorWallet.address;
 
     const eventTx = await moderatorWallet.sendTransaction(populatedTx);
@@ -638,12 +573,8 @@ describe("Moderator tests", function () {
 
   it("Should listen for event update", async () => {
     listeners.listenForEventUpdate(spyFunc, eventFacet);
-    const currMockedMetadata = JSON.parse(JSON.stringify(mockedMetadata));
-    currMockedMetadata.name = "Updated Name";
-    currMockedMetadata.description = "Updated description";
-    currMockedMetadata.image = imageBlob;
 
-    const populatedTx = await updateEvent(NFT_STORAGE_API_KEY, tokenId, currMockedMetadata, eventFacet);
+    const populatedTx = await updateEvent(eventIpfsUrl, tokenId, eventFacet);
     populatedTx.from = moderatorWallet.address;
     const tx = await moderatorWallet.sendTransaction(populatedTx);
     await tx.wait();
@@ -697,10 +628,10 @@ describe("Moderator tests", function () {
 });
 
 describe("Clip ticket", function () {
-  let eventFacet, ticketControllerFacet, imageBlob, signers, wallet, moderatorWallet;
+  let eventFacet, ticketControllerFacet, signers, wallet, moderatorWallet;
 
   before(async () => {
-    ({ eventFacet, ticketControllerFacet, imageBlob, signers, wallet } = await testSetUp());
+    ({ eventFacet, ticketControllerFacet, signers, wallet } = await testSetUp());
 
     moderatorWallet = signers[1];
   });
@@ -710,9 +641,6 @@ describe("Clip ticket", function () {
     const maxTicketPerClient = 10;
     const startDate = DATES.EVENT_START_DATE;
     const endDate = DATES.EVENT_END_DATE;
-
-    mockedMetadata.image = imageBlob;
-    mockedCategoryMetadata.image = imageBlob;
 
     let tokenIdParam;
     const tokenId = await mockedCreateEvent(maxTicketPerClient, startDate, endDate, eventFacet, wallet, tokenIdParam);
@@ -725,13 +653,7 @@ describe("Clip ticket", function () {
     await tx.wait();
 
     // Create category
-    const populatedTx1 = await createTicketCategory(
-      NFT_STORAGE_API_KEY,
-      tokenId,
-      mockedCategoryMetadata,
-      mockedContractData,
-      eventFacet,
-    );
+    const populatedTx1 = await createTicketCategory(categoryIpfsUrl, tokenId, mockedContractData, eventFacet);
     populatedTx1.from = moderatorWallet.address;
     const tx2 = await moderatorWallet.sendTransaction(populatedTx1);
     await tx2.wait();
@@ -748,9 +670,6 @@ describe("Clip ticket", function () {
     const startDate = DATES.EVENT_START_DATE;
     const endDate = DATES.EVENT_END_DATE;
 
-    mockedMetadata.image = imageBlob;
-    mockedCategoryMetadata.image = imageBlob;
-
     let tokenIdParam;
     const tokenId = await mockedCreateEvent(maxTicketPerClient, startDate, endDate, eventFacet, wallet, tokenIdParam);
 
@@ -762,13 +681,7 @@ describe("Clip ticket", function () {
     await txMember.wait();
 
     // Create category
-    const populatedTx1 = await createTicketCategory(
-      NFT_STORAGE_API_KEY,
-      tokenId,
-      mockedCategoryMetadata,
-      mockedContractData,
-      eventFacet,
-    );
+    const populatedTx1 = await createTicketCategory(categoryIpfsUrl, tokenId, mockedContractData, eventFacet);
     populatedTx1.from = moderatorWallet.address;
     const tx = await moderatorWallet.sendTransaction(populatedTx1);
     await tx.wait();
@@ -798,16 +711,11 @@ describe("Clip ticket", function () {
       },
     ];
 
-    mockedTicketMetadata.image = imageBlob;
-
-    const ticketsMetadata = [mockedTicketMetadata, mockedTicketMetadata];
-
     const populatedTx2 = await buyTickets(
-      NFT_STORAGE_API_KEY,
+      [ticketIpfsUrl, ticketIpfsUrl],
       eventCategoryData,
       priceData,
       place,
-      ticketsMetadata,
       ticketControllerFacet,
     );
     populatedTx2.from = moderatorWallet.address;
@@ -831,9 +739,6 @@ describe("Clip ticket", function () {
     const startDate = DATES.EVENT_START_DATE + 100000; // buddy ignore:line
     const endDate = DATES.EVENT_END_DATE;
 
-    mockedMetadata.image = imageBlob;
-    mockedCategoryMetadata.image = imageBlob;
-
     let tokenIdParam;
     const tokenId = await mockedCreateEvent(maxTicketPerClient, startDate, endDate, eventFacet, wallet, tokenIdParam);
 
@@ -846,13 +751,7 @@ describe("Clip ticket", function () {
 
     // Create category
     mockedContractData.saleStartDate = startDate;
-    const populatedTx1 = await createTicketCategory(
-      NFT_STORAGE_API_KEY,
-      tokenId,
-      mockedCategoryMetadata,
-      mockedContractData,
-      eventFacet,
-    );
+    const populatedTx1 = await createTicketCategory(categoryIpfsUrl, tokenId, mockedContractData, eventFacet);
     populatedTx1.from = moderatorWallet.address;
     const tx = await moderatorWallet.sendTransaction(populatedTx1);
     await tx.wait();
@@ -870,9 +769,6 @@ describe("Clip ticket", function () {
     const startDate = DATES.EVENT_START_DATE;
     const endDate = startDate + 5; // buddy ignore:line
 
-    mockedMetadata.image = imageBlob;
-    mockedCategoryMetadata.image = imageBlob;
-
     let tokenIdParam;
     const tokenId = await mockedCreateEvent(maxTicketPerClient, startDate, endDate, eventFacet, wallet, tokenIdParam);
 
@@ -885,13 +781,7 @@ describe("Clip ticket", function () {
 
     // Create category
     mockedContractData.saleEndDate = endDate;
-    const populatedTx1 = await createTicketCategory(
-      NFT_STORAGE_API_KEY,
-      tokenId,
-      mockedCategoryMetadata,
-      mockedContractData,
-      eventFacet,
-    );
+    const populatedTx1 = await createTicketCategory(categoryIpfsUrl, tokenId, mockedContractData, eventFacet);
     populatedTx1.from = moderatorWallet.address;
     const tx = await moderatorWallet.sendTransaction(populatedTx1);
     await tx.wait();
@@ -912,9 +802,6 @@ describe("Clip ticket", function () {
     const startDate = DATES.EVENT_START_DATE;
     const endDate = DATES.EVENT_END_DATE;
 
-    mockedMetadata.image = imageBlob;
-    mockedCategoryMetadata.image = imageBlob;
-
     let tokenIdParam;
     const tokenId = await mockedCreateEvent(maxTicketPerClient, startDate, endDate, eventFacet, wallet, tokenIdParam);
 
@@ -928,13 +815,7 @@ describe("Clip ticket", function () {
     // Create category
     mockedContractData.saleStartDate = DATES.EVENT_START_DATE + 10; // buddy ignore:line
     mockedContractData.saleEndDate = DATES.EVENT_END_DATE - 10; // buddy ignore:line
-    const populatedTx1 = await createTicketCategory(
-      NFT_STORAGE_API_KEY,
-      tokenId,
-      mockedCategoryMetadata,
-      mockedContractData,
-      eventFacet,
-    );
+    const populatedTx1 = await createTicketCategory(categoryIpfsUrl, tokenId, mockedContractData, eventFacet);
     populatedTx1.from = moderatorWallet.address;
     const txCategory = await moderatorWallet.sendTransaction(populatedTx1);
     await txCategory.wait();
@@ -964,16 +845,11 @@ describe("Clip ticket", function () {
       },
     ];
 
-    mockedTicketMetadata.image = imageBlob;
-
-    const ticketsMetadata = [mockedTicketMetadata, mockedTicketMetadata];
-
     const populatedTx2 = await buyTickets(
-      NFT_STORAGE_API_KEY,
+      [ticketIpfsUrl, ticketIpfsUrl],
       eventCategoryData,
       priceData,
       place,
-      ticketsMetadata,
       ticketControllerFacet,
     );
     populatedTx2.from = moderatorWallet.address;
