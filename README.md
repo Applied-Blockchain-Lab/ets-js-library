@@ -75,7 +75,9 @@ const key = "API key for NFT.storage";
 const transaction = await createEvent(key, metadata, contractData);
 //You need to sign and send the transaction after this.
 ```
+
 ##### Possiblle error messages:
+
 - ERC5007: Invalid endTime
 - ERC721: mint to the zero address
 - ERC721: token already minted
@@ -129,7 +131,9 @@ try {
   console.log(error);
 }
 ```
+
 ##### Possiblle error messages:
+
 - Event: Event does not exist
 - Event: Caller is not an admin or moderator
 - ERC721URIStorage: URI set of nonexistent token
@@ -159,7 +163,9 @@ try {
   console.log(error);
 }
 ```
+
 ##### Possiblle error messages:
+
 - Event: Event does not exist
 - Event: Caller is not an admin
 - Event: There are sold tickets
@@ -206,7 +212,9 @@ const events = [
 ...
 ];
 ```
+
 ##### Possiblle error messages:
+
 - Event: Event does not exist
 
 ### Fetch owned events (Admin or Moderator)
@@ -367,6 +375,7 @@ const transaction = await addTeamMember(eventId, role, address);
 ```
 
 ##### Possiblle error messages:
+
 - Event: Event does not exist
 - Event: Caller is not an admin
 - Event: Can't set cashier here
@@ -390,7 +399,9 @@ const role = utils.keccak256(utils.toUtf8Bytes("MODERATOR_ROLE"));
 const transaction = await removeTeamMember(eventId, role, address);
 //You need to sign and send the transaction after this.
 ```
+
 ##### Possiblle error messages:
+
 - Event: Event does not exist
 - Event: Caller is not an admin
 - Event: Can't remove cashier here
@@ -427,7 +438,9 @@ const members = [
 ...
 ];
 ```
+
 ##### Possiblle error messages:
+
 - Event: Event does not exist
 
 ### Fetch all event ids (Everyone)
@@ -462,10 +475,11 @@ const eventId = "Id of event";
 const transaction = await setEventCashier(eventId, address);
 //You need to sign and send the transaction after this.
 ```
+
 ##### Possiblle error messages:
+
 - Event: Event does not exist
 - Event: Caller is not an admin
-
 
 ### Create ticket category (Admin or Moderator)
 
@@ -512,7 +526,9 @@ const eventId = "Id of event";
 const transaction = await createTicketCategory(key, eventId, metadata, contractData);
 //You need to sign and send the transaction after this.
 ```
+
 ##### Possiblle error messages:
+
 - Event: Event does not exist
 - Event: Caller is not an admin or moderator
 - Event: Discount parameters length not eq
@@ -563,7 +579,9 @@ const categoryId = "Id of category";
 const transaction = await updateCategory(key, eventId, categoryId, metadata, contractData);
 //You need to sign and send the transaction after this.
 ```
+
 ##### Possiblle error messages:
+
 - Event: Event does not exist
 - Event: Category does not exist
 - Event: This category is for another event
@@ -593,7 +611,9 @@ try {
   console.log(error);
 }
 ```
+
 ##### Possiblle error messages:
+
 - Event: Event does not exist
 - Event: Category does not exist
 - Event: This category is for another event
@@ -616,7 +636,9 @@ const moreTickets = 5;
 const transaction = await addCategoryTicketsCount(eventId, categoryId, moreTickets);
 //You need to sign and send the transaction after this.
 ```
+
 ##### Possiblle error messages:
+
 - Event: Event does not exist
 - Event: Category does not exist
 - Event: This category is for another event
@@ -638,7 +660,9 @@ const lessTickets = 5;
 const transaction = await removeCategoryTicketsCount(eventId, categoryId, lessTickets);
 //You need to sign and send the transaction after this.
 ```
+
 ##### Possiblle error messages:
+
 - Event: Event does not exist
 - Event: Category does not exist
 - Event: This category is for another event
@@ -664,7 +688,9 @@ const value = true;
 const transaction = await manageCategorySelling(eventId, categoryId, value);
 //You need to sign and send the transaction after this.
 ```
+
 ##### Possiblle error messages:
+
 - Event: Event does not exist
 - Event: Category does not exist
 - Event: This category is for another event
@@ -687,7 +713,9 @@ const value = true;
 const transaction = await manageAllCategorySelling(eventId, value);
 //You need to sign and send the transaction after this.
 ```
+
 ##### Possiblle error messages:
+
 - Event: Event does not exist
 - Event: Caller is not an admin or moderator
 
@@ -753,7 +781,9 @@ const categories = [
   ...
 ];
 ```
+
 ##### Possiblle error messages:
+
 - Event: Event does not exist
 
 ### Update category sale dates (Admin or Moderator)
@@ -773,7 +803,9 @@ const saleEndDate = 1666666666; //unix timestamp
 const transaction = await updateCategorySaleDates(eventId, categoryId, saleStartDate, saleEndDate);
 //You need to sign and send the transaction after this.
 ```
+
 ##### Possiblle error messages:
+
 - Event: Event does not exist
 - Event: Category does not exist
 - Event: This category is for another event
@@ -839,7 +871,9 @@ const ticketsMetadata = [{
 const transaction = await buyTickets(key, eventCategoryData, priceData, place, ticketsMetadata);
 //You need to sign and send the transaction after this.
 ```
+
 ##### Possiblle error messages:
+
 - Event: Parameters length not eq
 - Event: Event does not exist
 - Event: Category does not exist
@@ -870,7 +904,9 @@ const refundData = { date: "timestamp", percentage: "percentage to return" };
 const transaction = await addRefundDeadline(eventId, refundData);
 //You need to sign and send the transaction after this.
 ```
+
 ##### Possiblle error messages:
+
 - Event: Event does not exist
 - Event: Caller is not an admin or moderator
 
@@ -890,7 +926,9 @@ const transaction = await returnTicket(ticketParams);
 ```
 
 This function does not send the tokens immediately to the account, but saves the information in the contract, after which the user must get them through the [withdrawRefund](#withdrawrefund) function.
+
 ##### Possiblle error messages:
+
 - Event: Event does not exist
 - Event: Category does not exist
 - Event: This category is for another event
@@ -898,6 +936,7 @@ This function does not send the tokens immediately to the account, but saves the
 - Event: Can't refund for this event
 - Event: Refund date is over
 - Event: Contract call reverted
+
 ### withdraw the refund (Everyone)
 
 1. Import withdrawRefund function from the library.
@@ -913,7 +952,9 @@ const ticketId = "id of ticket";
 const transaction = await withdrawRefund(eventId, ticketId);
 //You need to sign and send the transaction after this.
 ```
+
 ##### Possiblle error messages:
+
 - Event: Event does not exist
 - Event: Can't refund for this event
 - Event: Acc refund withdraw reverted
@@ -933,7 +974,9 @@ const eventId = "id of event";
 const transaction = await withdrawContractBalance(eventId);
 //You need to sign and send the transaction after this.
 ```
+
 ##### Possiblle error messages:
+
 - Event: Event does not exist
 - Event: Only cashier can withdraw contract balance
 - Event: Contract balance withdraw reverted
@@ -953,7 +996,9 @@ const ticketId = "id of ticket";
 const transaction = await clipTicket(eventId, ticketId);
 //You need to sign and send the transaction after this.
 ```
+
 ##### Possiblle error messages:
+
 - Event: Event does not exist
 - Event: Caller is not an admin, moderator or receptionist
 - Event: Wrong date for ticket clipping
@@ -1011,7 +1056,9 @@ const ticketsMetadata = [{
 const transaction = await bookTickets(key, eventId, categoryData, place, ticketsMetadata);
 //You need to sign and send the transaction after this.
 ```
+
 ##### Possiblle error messages:
+
 - Event: Event does not exist
 - Event: Caller is not an admin or moderator
 - Event: Parameter array can't be empty
@@ -1037,7 +1084,9 @@ const accounts = ["0x...", "0x..."];
 const transaction = await sendInvitation(eventId, ticketIds, accounts);
 //You need to sign and send the transaction after this.
 ```
+
 ##### Possiblle error messages:
+
 - Event: Event does not exist
 - Event: Caller is not an admin or moderator
 - Event: Parameter array can't be empty
@@ -1056,7 +1105,9 @@ const address = "0x...";
 
 const tickets = await getAddressTicketIdsByEvent(eventId, address);
 ```
+
 ##### Possiblle error messages:
+
 - Event: Event does not exist
 
 ## Tests
