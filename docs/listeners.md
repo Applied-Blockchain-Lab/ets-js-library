@@ -617,3 +617,103 @@ listeners.listenForNewTicketInvitation(callback);
 #### Emitted by:
 
 - sendInvitation()
+
+### Listen for new listed ticket (Everyone)
+
+1. Import listeners from the library.
+2. Create a callback function.
+3. Supply callback function to listeners.listenForTicketListed as parameter.
+
+```js
+import { listeners } from "ets-js-library";
+
+function callback(data) {
+  //This function will be called when the event is emitted.
+}
+
+listeners.listenForTicketListed(callback);
+```
+
+#### Emitted by:
+
+- listTicket()
+
+### Listen for update on listed ticket's price (Everyone)
+
+1. Import listeners from the library.
+2. Create a callback function.
+3. Supply callback function to listeners.listenForUpdatedListedTicketPrice as parameter.
+
+```js
+import { listeners } from "ets-js-library";
+
+function callback(data) {
+  //This function will be called when the event is emitted.
+}
+
+listeners.listenForUpdatedListedTicketPrice(callback);
+```
+
+#### Emitted by:
+
+- updateListedTicketPrice()
+
+### Listen for buy on listed ticket (Everyone)
+
+1. Import listeners from the library.
+2. Create a callback function.
+3. Supply callback function to listeners.listenForBoughtListedTicket as parameter.
+
+```js
+import { listeners } from "ets-js-library";
+
+function callback(data) {
+  //This function will be called when the event is emitted.
+}
+
+listeners.listenForBoughtListedTicket(callback);
+```
+
+#### Emitted by:
+
+- buyListedTicket()
+
+### Listen for buy on multiple listed tickets (Everyone)
+
+1. Import listeners from the library.
+2. Create a callback function.
+3. Supply callback function to listeners.listenForMultipleTicketsBought as parameter.
+
+```js
+import { listeners } from "ets-js-library";
+
+function callback(data) {
+  //This function will be called when the event is emitted.
+}
+
+listeners.listenForMultipleTicketsBought(callback);
+```
+
+#### Emitted by:
+
+- buyMultipleListedTickets()
+
+### Listen for cancel on listed ticket (Everyone)
+
+1. Import listeners from the library.
+2. Create a callback function.
+3. Supply callback function to listeners.listenForCanceledListedTicket as parameter.
+
+```js
+import { listeners } from "ets-js-library";
+
+function callback(data) {
+  //This function will be called when the event is emitted.
+}
+
+listeners.listenForCanceledListedTicket(callback);
+```
+
+#### Emitted by:
+
+- cancelListedTicket()
