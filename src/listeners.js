@@ -355,3 +355,58 @@ export function listenForNewTicketInvitation(callback, contract = ticketControll
     await callback(data);
   });
 }
+
+export function listenForTicketListed(callback, contract = ticketControllerContract) {
+  contract.on("TicketListed", async (ticketId, seller) => {
+    const data = {
+      ticketId,
+      account: seller,
+    };
+
+    await callback(data);
+  });
+}
+
+export function listenForUpdatedListedTicketPrice(callback, contract = ticketControllerContract) {
+  contract.on("UpdatedListedTicketPrice", async (ticketId, newPrice) => {
+    const data = {
+      ticketId,
+      newPrice,
+    };
+
+    await callback(data);
+  });
+}
+
+export function listenForBoughtListedTicket(callback, contract = ticketControllerContract) {
+  contract.on("BoughtListedTicket", async (ticketId, price, seller, buyer) => {
+    const data = {
+      ticketId,
+      price,
+      seller,
+      buyer,
+    };
+
+    await callback(data);
+  });
+}
+
+export function listenForMultipleTicketsBought(callback, contract = ticketControllerContract) {
+  contract.on("MultipleTicketsBought", async (ticketIds) => {
+    const data = {
+      ticketIds,
+    };
+
+    await callback(data);
+  });
+}
+
+export function listenForCanceledListedTicket(callback, contract = ticketControllerContract) {
+  contract.on("CanceledListedTicket", async (ticketId) => {
+    const data = {
+      ticketId,
+    };
+
+    await callback(data);
+  });
+}
