@@ -114,7 +114,7 @@ const transaction = await createEvent(ipfsUrl, contractData);
 //You need to sign and send the transaction after this.
 ```
 
-##### Possible error messages:
+#### Possible error messages
 
 - ERC5007: Invalid endTime
 - ERC721: mint to the zero address
@@ -151,7 +151,7 @@ try {
 }
 ```
 
-##### Possible error messages:
+#### Possible error messages
 
 - Event: Event does not exist
 - Event: Caller is not an admin or moderator
@@ -183,7 +183,7 @@ try {
 }
 ```
 
-##### Possible error messages:
+#### Possible error messages
 
 - Event: Event does not exist
 - Event: Caller is not an admin
@@ -232,7 +232,7 @@ const events = [
 ];
 ```
 
-##### Possible error messages:
+#### Possible error messages
 
 - Event: Event does not exist
 
@@ -393,7 +393,7 @@ const transaction = await addTeamMember(eventId, role, address);
 //You need to sign and send the transaction after this.
 ```
 
-##### Possible error messages:
+#### Possible error messages
 
 - Event: Event does not exist
 - Event: Caller is not an admin
@@ -419,7 +419,7 @@ const transaction = await removeTeamMember(eventId, role, address);
 //You need to sign and send the transaction after this.
 ```
 
-##### Possible error messages:
+#### Possible error messages
 
 - Event: Event does not exist
 - Event: Caller is not an admin
@@ -458,7 +458,7 @@ const members = [
 ];
 ```
 
-##### Possible error messages:
+#### Possible error messages
 
 - Event: Event does not exist
 
@@ -495,7 +495,7 @@ const transaction = await setEventCashier(eventId, address);
 //You need to sign and send the transaction after this.
 ```
 
-##### Possible error messages:
+#### Possible error messages
 
 - Event: Event does not exist
 - Event: Caller is not an admin
@@ -531,7 +531,7 @@ const transaction = await createTicketCategory(ipfsUrl, eventId, contractData);
 //You need to sign and send the transaction after this.
 ```
 
-##### Possible error messages:
+#### Possible error messages
 
 - Event: Event does not exist
 - Event: Caller is not an admin or moderator
@@ -569,7 +569,7 @@ const transaction = await updateCategory(ipfsUrl, eventId, categoryId, contractD
 //You need to sign and send the transaction after this.
 ```
 
-##### Possible error messages:
+#### Possible error messages
 
 - Event: Event does not exist
 - Event: Category does not exist
@@ -601,7 +601,7 @@ try {
 }
 ```
 
-##### Possible error messages:
+#### Possible error messages
 
 - Event: Event does not exist
 - Event: Category does not exist
@@ -626,7 +626,7 @@ const transaction = await addCategoryTicketsCount(eventId, categoryId, moreTicke
 //You need to sign and send the transaction after this.
 ```
 
-##### Possible error messages:
+#### Possible error messages
 
 - Event: Event does not exist
 - Event: Category does not exist
@@ -650,7 +650,7 @@ const transaction = await removeCategoryTicketsCount(eventId, categoryId, lessTi
 //You need to sign and send the transaction after this.
 ```
 
-##### Possible error messages:
+#### Possible error messages
 
 - Event: Event does not exist
 - Event: Category does not exist
@@ -678,7 +678,7 @@ const transaction = await manageCategorySelling(eventId, categoryId, value);
 //You need to sign and send the transaction after this.
 ```
 
-##### Possible error messages:
+#### Possible error messages
 
 - Event: Event does not exist
 - Event: Category does not exist
@@ -703,7 +703,7 @@ const transaction = await manageAllCategorySelling(eventId, value);
 //You need to sign and send the transaction after this.
 ```
 
-##### Possible error messages:
+#### Possible error messages
 
 - Event: Event does not exist
 - Event: Caller is not an admin or moderator
@@ -771,7 +771,7 @@ const categories = [
 ];
 ```
 
-##### Possible error messages:
+#### Possible error messages
 
 - Event: Event does not exist
 
@@ -793,7 +793,7 @@ const transaction = await updateCategorySaleDates(eventId, categoryId, saleStart
 //You need to sign and send the transaction after this.
 ```
 
-##### Possible error messages:
+#### Possible error messages
 
 - Event: Event does not exist
 - Event: Category does not exist
@@ -848,7 +848,7 @@ const transaction = await buyTickets(ipfsUrls, eventCategoryData, priceData, pla
 //You need to sign and send the transaction after this.
 ```
 
-##### Possible error messages:
+#### Possible error messages
 
 - Event: Parameters length not eq
 - Event: Event does not exist
@@ -881,7 +881,7 @@ const transaction = await addRefundDeadline(eventId, refundData);
 //You need to sign and send the transaction after this.
 ```
 
-##### Possible error messages:
+#### Possible error messages
 
 - Event: Event does not exist
 - Event: Caller is not an admin or moderator
@@ -903,7 +903,7 @@ const transaction = await returnTicket(ticketParams);
 
 This function does not send the tokens immediately to the account, but saves the information in the contract, after which the user must get them through the [withdrawRefund](#withdrawrefund) function.
 
-##### Possible error messages:
+#### Possible error messages
 
 - Event: Event does not exist
 - Event: Category does not exist
@@ -929,7 +929,7 @@ const transaction = await withdrawRefund(eventId, ticketId);
 //You need to sign and send the transaction after this.
 ```
 
-##### Possible error messages:
+#### Possible error messages
 
 - Event: Event does not exist
 - Event: Can't refund for this event
@@ -951,7 +951,7 @@ const transaction = await withdrawContractBalance(eventId);
 //You need to sign and send the transaction after this.
 ```
 
-##### Possible error messages:
+#### Possible error messages
 
 - Event: Event does not exist
 - Event: Only cashier can withdraw contract balance
@@ -973,7 +973,7 @@ const transaction = await clipTicket(eventId, ticketId);
 //You need to sign and send the transaction after this.
 ```
 
-##### Possible error messages:
+#### Possible error messages
 
 - Event: Event does not exist
 - Event: Caller is not an admin, moderator or receptionist
@@ -1022,7 +1022,7 @@ const transaction = await bookTickets(ipfsUrls, eventId, categoryData, place);
 //You need to sign and send the transaction after this.
 ```
 
-##### Possible error messages:
+#### Possible error messages
 
 - Event: Event does not exist
 - Event: Caller is not an admin or moderator
@@ -1050,7 +1050,7 @@ const transaction = await sendInvitation(eventId, ticketIds, accounts);
 //You need to sign and send the transaction after this.
 ```
 
-##### Possible error messages:
+#### Possible error messages
 
 - Event: Event does not exist
 - Event: Caller is not an admin or moderator
@@ -1071,9 +1071,94 @@ const address = "0x...";
 const tickets = await getAddressTicketIdsByEvent(eventId, address);
 ```
 
-##### Possible error messages:
+#### Possible error messages
 
 - Event: Event does not exist
+
+### Lists ticket for sale (Ticket owner)
+
+1. Import listTicket function from the library.
+2. Use ether's utility function to convert the price
+3. Execute listTicket function.
+
+```js
+import { listTicket } from "ets-js-library";
+import { utils } from "ethers";
+
+const ticketId = 1; // Your ticket's id from the smart contract
+const ticketPrice = ethers.utils.parseUnits("1", "ether"); // Тhe price for which it will be sold
+
+await listTicket(ticketId, ticketPrice);
+```
+
+#### Possible error messages
+
+- "ERC5507: Not token owner"
+- "ERC5192: Ticket is soulbound"
+- "TicketMarketplace: Ticket price can't be higher than the original price"
+
+### Updates the listed ticket's price (Ticket owner)
+
+1. Import updateListedTicketPrice function from the library.
+2. Use ether's utility function to convert the price
+3. Execute updateListedTicketPrice function.
+
+```js
+import { updateListedTicketPrice } from "ets-js-library";
+import { utils } from "ethers";
+
+const ticketId = 1; // Your ticket's id from the smart contract
+const ticketPrice = ethers.utils.parseUnits("1", "ether"); // Тhe price for which it will be sold
+
+await updateListedTicketPrice(ticketId, ticketPrice);
+```
+
+#### Possible error messages
+
+- "TicketMarketplace: Ticket is not listed"
+- "ERC5507: Not token owner"
+- "TicketMarketplace: Ticket price can't be higher than the original price"
+
+### Buys multiple or single listed ticket/s (Everyone)
+
+1. Import buyListedTickets function from the library.
+2. Use ether's utility function to convert the price
+3. Execute buyListedTickets function.
+
+```js
+import { buyListedTickets } from "ets-js-library";
+import { utils } from "ethers";
+
+const ticketIds = [1, 2]; // Array with ticket ids to buy.
+const price = ethers.utils.parseUnits("1", "ether"); // The total amount of prices for ticket ids
+
+await buyListedTickets(ticketIds, price);
+```
+
+#### Possible error messages
+
+- "TicketMarketplace: Parameters length not eq"
+- "TicketMarketplace: Ticket is not listed"
+- "TicketMarketplace: Can't buy own tickets"
+- "TransferCallerNotOwnerNorApproved"
+
+### Removes the ticket from marketplace (Ticket owner)
+
+1. Import cancelListedTicket function from the library.
+2. Execute cancelListedTicket function.
+
+```js
+import { cancelListedTicket } from "ets-js-library";
+
+const ticketId = 1; // Your ticket's id from the smart contract
+
+await cancelListedTicket(ticketId);
+```
+
+#### Possible error messages
+
+- "TicketMarketplace: Ticket is not listed"
+- "ERC5507: Not token owner"
 
 ## Tests
 

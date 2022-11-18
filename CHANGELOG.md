@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Wrappers for listeners
+
+## [0.20.3] - 2022-11-18
+
+### Added
+
+- TicketMarketplaceFacet's ABI in config
+- TicketMarketplaceFacet's functions
+
+### Changed
+
+- Updated README with new functions
+
 ## [0.20.0] - 2022-11-17
 
 ### Added
