@@ -13,7 +13,7 @@ import {
 } from "#ipfs.utils";
 import { calculateTotalValue } from "./utils/lib.js";
 import { ETS_SERVER_URL, NET_RPC_URL, NET_RPC_URL_ID, TOKEN_NAME, NET_LABEL } from "#config";
-import { eventsContract, ticketControllerContract, ticketsContract } from "#contract";
+import { eventsContract, ticketControllerContract, ticketsContract, ticketMarketplaceContract } from "#contract";
 import * as listeners from "./listeners.js";
 
 /* ========= IPFS FUNCTIONS ========== */
@@ -391,6 +391,51 @@ export async function fetchTicketOwnerOf(ticketId, contract = ticketsContract) {
   const account = await contract.ownerOf(ticketId);
 
   return account;
+}
+
+export async function listTicket(ticketId, ticketPrice, contract = ticketMarketplaceContract) {
+  try {
+    const tx = await contract.populateTransaction.listTicket(ticketId, ticketPrice);
+    return tx;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function updateListedTicketPrice(ticketId, ticketPrice, contract = ticketMarketplaceContract) {
+  try {
+    const tx = await contract.populateTransaction.updateListedTicketPrice(ticketId, ticketPrice);
+    return tx;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function buyListedTickets(ticketIds, price, contract = ticketMarketplaceContract) {
+  if (ticketIds.length === 1) {
+    try {
+      const tx = await contract.populateTransaction.buyListedTicket(ticketIds[0], { value: price });
+      return tx;
+    } catch (error) {
+      throw error;
+    }
+  } else {
+    try {
+      const tx = await contract.populateTransaction.buyMultipleListedTickets(ticketIds, { value: price });
+      return tx;
+    } catch (error) {
+      throw error;
+    }
+  }
+}
+
+export async function cancelListedTicket(ticketId, contract = ticketMarketplaceContract) {
+  try {
+    const tx = await contract.populateTransaction.cancelListedTicket(ticketId);
+    return tx;
+  } catch (error) {
+    throw error;
+  }
 }
 
 /* ========= EXPRESS SERVER FUNCTIONS ========== */
