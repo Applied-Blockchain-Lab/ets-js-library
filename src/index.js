@@ -447,6 +447,24 @@ export async function postponeEvent(eventId, time, contract = eventsContract) {
   }
 }
 
+export async function cancelEvent(eventId, contract = eventsContract) {
+  try {
+    const tx = await contract.populateTransaction.cancelEvent(eventId);
+    return tx;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function withdrawFromCanceledEvent(eventId, contract = eventsContract) {
+  try {
+    const tx = await contract.populateTransaction.withdrawFromCanceledEvent(eventId);
+    return tx;
+  } catch (error) {
+    throw error;
+  }
+}
+
 /* ========= EXPRESS SERVER FUNCTIONS ========== */
 export async function fetchCountriesFromServer(serverUrl = ETS_SERVER_URL) {
   try {

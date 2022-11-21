@@ -421,3 +421,13 @@ export function listenForEventPostponed(callback, contract = eventsContract) {
     await callback(data);
   });
 }
+
+export function listenForEventCanceled(callback, contract = eventsContract) {
+  contract.on("EventCanceled", async (eventId) => {
+    const data = {
+      eventId,
+    };
+
+    await callback(data);
+  });
+}
