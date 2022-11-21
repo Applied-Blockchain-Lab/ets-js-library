@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.20.8] - 2022-11-21
+
+### Added
+
+- Release 5 functions from smart contract
+
+### Changed
+
+- Updated README with release 5 functions
+- Updated listeners.md with EventCanceled smart contract event
+
 ## [0.20.7] - 2022-11-21
 
 ### Added
