@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.20.7] - 2022-11-21
+
+### Added
+
+- postponeEvent wrapper function
+- EventPostponed smart contract event listener
+
+### Changed
+
+- Updated README with postponeEvent's function
+- Updated listeners.md with postponeEvent's function
+
 ## [0.20.4] - 2022-11-18
 
 ### Added
