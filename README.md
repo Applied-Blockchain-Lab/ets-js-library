@@ -1168,16 +1168,57 @@ await cancelListedTicket(ticketId);
 ```js
 import { postponeEvent } from "ets-js-library";
 
-const eventId = 1; // Event's id from the smart contract
-const time = 86400; // Seconds to postpone event
+const eventId = 1; // The event id generated when creating an event
+const time = 86400; // The amount of seconds to postpone the event
 
 await postponeEvent(eventId, time);
 ```
 
 #### Possible error messages
 
+- "Event: Event does not exist"
 - "Event: Caller is not an admin"
 - "Event: Invalid postpone time given"
+
+### Cancels an event (Admin)
+
+1. Import cancelEvent function from the library.
+2. Execute cancelEvent function.
+
+```js
+import { cancelEvent } from "ets-js-library";
+
+const eventId = 1; // The event id generated when creating an event
+
+await cancelEvent(eventId);
+```
+
+#### Possible error messages
+
+- "Event: Event does not exist"
+- "Event: Caller is not an admin"
+- "Event: Event canceled"
+- "Event: Event can't be canceled"
+
+### Withdraws payed tickets price from canceled event (Ticket owner)
+
+1. Import withdrawFromCanceledEvent function from the library.
+2. Execute withdrawFromCanceledEvent function.
+
+```js
+import { withdrawFromCanceledEvent } from "ets-js-library";
+
+const eventId = 1; // The event id generated when creating an event
+
+await withdrawFromCanceledEvent(eventId);
+```
+
+#### Possible error messages
+
+- "Event: Event does not exist"
+- "Event: Event is not canceled"
+- "Event: No withdrawals"
+- "Event: Failed to send Ether"
 
 ## Tests
 

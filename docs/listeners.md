@@ -737,3 +737,23 @@ listeners.listenForEventPostponed(callback);
 #### Emitted by:
 
 - postponeEvent()
+
+### Listen for event cancel (Everyone)
+
+1. Import listeners from the library.
+2. Create a callback function.
+3. Supply callback function to listeners.listenForEventCanceled as parameter.
+
+```js
+import { listeners } from "ets-js-library";
+
+function callback(data) {
+  //This function will be called when the event is emitted.
+}
+
+listeners.listenForEventCanceled(callback);
+```
+
+#### Emitted by:
+
+- cancelEvent()
