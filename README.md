@@ -1160,6 +1160,25 @@ await cancelListedTicket(ticketId);
 - "TicketMarketplace: Ticket is not listed"
 - "ERC5507: Not token owner"
 
+### Postpones event (Admin)
+
+1. Import postponeEvent function from the library.
+2. Execute postponeEvent function.
+
+```js
+import { postponeEvent } from "ets-js-library";
+
+const eventId = 1; // Event's id from the smart contract
+const time = 86400; // Seconds to postpone event
+
+await postponeEvent(eventId, time);
+```
+
+#### Possible error messages
+
+- "Event: Caller is not an admin"
+- "Event: Invalid postpone time given"
+
 ## Tests
 
 > :warning: **hardhat@esm** is used to test the library to be able to match the type which is _module_, but official hardhat requires _commonjs_

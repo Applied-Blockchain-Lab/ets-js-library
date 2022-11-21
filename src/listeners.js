@@ -410,3 +410,14 @@ export function listenForCanceledListedTicket(callback, contract = ticketControl
     await callback(data);
   });
 }
+
+export function listenForEventPostponed(callback, contract = eventsContract) {
+  contract.on("EventPostponed", async (eventId, time) => {
+    const data = {
+      eventId,
+      time,
+    };
+
+    await callback(data);
+  });
+}
