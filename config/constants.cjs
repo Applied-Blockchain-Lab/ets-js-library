@@ -4,7 +4,7 @@ const NET_RPC_URL = "https://api.avax-test.network/ext/bc/C/rpc";
 const NET_RPC_URL_ID = "0xa869";
 const TOKEN_NAME = "AVAX";
 const NET_LABEL = "Avalanche Fuji Testnet";
-    
+
 module.exports = {
   TICKETS_CONTRACT_ADDRESS,
   EVENTS_CONTRACT_ADDRESS,

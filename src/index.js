@@ -438,6 +438,15 @@ export async function cancelListedTicket(ticketId, contract = ticketMarketplaceC
   }
 }
 
+export async function postponeEvent(eventId, time, contract = eventsContract) {
+  try {
+    const tx = await contract.populateTransaction.postponeEvent(eventId, time);
+    return tx;
+  } catch (error) {
+    throw error;
+  }
+}
+
 /* ========= EXPRESS SERVER FUNCTIONS ========== */
 export async function fetchCountriesFromServer(serverUrl = ETS_SERVER_URL) {
   try {
