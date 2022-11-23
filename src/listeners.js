@@ -1,5 +1,5 @@
 import axios from "axios";
-import { eventsContract, ticketControllerContract, ticketsContract } from "#contract";
+import { eventsContract, ticketControllerContract, ticketsContract, ticketMarketplaceContract } from "#contract";
 import { fetchSingleEventMetadata, makeGatewayUrl } from "#ipfs.utils";
 
 export function listenForNewEvent(callback, contract = eventsContract) {
@@ -356,7 +356,7 @@ export function listenForNewTicketInvitation(callback, contract = ticketControll
   });
 }
 
-export function listenForTicketListed(callback, contract = ticketControllerContract) {
+export function listenForTicketListed(callback, contract = ticketMarketplaceContract) {
   contract.on("TicketListed", async (ticketId, seller) => {
     const data = {
       ticketId,
@@ -367,7 +367,7 @@ export function listenForTicketListed(callback, contract = ticketControllerContr
   });
 }
 
-export function listenForUpdatedListedTicketPrice(callback, contract = ticketControllerContract) {
+export function listenForUpdatedListedTicketPrice(callback, contract = ticketMarketplaceContract) {
   contract.on("UpdatedListedTicketPrice", async (ticketId, newPrice) => {
     const data = {
       ticketId,
@@ -378,7 +378,7 @@ export function listenForUpdatedListedTicketPrice(callback, contract = ticketCon
   });
 }
 
-export function listenForBoughtListedTicket(callback, contract = ticketControllerContract) {
+export function listenForBoughtListedTicket(callback, contract = ticketMarketplaceContract) {
   contract.on("BoughtListedTicket", async (ticketId, price, seller, buyer) => {
     const data = {
       ticketId,
@@ -391,7 +391,7 @@ export function listenForBoughtListedTicket(callback, contract = ticketControlle
   });
 }
 
-export function listenForMultipleTicketsBought(callback, contract = ticketControllerContract) {
+export function listenForMultipleTicketsBought(callback, contract = ticketMarketplaceContract) {
   contract.on("MultipleTicketsBought", async (ticketIds, buyer) => {
     const data = {
       ticketIds,
@@ -402,7 +402,7 @@ export function listenForMultipleTicketsBought(callback, contract = ticketContro
   });
 }
 
-export function listenForCanceledListedTicket(callback, contract = ticketControllerContract) {
+export function listenForCanceledListedTicket(callback, contract = ticketMarketplaceContract) {
   contract.on("CanceledListedTicket", async (ticketId, owner) => {
     const data = {
       ticketId,
