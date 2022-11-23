@@ -392,9 +392,10 @@ export function listenForBoughtListedTicket(callback, contract = ticketControlle
 }
 
 export function listenForMultipleTicketsBought(callback, contract = ticketControllerContract) {
-  contract.on("MultipleTicketsBought", async (ticketIds) => {
+  contract.on("MultipleTicketsBought", async (ticketIds, buyer) => {
     const data = {
       ticketIds,
+      buyer,
     };
 
     await callback(data);
