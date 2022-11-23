@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.20.14] - 2022-11-23
+
+### Changed
+
+- Two listener functions return parameters
+
 ## [0.20.11] - 2022-11-23
 
 ### Changed
