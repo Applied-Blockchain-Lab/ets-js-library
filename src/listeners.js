@@ -395,7 +395,7 @@ export function listenForMultipleTicketsBought(callback, contract = ticketContro
   contract.on("MultipleTicketsBought", async (ticketIds, buyer) => {
     const data = {
       ticketIds,
-      account: buyer,
+      buyer,
     };
 
     await callback(data);
