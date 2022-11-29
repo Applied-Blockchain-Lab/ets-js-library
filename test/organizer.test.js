@@ -21,6 +21,7 @@ describe("Organizer tests", function () {
   let wallet;
   let signers;
   const addressLength = 64;
+  const TEN_DAYS = 10;
 
   before(async function () {
     ({ diamondAddress, eventFacet, ticketControllerFacet, signers, wallet } = await testSetUp(
@@ -32,8 +33,11 @@ describe("Organizer tests", function () {
     ));
 
     const maxTicketPerClient = 10;
-    const startDate = DATES.EVENT_START_DATE;
-    const endDate = DATES.EVENT_END_DATE;
+    const startDate =
+      (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp + TEN_DAYS * DATES.DAY;
+    const endDate =
+      (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp +
+      (TEN_DAYS + TEN_DAYS) * DATES.DAY;
 
     tokenId = await mockedCreateEvent(maxTicketPerClient, startDate, endDate, eventFacet, wallet, tokenId);
   });

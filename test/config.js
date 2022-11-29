@@ -71,10 +71,12 @@ const mockedCategoryMetadata = {
 };
 
 const date = Math.floor(Date.now() / 1000); // buddy ignore:line
+const DAY = 86400;
+const HOUR = 3600;
 
 const mockedContractData = {
-  saleStartDate: date, // unix timestamp
-  saleEndDate: date + 3000000, // buddy ignore:line
+  saleStartDate: date + 1 * DAY, // buddy ignore:line
+  saleEndDate: date + 3 * DAY, // buddy ignore:line
   ticketsCount: 50,
   ticketPrice: 10,
   discountsTicketsCount: [10, 5], // buddy ignore:line
@@ -114,8 +116,10 @@ const errorMessages = {
 const DATES = {
   EARLY_SALE_START_DATE: date - 1000, // buddy ignore:line
   LATE_SALE_END_DATE: date + 5000001, // buddy ignore:line
-  EVENT_START_DATE: date,
-  EVENT_END_DATE: date + 5000000, // buddy ignore:line
+  EVENT_START_DATE: date + 10 * DAY, // buddy ignore:line
+  EVENT_END_DATE: date + 20 * DAY, // buddy ignore:line
+  DAY,
+  HOUR,
 };
 
 export {
