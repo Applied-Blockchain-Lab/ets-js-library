@@ -36,6 +36,10 @@ import {
   updatedCategoryIpfsUrl,
 } from "./utils.js";
 
+const ONE_DAY = 1;
+const THREE_DAYS = 3;
+const TEN_DAYS = 10;
+
 describe("Moderator tests", function () {
   let diamondAddress;
   let eventFacet;
@@ -110,9 +114,13 @@ describe("Moderator tests", function () {
     );
   });
 
-  it("Should revert create ticket category when the end sale date is after the end date of the event", async () => {
-    mockedContractData.saleStartDate = DATES.EVENT_START_DATE;
-    mockedContractData.saleEndDate = DATES.LATE_SALE_END_DATE;
+  it("Should revert create ticket category when the end sale date is after the start date of the event", async () => {
+    mockedContractData.saleStartDate =
+      (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp + ONE_DAY * DATES.DAY;
+    mockedContractData.saleEndDate =
+      (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp +
+      (TEN_DAYS + ONE_DAY) * DATES.DAY;
+
     const populatedTx = await createTicketCategory(categoryIpfsUrl, tokenId, mockedContractData, eventFacet);
     populatedTx.from = moderatorWallet.address;
 
@@ -393,8 +401,11 @@ describe("Moderator tests", function () {
   });
 
   it("Should buy tickets from single event", async () => {
-    mockedContractData.saleStartDate = DATES.EVENT_START_DATE;
-    mockedContractData.saleEndDate = DATES.EVENT_END_DATE;
+    mockedContractData.saleStartDate =
+      (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp + ONE_DAY * DATES.DAY;
+    mockedContractData.saleEndDate =
+      (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp + THREE_DAYS * DATES.DAY;
+
     const populatedTx1 = await createTicketCategory(categoryIpfsUrl, tokenId, mockedContractData, eventFacet);
     populatedTx1.from = moderatorWallet.address;
     const tx1 = await moderatorWallet.sendTransaction(populatedTx1);
@@ -424,6 +435,8 @@ describe("Moderator tests", function () {
         seat: 2,
       },
     ];
+
+    await ethers.provider.send("evm_increaseTime", [ONE_DAY * DATES.DAY]);
 
     const populatedTx = await buyTickets(
       [ticketIpfsUrl, ticketIpfsUrl],
@@ -639,8 +652,12 @@ describe("Clip ticket", function () {
   it("Should revert clip ticket when there is not such ticket", async () => {
     // Create event
     const maxTicketPerClient = 10;
-    const startDate = DATES.EVENT_START_DATE;
-    const endDate = DATES.EVENT_END_DATE;
+
+    const startDate =
+      (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp + TEN_DAYS * DATES.DAY;
+    const endDate =
+      (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp +
+      (TEN_DAYS + TEN_DAYS) * DATES.DAY;
 
     let tokenIdParam;
     const tokenId = await mockedCreateEvent(maxTicketPerClient, startDate, endDate, eventFacet, wallet, tokenIdParam);
@@ -653,10 +670,18 @@ describe("Clip ticket", function () {
     await tx.wait();
 
     // Create category
+
+    mockedContractData.saleStartDate =
+      (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp + ONE_DAY * DATES.DAY;
+    mockedContractData.saleEndDate =
+      (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp + THREE_DAYS * DATES.DAY;
+
     const populatedTx1 = await createTicketCategory(categoryIpfsUrl, tokenId, mockedContractData, eventFacet);
     populatedTx1.from = moderatorWallet.address;
     const tx2 = await moderatorWallet.sendTransaction(populatedTx1);
     await tx2.wait();
+
+    await ethers.provider.send("evm_increaseTime", [TEN_DAYS * DATES.DAY]);
 
     const populatedTx = await clipTicket(tokenId, 1, ticketControllerFacet);
     populatedTx.from = moderatorWallet.address;
@@ -667,8 +692,12 @@ describe("Clip ticket", function () {
   it("Should revert clip ticket when the caller does not have a required role", async () => {
     // Create event
     const maxTicketPerClient = 10;
-    const startDate = DATES.EVENT_START_DATE;
-    const endDate = DATES.EVENT_END_DATE;
+
+    const startDate =
+      (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp + TEN_DAYS * DATES.DAY;
+    const endDate =
+      (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp +
+      (TEN_DAYS + TEN_DAYS) * DATES.DAY;
 
     let tokenIdParam;
     const tokenId = await mockedCreateEvent(maxTicketPerClient, startDate, endDate, eventFacet, wallet, tokenIdParam);
@@ -681,6 +710,12 @@ describe("Clip ticket", function () {
     await txMember.wait();
 
     // Create category
+
+    mockedContractData.saleStartDate =
+      (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp + ONE_DAY * DATES.DAY;
+    mockedContractData.saleEndDate =
+      (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp + THREE_DAYS * DATES.DAY;
+
     const populatedTx1 = await createTicketCategory(categoryIpfsUrl, tokenId, mockedContractData, eventFacet);
     populatedTx1.from = moderatorWallet.address;
     const tx = await moderatorWallet.sendTransaction(populatedTx1);
@@ -711,6 +746,8 @@ describe("Clip ticket", function () {
       },
     ];
 
+    await ethers.provider.send("evm_increaseTime", [ONE_DAY * DATES.DAY]);
+
     const populatedTx2 = await buyTickets(
       [ticketIpfsUrl, ticketIpfsUrl],
       eventCategoryData,
@@ -736,8 +773,12 @@ describe("Clip ticket", function () {
   it("Should revert clip ticket if the event has not started", async () => {
     // Create event
     const maxTicketPerClient = 10;
-    const startDate = DATES.EVENT_START_DATE + 100000; // buddy ignore:line
-    const endDate = DATES.EVENT_END_DATE;
+
+    const startDate =
+      (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp + TEN_DAYS * DATES.DAY;
+    const endDate =
+      (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp +
+      (TEN_DAYS + TEN_DAYS) * DATES.DAY;
 
     let tokenIdParam;
     const tokenId = await mockedCreateEvent(maxTicketPerClient, startDate, endDate, eventFacet, wallet, tokenIdParam);
@@ -750,7 +791,12 @@ describe("Clip ticket", function () {
     await txMember.wait();
 
     // Create category
-    mockedContractData.saleStartDate = startDate;
+
+    mockedContractData.saleStartDate =
+      (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp + ONE_DAY * DATES.DAY;
+    mockedContractData.saleEndDate =
+      (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp + THREE_DAYS * DATES.DAY;
+
     const populatedTx1 = await createTicketCategory(categoryIpfsUrl, tokenId, mockedContractData, eventFacet);
     populatedTx1.from = moderatorWallet.address;
     const tx = await moderatorWallet.sendTransaction(populatedTx1);
@@ -766,8 +812,12 @@ describe("Clip ticket", function () {
   it("Should revert clip ticket if the event has finished", async () => {
     // Create event
     const maxTicketPerClient = 10;
-    const startDate = DATES.EVENT_START_DATE;
-    const endDate = startDate + 5; // buddy ignore:line
+
+    const startDate =
+      (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp + TEN_DAYS * DATES.DAY;
+    const endDate =
+      (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp +
+      (TEN_DAYS + TEN_DAYS) * DATES.DAY;
 
     let tokenIdParam;
     const tokenId = await mockedCreateEvent(maxTicketPerClient, startDate, endDate, eventFacet, wallet, tokenIdParam);
@@ -780,14 +830,18 @@ describe("Clip ticket", function () {
     await txMember.wait();
 
     // Create category
-    mockedContractData.saleEndDate = endDate;
+
+    mockedContractData.saleStartDate =
+      (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp + ONE_DAY * DATES.DAY;
+    mockedContractData.saleEndDate =
+      (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp + THREE_DAYS * DATES.DAY;
+
     const populatedTx1 = await createTicketCategory(categoryIpfsUrl, tokenId, mockedContractData, eventFacet);
     populatedTx1.from = moderatorWallet.address;
     const tx = await moderatorWallet.sendTransaction(populatedTx1);
     await tx.wait();
 
-    const FIVE_SECONDS = 5000;
-    setTimeout(() => {}, FIVE_SECONDS);
+    await ethers.provider.send("evm_increaseTime", [(TEN_DAYS + TEN_DAYS + ONE_DAY) * DATES.DAY]);
 
     // Try to clip a ticket
     const ticketId = 1;
@@ -799,8 +853,12 @@ describe("Clip ticket", function () {
   it("Should clip ticket only once", async () => {
     // Create event
     const maxTicketPerClient = 10;
-    const startDate = DATES.EVENT_START_DATE;
-    const endDate = DATES.EVENT_END_DATE;
+
+    const startDate =
+      (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp + TEN_DAYS * DATES.DAY;
+    const endDate =
+      (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp +
+      (TEN_DAYS + TEN_DAYS) * DATES.DAY;
 
     let tokenIdParam;
     const tokenId = await mockedCreateEvent(maxTicketPerClient, startDate, endDate, eventFacet, wallet, tokenIdParam);
@@ -813,8 +871,12 @@ describe("Clip ticket", function () {
     await txMember.wait();
 
     // Create category
-    mockedContractData.saleStartDate = DATES.EVENT_START_DATE + 10; // buddy ignore:line
-    mockedContractData.saleEndDate = DATES.EVENT_END_DATE - 10; // buddy ignore:line
+
+    mockedContractData.saleStartDate =
+      (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp + ONE_DAY * DATES.DAY;
+    mockedContractData.saleEndDate =
+      (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp + THREE_DAYS * DATES.DAY;
+
     const populatedTx1 = await createTicketCategory(categoryIpfsUrl, tokenId, mockedContractData, eventFacet);
     populatedTx1.from = moderatorWallet.address;
     const txCategory = await moderatorWallet.sendTransaction(populatedTx1);
@@ -845,6 +907,8 @@ describe("Clip ticket", function () {
       },
     ];
 
+    await ethers.provider.send("evm_increaseTime", [ONE_DAY * DATES.DAY]);
+
     const populatedTx2 = await buyTickets(
       [ticketIpfsUrl, ticketIpfsUrl],
       eventCategoryData,
@@ -855,6 +919,8 @@ describe("Clip ticket", function () {
     populatedTx2.from = moderatorWallet.address;
     const tx2 = await moderatorWallet.sendTransaction(populatedTx2);
     await tx2.wait();
+
+    await ethers.provider.send("evm_increaseTime", [TEN_DAYS * DATES.DAY]);
 
     const populatedTx = await clipTicket(tokenId, 1, ticketControllerFacet);
     populatedTx.from = moderatorWallet.address;

@@ -27,10 +27,6 @@ import { mockedCreateEvent, testSetUp, categoryIpfsUrl, ticketIpfsUrl } from "./
 import { spy } from "sinon";
 
 describe("Visitor tests", () => {
-  const maxTicketPerClient = 10;
-  const startDate = DATES.EVENT_START_DATE;
-  const endDate = DATES.EVENT_END_DATE;
-
   let mock;
   let eventFacet;
   let ticketFacet;
@@ -41,6 +37,9 @@ describe("Visitor tests", () => {
   let visitorWallet;
   let signers;
   const spyFunc = spy();
+  const ONE_DAY = 1;
+  const THREE_DAYS = 3;
+  const TEN_DAYS = 10;
 
   function checkFunctionInvocation() {
     if (spyFunc.callCount === 0) {
@@ -51,12 +50,26 @@ describe("Visitor tests", () => {
   }
 
   before(async () => {
+    const maxTicketPerClient = 10;
+
+    const startDate =
+      (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp + TEN_DAYS * DATES.DAY;
+    const endDate =
+      (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp +
+      (TEN_DAYS + TEN_DAYS) * DATES.DAY;
+
     mock = new MockAdapter(axios);
     ({ eventFacet, ticketControllerFacet, ticketFacet, signers, wallet } = await testSetUp());
     visitorWallet = signers[1];
 
     firstEventTokenId = await mockedCreateEvent(maxTicketPerClient, startDate, endDate, eventFacet, wallet);
     secondEventTokenId = await mockedCreateEvent(maxTicketPerClient + 1, startDate, endDate, eventFacet, wallet);
+
+    mockedContractData.saleStartDate =
+      (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp + ONE_DAY * DATES.DAY;
+    mockedContractData.saleEndDate =
+      (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp + THREE_DAYS * DATES.DAY;
+
     // create ticket category
     const populatedTx = await createTicketCategory(categoryIpfsUrl, firstEventTokenId, mockedContractData, eventFacet);
     const tx = await wallet.sendTransaction(populatedTx);
@@ -68,7 +81,6 @@ describe("Visitor tests", () => {
       mockedContractData,
       eventFacet,
     );
-
     const tx2 = await wallet.sendTransaction(populatedTx2);
     await tx2.wait();
   });
@@ -127,6 +139,8 @@ describe("Visitor tests", () => {
       },
     ];
 
+    await ethers.provider.send("evm_increaseTime", [ONE_DAY * DATES.DAY]);
+
     const populatedTx = await buyTickets(
       [ticketIpfsUrl, ticketIpfsUrl],
       eventCategoryData,
@@ -170,6 +184,8 @@ describe("Visitor tests", () => {
       },
     ];
 
+    await ethers.provider.send("evm_increaseTime", [DATES.HOUR]);
+
     const populatedTx = await buyTickets(
       [ticketIpfsUrl, ticketIpfsUrl],
       eventCategoryData,
@@ -206,6 +222,8 @@ describe("Visitor tests", () => {
         seat: 4,
       },
     ];
+
+    await ethers.provider.send("evm_increaseTime", [DATES.HOUR]);
 
     const populatedTx = await buyTickets(
       [ticketIpfsUrl, ticketIpfsUrl],
@@ -328,6 +346,8 @@ describe("Visitor tests", () => {
       },
     ];
 
+    await ethers.provider.send("evm_increaseTime", [DATES.HOUR]);
+
     const populatedTx = await buyTickets(
       [ticketIpfsUrl, ticketIpfsUrl, ticketIpfsUrl],
       eventCategoryData,
@@ -388,6 +408,8 @@ describe("Visitor tests", () => {
       },
     ];
 
+    await ethers.provider.send("evm_increaseTime", [DATES.HOUR]);
+
     const populatedTx = await buyTickets(
       [ticketIpfsUrl, ticketIpfsUrl, ticketIpfsUrl],
       eventCategoryData,
@@ -437,6 +459,8 @@ describe("Visitor tests", () => {
         seat: 1,
       },
     ];
+
+    await ethers.provider.send("evm_increaseTime", [DATES.HOUR]);
 
     const populatedTx = await buyTickets(
       [ticketIpfsUrl, ticketIpfsUrl, ticketIpfsUrl],
@@ -517,7 +541,11 @@ describe("Visitor tests", () => {
 
     let populatedTx;
     let res;
-    const refundData = { date: DATES.EVENT_END_DATE, percentage: 20 };
+
+    const refundData = {
+      date: (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp + TEN_DAYS * DATES.DAY,
+      percentage: 20,
+    };
 
     populatedTx = await addRefundDeadline(firstEventTokenId, refundData, ticketControllerFacet);
     res = await wallet.sendTransaction(populatedTx);
@@ -547,6 +575,8 @@ describe("Visitor tests", () => {
         seat: 6,
       },
     ];
+
+    await ethers.provider.send("evm_increaseTime", [DATES.HOUR]);
 
     populatedTx = await buyTickets(
       [ticketIpfsUrl, ticketIpfsUrl],
@@ -606,8 +636,11 @@ describe("Visitor tests", () => {
   it("Should listen for new category", async () => {
     listeners.listenForNewCategory(spyFunc, eventFacet);
 
-    mockedContractData.saleStartDate = DATES.EVENT_START_DATE;
-    mockedContractData.saleEndDate = DATES.EVENT_END_DATE;
+    mockedContractData.saleStartDate =
+      (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp + ONE_DAY * DATES.DAY;
+    mockedContractData.saleEndDate =
+      (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp + THREE_DAYS * DATES.DAY;
+
     const populatedTx1 = await createTicketCategory(categoryIpfsUrl, firstEventTokenId, mockedContractData, eventFacet);
     const tx1 = await wallet.sendTransaction(populatedTx1);
     await tx1.wait();
@@ -683,8 +716,12 @@ describe("Visitor tests", () => {
 
     const categories = await fetchCategoriesByEventId(secondEventTokenId, eventFacet);
     const categoryId = categories[0].id;
-    const saleStartDate = DATES.EVENT_START_DATE + 100;
-    const saleEndDate = DATES.EVENT_END_DATE - 100;
+
+    const saleStartDate =
+      (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp + ONE_DAY * DATES.DAY;
+    const saleEndDate =
+      (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp + THREE_DAYS * DATES.DAY;
+
     const populatedTx = await updateCategorySaleDates(
       secondEventTokenId,
       categoryId,
@@ -717,6 +754,8 @@ describe("Visitor tests", () => {
 
   it("Should listen for clipped tickets", async () => {
     listeners.listenForClipedTicket(spyFunc, ticketControllerFacet);
+
+    await ethers.provider.send("evm_increaseTime", [TEN_DAYS * DATES.DAY]);
 
     const populatedTx = await clipTicket(firstEventTokenId, 1, ticketControllerFacet);
     const tx = await wallet.sendTransaction(populatedTx);
