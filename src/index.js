@@ -465,6 +465,16 @@ export async function withdrawFromCanceledEvent(eventId, contract = eventsContra
   }
 }
 
+export async function getListedTicketById(ticketId, contract = ticketMarketplaceContract) {
+  try {
+    const ticket = await contract.getListedTicketById(ticketId);
+
+    return ticket;
+  } catch (error) {
+    throw error;
+  }
+}
+
 /* ========= EXPRESS SERVER FUNCTIONS ========== */
 export async function fetchCountriesFromServer(serverUrl = ETS_SERVER_URL) {
   try {
