@@ -1220,6 +1220,19 @@ await withdrawFromCanceledEvent(eventId);
 - "Event: No withdrawals"
 - "Event: Failed to send Ether"
 
+### Gets the listed ticket by its id (Everyone)
+
+1. Import getListedTicketById function from the library.
+2. Execute getListedTicketById function.
+
+```js
+import { getListedTicketById } from "ets-js-library";
+
+const ticketId = 1; // The ticket id generated when ticket is listed
+
+await getListedTicketById(ticketId);
+```
+
 ## Tests
 
 > :warning: **hardhat@esm** is used to test the library to be able to match the type which is _module_, but official hardhat requires _commonjs_

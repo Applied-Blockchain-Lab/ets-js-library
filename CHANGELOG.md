@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.21.6] - 2022-12-01
+
+### Added
+
+- getListedTicketById function in index and README
+
 ## [0.20.16] - 2022-11-23
 
 ### Fixed
