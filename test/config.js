@@ -111,6 +111,11 @@ const errorMessages = {
   categoryIsFromAnotherEvent: "Event: This category is for another event",
   placeIsTaken: "Event: Place is taken",
   onlyCashier: "Event: Only cashier can withdraw contract balance",
+  notTokenOwner: "ERC5507: Not token owner",
+  ticketIsSoulbound: "ERC5192: Ticket is soulbound",
+  ticketPriceCantBeHigherThanOriginalPrice: "TicketMarketplace: Ticket price can't be higher than the original price",
+  ticketIsNotListed: "TicketMarketplace: Ticket is not listed",
+  cantBuyOwnTickets: "TicketMarketplace: Can't buy own tickets",
 };
 
 const DATES = {
