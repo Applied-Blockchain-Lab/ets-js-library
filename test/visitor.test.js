@@ -937,8 +937,6 @@ describe("Visitor tests", () => {
     spyFunc.resetHistory();
   });
 
-  // "TransferCallerNotOwnerNorApproved" error how to test
-
   it("Should remove a ticket from the marketplace and listen for emitted event", async () => {
     listeners.listenForCanceledListedTicket(spyFunc, ticketMarketplaceFacet);
 
