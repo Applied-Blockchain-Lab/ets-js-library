@@ -22,6 +22,7 @@ import {
   bookTickets,
   sendInvitation,
   withdrawContractBalance,
+  listTicket,
 } from "../src/index.js";
 import { mockedContractData, EXAMPLE_ADDRESS, errorMessages, DATES } from "./config.js";
 import { expect } from "chai";
@@ -41,10 +42,10 @@ const THREE_DAYS = 3;
 const TEN_DAYS = 10;
 
 describe("Moderator tests", function () {
-  let diamondAddress;
   let eventFacet;
   let ticketControllerFacet;
   let ticketFacet;
+  let ticketMarketplaceFacet;
   let tokenId;
   let wallet;
   let moderatorWallet;
@@ -61,14 +62,8 @@ describe("Moderator tests", function () {
   }
 
   before(async function () {
-    ({ diamondAddress, eventFacet, ticketControllerFacet, ticketFacet, signers, wallet } = await testSetUp(
-      diamondAddress,
-      eventFacet,
-      ticketControllerFacet,
-      ticketFacet,
-      signers,
-      wallet,
-    ));
+    ({ eventFacet, ticketControllerFacet, ticketFacet, ticketMarketplaceFacet, signers, wallet } = await testSetUp());
+
     moderatorWallet = signers[1];
 
     const maxTicketPerClient = 10;
@@ -504,6 +499,7 @@ describe("Moderator tests", function () {
   });
 
   it("Should book tickets", async () => {
+    const receiverWallet = signers[2]; // buddy ignore:line
     const categoryData = [
       {
         categoryId: 2,
@@ -515,12 +511,12 @@ describe("Moderator tests", function () {
       {
         row: 1,
         seat: 3,
-        account: EXAMPLE_ADDRESS,
+        account: receiverWallet.address,
       },
       {
         row: 1,
         seat: 4,
-        account: EXAMPLE_ADDRESS,
+        account: receiverWallet.address,
       },
       {
         row: 1,
@@ -546,7 +542,7 @@ describe("Moderator tests", function () {
     checkFunctionInvocation();
     spyFunc.resetHistory();
 
-    const tickets = await getAddressTicketIdsByEvent(tokenId, EXAMPLE_ADDRESS, ticketControllerFacet);
+    const tickets = await getAddressTicketIdsByEvent(tokenId, receiverWallet.address, ticketControllerFacet);
     expect(tickets.length).to.equal(2); // buddy ignore:line
   });
 
@@ -555,7 +551,8 @@ describe("Moderator tests", function () {
 
     const ticketId = 4;
     const ticketIds = [ticketId];
-    const accounts = [EXAMPLE_ADDRESS];
+    const receiverWallet = signers[2]; // buddy ignore:line
+    const accounts = [receiverWallet.address];
 
     const populatedTx = await sendInvitation(tokenId, ticketIds, accounts, ticketControllerFacet);
     populatedTx.from = moderatorWallet.address;
@@ -566,7 +563,18 @@ describe("Moderator tests", function () {
     spyFunc.resetHistory();
 
     const ownerOfBookedTicket = await ticketFacet.ownerOf(ticketId);
-    expect(ownerOfBookedTicket.toLowerCase()).to.equal(EXAMPLE_ADDRESS.toLowerCase());
+    expect(ownerOfBookedTicket.toLowerCase()).to.equal(receiverWallet.address.toLowerCase());
+  });
+
+  it("Should revert listing tickets which are invites", async () => {
+    const ticketId = 4;
+
+    const receiverWallet = signers[2]; // buddy ignore:line
+    const ticketPrice = ethers.utils.parseUnits("0", "ether");
+
+    const populatedTx = await listTicket(ticketId, ticketPrice, ticketMarketplaceFacet);
+    populatedTx.from = receiverWallet.address;
+    await expect(receiverWallet.sendTransaction(populatedTx)).to.be.revertedWith(errorMessages.ticketIsSoulbound);
   });
 
   it("Should listen for new Events", async () => {
