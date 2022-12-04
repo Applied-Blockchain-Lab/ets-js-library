@@ -116,6 +116,9 @@ const errorMessages = {
   ticketPriceCantBeHigherThanOriginalPrice: "TicketMarketplace: Ticket price can't be higher than the original price",
   ticketIsNotListed: "TicketMarketplace: Ticket is not listed",
   cantBuyOwnTickets: "TicketMarketplace: Can't buy own tickets",
+  invalidPostponeTime: "Event: Invalid postpone time given",
+  eventCanceled: "Event: Event canceled",
+  eventIsNotCanceled: "Event: Event is not canceled",
 };
 
 const DATES = {

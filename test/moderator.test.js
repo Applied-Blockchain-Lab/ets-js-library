@@ -23,6 +23,9 @@ import {
   sendInvitation,
   withdrawContractBalance,
   listTicket,
+  postponeEvent,
+  cancelEvent,
+  withdrawFromCanceledEvent,
 } from "../src/index.js";
 import { mockedContractData, EXAMPLE_ADDRESS, errorMessages, DATES } from "./config.js";
 import { expect } from "chai";
@@ -645,6 +648,198 @@ describe("Moderator tests", function () {
     populatedTx.from = moderatorWallet.address;
 
     await expect(moderatorWallet.sendTransaction(populatedTx)).to.be.revertedWith(errorMessages.callerIsNotAdmin);
+  });
+
+  it("Should revert postpone event when it is not the owner", async () => {
+    const time = 86400;
+    const populatedTx = await postponeEvent(tokenId, time, eventFacet);
+    populatedTx.from = moderatorWallet.address;
+
+    await expect(moderatorWallet.sendTransaction(populatedTx)).to.be.revertedWith(errorMessages.callerIsNotAdmin);
+  });
+
+  it("Should revert postpone event when event does not exist", async () => {
+    const time = 86400;
+    const populatedTx = await postponeEvent(0, time, eventFacet);
+
+    await expect(wallet.sendTransaction(populatedTx)).to.be.revertedWith(errorMessages.eventDoesNotExist);
+  });
+
+  it("Should revert postpone event when 0 postpone time is given", async () => {
+    const time = 0;
+    const populatedTx = await postponeEvent(tokenId, time, eventFacet);
+
+    await expect(wallet.sendTransaction(populatedTx)).to.be.revertedWith(errorMessages.invalidPostponeTime);
+  });
+
+  it("Should cancel event", async () => {
+    const maxTicketPerClient = 10;
+    const startDate = DATES.EVENT_START_DATE;
+    const endDate = DATES.EVENT_END_DATE;
+    const eventId = await mockedCreateEvent(maxTicketPerClient, startDate, endDate, eventFacet, wallet, tokenId);
+
+    const populatedTx = await cancelEvent(eventId, eventFacet);
+    const tx = await wallet.sendTransaction(populatedTx);
+    await tx.wait();
+
+    const event = await fetchEvent(eventId, eventFacet);
+    expect(event.status).to.equal(2); // buddy ignore:line
+  });
+
+  it("Should withdraw payed tickets price from canceled event", async () => {
+    const maxTicketPerClient = 10;
+    const startDate =
+      (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp + TEN_DAYS * DATES.DAY;
+    const endDate =
+      (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp +
+      (TEN_DAYS + TEN_DAYS) * DATES.DAY;
+
+    let tokenIdParam;
+    const newEventTokenId = await mockedCreateEvent(
+      maxTicketPerClient,
+      startDate,
+      endDate,
+      eventFacet,
+      wallet,
+      tokenIdParam,
+    );
+
+    // Grant moderator role
+    const moderatorRole = utils.keccak256(utils.toUtf8Bytes("MODERATOR_ROLE"));
+    const moderatorAddress = await moderatorWallet.getAddress();
+    const addTeamMemberTx = await addTeamMember(newEventTokenId, moderatorRole, moderatorAddress, eventFacet);
+    const txMember = await wallet.sendTransaction(addTeamMemberTx);
+    await txMember.wait();
+
+    // Create category
+
+    mockedContractData.saleStartDate =
+      (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp + ONE_DAY * DATES.DAY;
+    mockedContractData.saleEndDate =
+      (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp + THREE_DAYS * DATES.DAY;
+
+    const populatedTx1 = await createTicketCategory(categoryIpfsUrl, newEventTokenId, mockedContractData, eventFacet);
+    populatedTx1.from = moderatorWallet.address;
+    const txCategory = await moderatorWallet.sendTransaction(populatedTx1);
+    await txCategory.wait();
+    const categories = await fetchCategoriesByEventId(newEventTokenId, eventFacet);
+    console.log(categories);
+    // Buy ticket
+    const eventCategoryData = [
+      {
+        eventId: newEventTokenId,
+        categoryId: 3,
+      },
+    ];
+    const priceData = [
+      {
+        amount: 2,
+        price: ethers.utils.parseUnits("10", "ether"),
+      },
+    ];
+
+    const place = [
+      {
+        row: 1,
+        seat: 1,
+      },
+      {
+        row: 1,
+        seat: 2,
+      },
+    ];
+
+    await ethers.provider.send("evm_increaseTime", [ONE_DAY * DATES.DAY]);
+    const eventBefore = await fetchEvent(newEventTokenId, eventFacet);
+    const eventBalanceBefore = eventBefore.balance;
+    console.log(eventBalanceBefore);
+    const populatedTx2 = await buyTickets(
+      [ticketIpfsUrl, ticketIpfsUrl],
+      eventCategoryData,
+      priceData,
+      place,
+      ticketControllerFacet,
+    );
+    populatedTx2.from = moderatorWallet.address;
+    const tx2 = await moderatorWallet.sendTransaction(populatedTx2);
+    await tx2.wait();
+
+    const event = await fetchEvent(newEventTokenId, eventFacet);
+    const eventBalance = event.balance;
+    console.log(eventBalance);
+    // cancel event
+    const populatedTx = await cancelEvent(newEventTokenId, eventFacet);
+    const tx = await wallet.sendTransaction(populatedTx);
+    await tx.wait();
+
+    // withdraw payed tickets price
+    const populatedWithdrawTx = await withdrawFromCanceledEvent(newEventTokenId, eventFacet);
+    const withdrawTx = await wallet.sendTransaction(populatedWithdrawTx);
+    await withdrawTx.wait();
+
+    const balance = await wallet.getBalance();
+    expect(balance).to.be.gt(ethers.utils.parseUnits("100", "ether"));
+  });
+
+  // ?? reverts with "Event is not canceled"
+  it("Should revert withdraw payed tickets price when event does not exist", async () => {
+    const populatedTx = await withdrawFromCanceledEvent(100, eventFacet); // buddy ignore:line
+
+    await expect(wallet.sendTransaction(populatedTx)).to.be.revertedWith(errorMessages.eventDoesNotExist);
+  });
+
+  it("Should revert withdraw payed tickets price when event is not canceled", async () => {
+    const populatedTx = await withdrawFromCanceledEvent(tokenId, eventFacet);
+
+    await expect(wallet.sendTransaction(populatedTx)).to.be.revertedWith(errorMessages.eventIsNotCanceled);
+  });
+
+  it("Should postpone event", async () => {
+    const eventBeforePostpone = await fetchEvent(tokenId, eventFacet);
+    const startDate = eventBeforePostpone.startTime.toNumber();
+    const endDate = eventBeforePostpone.endTime.toNumber();
+    const categoriesBeforePostpone = await fetchCategoriesByEventId(tokenId, eventFacet);
+    const categoryStartDate = categoriesBeforePostpone[0].saleStartDate.toNumber();
+    const categoryEndDate = categoriesBeforePostpone[0].saleEndDate.toNumber();
+
+    const time = 86400; // The amount of seconds to postpone the event
+    const populatedTx = await postponeEvent(tokenId, time, eventFacet);
+    const tx = await wallet.sendTransaction(populatedTx);
+    await tx.wait();
+
+    const eventAfterPostpone = await fetchEvent(tokenId, eventFacet);
+    const categoriesAfterPostpone = await fetchCategoriesByEventId(tokenId, eventFacet);
+
+    expect(eventAfterPostpone.status).to.equal(1);
+    expect(eventAfterPostpone.startTime).to.equal(startDate + time);
+    expect(eventAfterPostpone.endTime).to.equal(endDate + time);
+    expect(categoriesAfterPostpone[0].saleStartDate.toNumber()).to.equal(categoryStartDate + time);
+    expect(categoriesAfterPostpone[0].saleEndDate.toNumber()).to.equal(categoryEndDate + time);
+  });
+
+  it("Should revert cancel event when it is not the owner", async () => {
+    const populatedTx = await cancelEvent(tokenId, eventFacet);
+    populatedTx.from = moderatorWallet.address;
+
+    await expect(moderatorWallet.sendTransaction(populatedTx)).to.be.revertedWith(errorMessages.callerIsNotAdmin);
+  });
+
+  it("Should revert cancel event when event does not exist", async () => {
+    const populatedTx = await cancelEvent(0, eventFacet);
+
+    await expect(wallet.sendTransaction(populatedTx)).to.be.revertedWith(errorMessages.eventDoesNotExist);
+  });
+
+  it("Should revert cancel event when event is already cancelled", async () => {
+    const populatedTx = await cancelEvent(tokenId + 2, eventFacet); // buddy ignore:line
+
+    await expect(wallet.sendTransaction(populatedTx)).to.be.revertedWith(errorMessages.eventCanceled);
+  });
+
+  it("Should revert cancel event when event is already postponed", async () => {
+    const populatedTx = await cancelEvent(tokenId, eventFacet);
+
+    await expect(wallet.sendTransaction(populatedTx)).to.be.revertedWith(errorMessages.eventPostponed);
   });
 });
 
