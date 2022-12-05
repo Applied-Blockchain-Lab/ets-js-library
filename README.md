@@ -1202,6 +1202,8 @@ await cancelEvent(eventId);
 
 ### Withdraws payed tickets price from canceled event (Ticket owner)
 
+When the event is cancelled, ticket buyers can get their money back. Event needs to be cancelled.
+
 1. Import withdrawFromCanceledEvent function from the library.
 2. Execute withdrawFromCanceledEvent function.
 
@@ -1217,7 +1219,7 @@ await withdrawFromCanceledEvent(eventId);
 
 - "Event: Event does not exist"
 - "Event: Event is not canceled"
-- "Event: No withdrawals"
+- "Event: No withdrawals (If the user has not purchased a ticket)"
 - "Event: Failed to send Ether"
 
 ### Gets the listed ticket by its id (Everyone)
