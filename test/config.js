@@ -119,6 +119,7 @@ const errorMessages = {
   invalidPostponeTime: "Event: Invalid postpone time given",
   eventCanceled: "Event: Event canceled",
   eventIsNotCanceled: "Event: Event is not canceled",
+  noWithdrawal: "Event: No withdrawals",
 };
 
 const DATES = {

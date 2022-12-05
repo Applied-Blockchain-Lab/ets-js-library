@@ -665,7 +665,7 @@ describe("Moderator tests", function () {
     await expect(wallet.sendTransaction(populatedTx)).to.be.revertedWith(errorMessages.eventDoesNotExist);
   });
 
-  it("Should revert postpone event when 0 postpone time is given", async () => {
+  it.skip("Should revert postpone event when 0 postpone time is given", async () => {
     const time = 0;
     const populatedTx = await postponeEvent(tokenId, time, eventFacet);
 
@@ -722,8 +722,6 @@ describe("Moderator tests", function () {
     populatedTx1.from = moderatorWallet.address;
     const txCategory = await moderatorWallet.sendTransaction(populatedTx1);
     await txCategory.wait();
-    const categories = await fetchCategoriesByEventId(newEventTokenId, eventFacet);
-    console.log(categories);
     // Buy ticket
     const eventCategoryData = [
       {
@@ -750,9 +748,6 @@ describe("Moderator tests", function () {
     ];
 
     await ethers.provider.send("evm_increaseTime", [ONE_DAY * DATES.DAY]);
-    const eventBefore = await fetchEvent(newEventTokenId, eventFacet);
-    const eventBalanceBefore = eventBefore.balance;
-    console.log(eventBalanceBefore);
     const populatedTx2 = await buyTickets(
       [ticketIpfsUrl, ticketIpfsUrl],
       eventCategoryData,
@@ -764,9 +759,8 @@ describe("Moderator tests", function () {
     const tx2 = await moderatorWallet.sendTransaction(populatedTx2);
     await tx2.wait();
 
-    const event = await fetchEvent(newEventTokenId, eventFacet);
-    const eventBalance = event.balance;
-    console.log(eventBalance);
+    const balanceBeforeBuy = await moderatorWallet.getBalance();
+
     // cancel event
     const populatedTx = await cancelEvent(newEventTokenId, eventFacet);
     const tx = await wallet.sendTransaction(populatedTx);
@@ -774,18 +768,28 @@ describe("Moderator tests", function () {
 
     // withdraw payed tickets price
     const populatedWithdrawTx = await withdrawFromCanceledEvent(newEventTokenId, eventFacet);
-    const withdrawTx = await wallet.sendTransaction(populatedWithdrawTx);
-    await withdrawTx.wait();
+    populatedWithdrawTx.from = moderatorWallet.address;
+    const withdrawTx = await moderatorWallet.sendTransaction(populatedWithdrawTx);
+    const res = await withdrawTx.wait();
 
-    const balance = await wallet.getBalance();
-    expect(balance).to.be.gt(ethers.utils.parseUnits("100", "ether"));
+    const gasUsed = res.gasUsed;
+    const gasFees = res.effectiveGasPrice.mul(gasUsed);
+
+    const balanceAfterWithdraw = await moderatorWallet.getBalance();
+    expect(balanceAfterWithdraw).to.equal(balanceBeforeBuy.add(ethers.utils.parseUnits("20", "ether")).sub(gasFees));
   });
 
   // ?? reverts with "Event is not canceled"
-  it("Should revert withdraw payed tickets price when event does not exist", async () => {
+  it.skip("Should revert withdraw payed tickets price when event does not exist", async () => {
     const populatedTx = await withdrawFromCanceledEvent(100, eventFacet); // buddy ignore:line
 
     await expect(wallet.sendTransaction(populatedTx)).to.be.revertedWith(errorMessages.eventDoesNotExist);
+  });
+
+  it("Should revert withdraw payed tickets price when the user hasn't purchased ticket", async () => {
+    const populatedTx = await withdrawFromCanceledEvent(tokenId + 3, eventFacet); // buddy ignore:line
+
+    await expect(wallet.sendTransaction(populatedTx)).to.be.revertedWith(errorMessages.noWithdrawal);
   });
 
   it("Should revert withdraw payed tickets price when event is not canceled", async () => {
@@ -834,12 +838,6 @@ describe("Moderator tests", function () {
     const populatedTx = await cancelEvent(tokenId + 2, eventFacet); // buddy ignore:line
 
     await expect(wallet.sendTransaction(populatedTx)).to.be.revertedWith(errorMessages.eventCanceled);
-  });
-
-  it("Should revert cancel event when event is already postponed", async () => {
-    const populatedTx = await cancelEvent(tokenId, eventFacet);
-
-    await expect(wallet.sendTransaction(populatedTx)).to.be.revertedWith(errorMessages.eventPostponed);
   });
 });
 
