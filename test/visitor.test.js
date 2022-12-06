@@ -1,7 +1,9 @@
 import {
   addCategoryTicketsCount,
   addRefundDeadline,
+  buyListedTickets,
   buyTickets,
+  cancelListedTicket,
   clipTicket,
   createTicketCategory,
   fetchAllEventsFromServer,
@@ -9,13 +11,16 @@ import {
   fetchCountriesFromServer,
   fetchPlacesFromServer,
   getAddressTicketIdsByEvent,
+  getListedTicketById,
   listeners,
+  listTicket,
   removeCategory,
   removeCategoryTicketsCount,
   returnTicket,
   setEventCashier,
   updateCategory,
   updateCategorySaleDates,
+  updateListedTicketPrice,
   withdrawRefund,
 } from "../src/index.js";
 import axios from "axios";
@@ -31,6 +36,7 @@ describe("Visitor tests", () => {
   let eventFacet;
   let ticketFacet;
   let ticketControllerFacet;
+  let ticketMarketplaceFacet;
   let firstEventTokenId;
   let secondEventTokenId;
   let wallet;
@@ -59,7 +65,7 @@ describe("Visitor tests", () => {
       (TEN_DAYS + TEN_DAYS) * DATES.DAY;
 
     mock = new MockAdapter(axios);
-    ({ eventFacet, ticketControllerFacet, ticketFacet, signers, wallet } = await testSetUp());
+    ({ eventFacet, ticketControllerFacet, ticketFacet, ticketMarketplaceFacet, signers, wallet } = await testSetUp());
     visitorWallet = signers[1];
 
     firstEventTokenId = await mockedCreateEvent(maxTicketPerClient, startDate, endDate, eventFacet, wallet);
@@ -367,6 +373,17 @@ describe("Visitor tests", () => {
 
     const tickets2 = await getAddressTicketIdsByEvent(secondEventTokenId, visitorWallet.address, ticketControllerFacet);
     expect(tickets2.length).to.equal(1); // buddy ignore:line
+  });
+
+  it("Should get tickets of address of event", async () => {
+    const tickets = await getAddressTicketIdsByEvent(firstEventTokenId, visitorWallet.address, ticketControllerFacet);
+    expect(tickets.length).to.equal(4); // buddy ignore:line
+  });
+
+  it("Should revert get tickets of address of event when event doesn't exist", async () => {
+    await expect(
+      getAddressTicketIdsByEvent(100, visitorWallet.address, ticketControllerFacet), // buddy ignore:line
+    ).to.be.revertedWith(errorMessages.eventDoesNotExist);
   });
 
   it("Should revert when buying multiple tickets from multiple events with taken places", async () => {
@@ -750,6 +767,225 @@ describe("Visitor tests", () => {
 
     checkFunctionInvocation();
     spyFunc.resetHistory();
+  });
+
+  it("Should list ticket for sale and listen for emitted event", async () => {
+    listeners.listenForTicketListed(spyFunc, ticketMarketplaceFacet);
+
+    const ticketIds = await getAddressTicketIdsByEvent(firstEventTokenId, visitorWallet.address, ticketControllerFacet);
+    const firstTicketId = ticketIds[0].toNumber();
+    const secondTicketId = ticketIds[2].toNumber(); // buddy ignore:line
+    const price = ethers.utils.parseUnits("1", "ether");
+    const populatedFirstListTx = await listTicket(firstTicketId, price, ticketMarketplaceFacet);
+
+    populatedFirstListTx.from = visitorWallet.address;
+    const firstListtx = await visitorWallet.sendTransaction(populatedFirstListTx);
+    await firstListtx.wait();
+
+    const populatedSecondListTx = await listTicket(secondTicketId, price, ticketMarketplaceFacet);
+
+    populatedSecondListTx.from = visitorWallet.address;
+    const tx = await visitorWallet.sendTransaction(populatedSecondListTx);
+    await tx.wait();
+
+    const ticket = await getListedTicketById(firstTicketId, ticketMarketplaceFacet);
+    const secondTicket = await getListedTicketById(secondTicketId, ticketMarketplaceFacet);
+
+    expect(ticket.isListed).to.eql(true);
+    expect(ticket.price).to.eql(price);
+    expect(secondTicket.isListed).to.eql(true);
+    checkFunctionInvocation();
+    spyFunc.resetHistory();
+  });
+
+  it("Should revert listing ticket by non owner", async () => {
+    const ticketIds = await getAddressTicketIdsByEvent(firstEventTokenId, visitorWallet.address, ticketControllerFacet);
+    const ticketId = ticketIds[0].toNumber();
+    const price = ethers.utils.parseUnits("1", "ether");
+    const populatedTx = await listTicket(ticketId, price, ticketMarketplaceFacet);
+
+    await expect(wallet.sendTransaction(populatedTx)).to.be.revertedWith(errorMessages.notTokenOwner);
+  });
+
+  it("Should revert listing ticket when price is higher than original price", async () => {
+    const ticketIds = await getAddressTicketIdsByEvent(firstEventTokenId, visitorWallet.address, ticketControllerFacet);
+    const ticketId = ticketIds[0].toNumber();
+    const price = ethers.utils.parseUnits("11", "ether");
+    const populatedTx = await listTicket(ticketId, price, ticketMarketplaceFacet);
+
+    populatedTx.from = visitorWallet.address;
+    await expect(visitorWallet.sendTransaction(populatedTx)).to.be.revertedWith(
+      errorMessages.ticketPriceCantBeHigherThanOriginalPrice,
+    );
+  });
+
+  it("Should update the listed ticket's price and listen for emitted event", async () => {
+    listeners.listenForUpdatedListedTicketPrice(spyFunc, ticketMarketplaceFacet);
+
+    const ticketIds = await getAddressTicketIdsByEvent(firstEventTokenId, visitorWallet.address, ticketControllerFacet);
+    const ticketId = ticketIds[0].toNumber();
+
+    const newPrice = ethers.utils.parseUnits("2", "ether");
+    const populatedTx2 = await updateListedTicketPrice(ticketId, newPrice, ticketMarketplaceFacet);
+
+    populatedTx2.from = visitorWallet.address;
+    const tx2 = await visitorWallet.sendTransaction(populatedTx2);
+    await tx2.wait();
+
+    const ticket = await getListedTicketById(ticketId, ticketMarketplaceFacet);
+    expect(ticket.price).to.equal(newPrice);
+
+    checkFunctionInvocation();
+    spyFunc.resetHistory();
+  });
+
+  it("Should revert updating the listed ticket's price by non owner", async () => {
+    const ticketIds = await getAddressTicketIdsByEvent(firstEventTokenId, visitorWallet.address, ticketControllerFacet);
+    const ticketId = ticketIds[0].toNumber();
+
+    const newPrice = ethers.utils.parseUnits("2", "ether");
+    const populatedTx2 = await updateListedTicketPrice(ticketId, newPrice, ticketMarketplaceFacet);
+
+    await expect(wallet.sendTransaction(populatedTx2)).to.be.revertedWith(errorMessages.notTokenOwner);
+  });
+
+  it("Should revert updating the listed ticket's price when price is higher than original price", async () => {
+    const ticketIds = await getAddressTicketIdsByEvent(firstEventTokenId, visitorWallet.address, ticketControllerFacet);
+    const ticketId = ticketIds[0].toNumber();
+
+    const newPrice = ethers.utils.parseUnits("11", "ether");
+    const populatedTx2 = await updateListedTicketPrice(ticketId, newPrice, ticketMarketplaceFacet);
+
+    populatedTx2.from = visitorWallet.address;
+    await expect(visitorWallet.sendTransaction(populatedTx2)).to.be.revertedWith(
+      errorMessages.ticketPriceCantBeHigherThanOriginalPrice,
+    );
+  });
+
+  it("Should revert updating the listed ticket's price when ticket is not listed", async () => {
+    const ticketIds = await getAddressTicketIdsByEvent(firstEventTokenId, visitorWallet.address, ticketControllerFacet);
+    const ticketId = ticketIds[1].toNumber();
+
+    const newPrice = ethers.utils.parseUnits("2", "ether");
+    const populatedTx2 = await updateListedTicketPrice(ticketId, newPrice, ticketMarketplaceFacet);
+
+    await expect(wallet.sendTransaction(populatedTx2)).to.be.revertedWith(errorMessages.ticketIsNotListed);
+  });
+
+  it("Should revert buying a ticket when ticket is not listed", async () => {
+    const ticketIds = await getAddressTicketIdsByEvent(firstEventTokenId, visitorWallet.address, ticketControllerFacet);
+    const ticketId = ticketIds[1].toNumber();
+    const ticketIdsToBuy = [ticketId];
+    const buyerWallet = signers[2]; // buddy ignore:line
+
+    const price = ethers.utils.parseUnits("2", "ether");
+    const populatedTx = await buyListedTickets(ticketIdsToBuy, price, ticketMarketplaceFacet);
+
+    populatedTx.from = buyerWallet.address;
+    await expect(buyerWallet.sendTransaction(populatedTx)).to.be.revertedWith(errorMessages.ticketIsNotListed);
+  });
+
+  it.skip("Should revert buying a ticket when price is lower than listed price", async () => {
+    const ticketIds = await getAddressTicketIdsByEvent(firstEventTokenId, visitorWallet.address, ticketControllerFacet);
+    const ticketId = ticketIds[0].toNumber();
+    const ticketIdsToBuy = [ticketId];
+    const buyerWallet = signers[2]; // buddy ignore:line
+
+    const price = ethers.utils.parseUnits("1", "ether");
+    const populatedTx = await buyListedTickets(ticketIdsToBuy, price, ticketMarketplaceFacet);
+
+    populatedTx.from = buyerWallet.address;
+    await expect(buyerWallet.sendTransaction(populatedTx)).to.be.revertedWith(
+      errorMessages.ticketPriceIsHigherThanListedPrice,
+    );
+  });
+
+  it("Should revert buying a ticket that you listed", async () => {
+    const ticketIds = await getAddressTicketIdsByEvent(firstEventTokenId, visitorWallet.address, ticketControllerFacet);
+    const ticketId = ticketIds[0].toNumber();
+    const ticketIdsToBuy = [ticketId];
+
+    const price = ethers.utils.parseUnits("2", "ether");
+    const populatedTx = await buyListedTickets(ticketIdsToBuy, price, ticketMarketplaceFacet);
+
+    populatedTx.from = visitorWallet.address;
+    await expect(visitorWallet.sendTransaction(populatedTx)).to.be.revertedWith(errorMessages.cantBuyOwnTickets);
+  });
+
+  it("Should buy a ticket and listen for emitted event", async () => {
+    listeners.listenForBoughtListedTicket(spyFunc, ticketMarketplaceFacet);
+
+    const ticketIds = await getAddressTicketIdsByEvent(firstEventTokenId, visitorWallet.address, ticketControllerFacet);
+    const ticketId = ticketIds[0].toNumber();
+    const secondTicketId = ticketIds[2].toNumber(); // buddy ignore:line
+    const ticketIdsToBuy = [ticketId, secondTicketId];
+    const buyerWallet = signers[2]; // buddy ignore:line
+
+    const price = ethers.utils.parseUnits("3", "ether");
+    const populatedTx = await buyListedTickets(ticketIdsToBuy, price, ticketMarketplaceFacet);
+
+    populatedTx.from = buyerWallet.address;
+    const tx = await buyerWallet.sendTransaction(populatedTx);
+    await tx.wait();
+
+    const ownerOfFirstTicket = await ticketFacet.ownerOf(ticketId);
+    const ownerOfSecondTicket = await ticketFacet.ownerOf(secondTicketId);
+    expect(ownerOfFirstTicket).to.equal(buyerWallet.address);
+    expect(ownerOfSecondTicket).to.equal(buyerWallet.address);
+
+    checkFunctionInvocation();
+    spyFunc.resetHistory();
+  });
+
+  it("Should remove a ticket from the marketplace and listen for emitted event", async () => {
+    listeners.listenForCanceledListedTicket(spyFunc, ticketMarketplaceFacet);
+
+    const ticketIds = await getAddressTicketIdsByEvent(firstEventTokenId, visitorWallet.address, ticketControllerFacet);
+    const ticketId = ticketIds[1].toNumber();
+
+    const price = ethers.utils.parseUnits("1", "ether");
+    const populatedListTicketTx = await listTicket(ticketId, price, ticketMarketplaceFacet);
+
+    populatedListTicketTx.from = visitorWallet.address;
+    const listTicketTx = await visitorWallet.sendTransaction(populatedListTicketTx);
+    await listTicketTx.wait();
+
+    const populatedTx = await cancelListedTicket(ticketId, ticketMarketplaceFacet);
+
+    populatedTx.from = visitorWallet.address;
+    const tx = await visitorWallet.sendTransaction(populatedTx);
+    await tx.wait();
+
+    const ticket = await getListedTicketById(ticketId, ticketMarketplaceFacet);
+    expect(ticket.isListed).to.equal(false);
+
+    checkFunctionInvocation();
+    spyFunc.resetHistory();
+  });
+
+  it("Should revert removing a ticket from the marketplace by non owner", async () => {
+    const buyerWallet = signers[2]; // buddy ignore:line
+    const ticketId = 2;
+    const price = ethers.utils.parseUnits("1", "ether");
+    const populatedListTicketTx = await listTicket(ticketId, price, ticketMarketplaceFacet);
+
+    populatedListTicketTx.from = buyerWallet.address;
+    const listTicketTx = await buyerWallet.sendTransaction(populatedListTicketTx);
+    await listTicketTx.wait();
+
+    const populatedTx = await cancelListedTicket(ticketId, ticketMarketplaceFacet);
+
+    await expect(wallet.sendTransaction(populatedTx)).to.be.revertedWith(errorMessages.notTokenOwner);
+  });
+
+  it("Should revert removing a ticket from the marketplace when ticket is not listed", async () => {
+    const ticketIds = await getAddressTicketIdsByEvent(firstEventTokenId, visitorWallet.address, ticketControllerFacet);
+    const ticketId = ticketIds[1].toNumber();
+
+    const populatedTx = await cancelListedTicket(ticketId, ticketMarketplaceFacet);
+
+    populatedTx.from = visitorWallet.address;
+    await expect(visitorWallet.sendTransaction(populatedTx)).to.be.revertedWith(errorMessages.ticketIsNotListed);
   });
 
   it("Should listen for clipped tickets", async () => {
