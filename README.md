@@ -1075,6 +1075,57 @@ const tickets = await getAddressTicketIdsByEvent(eventId, address);
 
 - Event: Event does not exist
 
+### Get contract tickets for event (Admin or Moderator)
+
+1. Import getContractTicketIdsByEvent function from the library.
+2. Execute getContractTicketIdsByEvent function.
+
+```js
+import { getContractTicketIdsByEvent } from "ets-js-library";
+
+const eventId = "id of event";
+
+const tickets = await getContractTicketIdsByEvent(eventId);
+```
+
+#### Possible error messages
+
+- Event: Event does not exist
+
+### Get ticket by Id (Everyone)
+
+1. Import getSingleTicketById function from the library.
+2. Execute getSingleTicketById function.
+
+```js
+import { getSingleTicketById } from "ets-js-library";
+
+const eventId = "id of event";
+
+const ticket = await getSingleTicketById(eventId);
+```
+
+#### Possible error messages
+
+- Event: Event does not exist
+
+### Get multiple tickets by Ids (Everyone)
+
+1. Import getTicketsByIds function from the library.
+2. Execute getTicketsByIds function.
+
+```js
+import { getTicketsByIds } from "ets-js-library";
+
+const eventIds = [1,2,3];
+
+const ticket = await getTicketsByIds(eventIds);
+```
+
+#### Possible error messages
+
+- Event: Event does not exist
+
 ### Lists ticket for sale (Ticket owner)
 
 1. Import listTicket function from the library.
