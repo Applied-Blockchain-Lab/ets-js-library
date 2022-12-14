@@ -404,6 +404,7 @@ export async function getSingleTicketById(ticketId, contract = ticketsContract) 
   try {
     const ticket = await contract.getTicket(ticketId);
     const fullTicket = await fetchSingleTicketMetadata(ticket);
+    fullTicket.id = ticketId;
     return fullTicket;
   } catch (error) {
     throw error;
@@ -417,7 +418,7 @@ export async function getTicketsByIds(ticketIds, contract = ticketsContract) {
     try {
       const ticket = await contract.getTicket(ticketId);
       const fullTicket = await fetchSingleTicketMetadata(ticket);
-
+      fullTicket.id = ticketId;
       fullTickets.push(fullTicket);
     } catch (error) {
       throw error;
