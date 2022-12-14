@@ -1117,7 +1117,7 @@ const ticket = await getSingleTicketById(eventId);
 ```js
 import { getTicketsByIds } from "ets-js-library";
 
-const eventIds = [1,2,3];
+const eventIds = [1, 2, 3];
 
 const ticket = await getTicketsByIds(eventIds);
 ```

@@ -93,21 +93,29 @@ async function fetchCategoriesMetadata(categories) {
 }
 
 async function fetchSingleCategoryMetadata(category) {
-  const url = makeGatewayUrl(category.cid);
-  const response = await axios.get(url);
-  const metadata = response.data;
-  Object.assign(metadata, category);
-  metadata.image = makeGatewayUrl(metadata.image);
-  return metadata;
+  try {
+    const url = makeGatewayUrl(category.cid);
+    const response = await axios.get(url);
+    const metadata = response.data;
+    Object.assign(metadata, category);
+    metadata.image = makeGatewayUrl(metadata.image);
+    return metadata;
+  } catch {
+    return category;
+  }
 }
 
 async function fetchSingleTicketMetadata(ticket) {
-  const url = makeGatewayUrl(ticket.tokenUri);
-  const response = await axios.get(url);
-  const metadata = response.data;
-  Object.assign(metadata, ticket);
-  metadata.image = makeGatewayUrl(metadata.image);
-  return metadata;
+  try {
+    const url = makeGatewayUrl(ticket.tokenUri);
+    const response = await axios.get(url);
+    const metadata = response.data;
+    Object.assign(metadata, ticket);
+    metadata.image = makeGatewayUrl(metadata.image);
+    return metadata;
+  } catch {
+    return ticket;
+  }
 }
 
 export {
