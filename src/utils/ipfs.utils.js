@@ -68,10 +68,53 @@ async function fetchSingleEventMetadata(eventId, contract = eventsContract) {
     eventMetadata.data.eventId = eventId;
     eventMetadata.data.cid = eventUri;
     Object.assign(eventMetadata.data, contractData);
+    eventMetadata.data.image = makeGatewayUrl(eventMetadata.data.image);
 
     return eventMetadata.data;
   } catch (error) {
     throw error;
+  }
+}
+
+async function fetchCategoriesMetadata(categories) {
+  const categoriesMetadata = [];
+
+  for (const category of categories) {
+    try {
+      const categoryMetadata = await fetchSingleCategoryMetadata(category);
+
+      categoriesMetadata.push(categoryMetadata);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  return categoriesMetadata;
+}
+
+async function fetchSingleCategoryMetadata(category) {
+  try {
+    const url = makeGatewayUrl(category.cid);
+    const response = await axios.get(url);
+    const metadata = response.data;
+    Object.assign(metadata, category);
+    metadata.image = makeGatewayUrl(metadata.image);
+    return metadata;
+  } catch {
+    return category;
+  }
+}
+
+async function fetchSingleTicketMetadata(ticket) {
+  try {
+    const url = makeGatewayUrl(ticket.tokenUri);
+    const response = await axios.get(url);
+    const metadata = response.data;
+    Object.assign(metadata, ticket);
+    metadata.image = makeGatewayUrl(metadata.image);
+    return metadata;
+  } catch {
+    return ticket;
   }
 }
 
@@ -83,4 +126,6 @@ export {
   fetchSingleEventMetadata,
   getIpfsUrl,
   makeGatewayUrl,
+  fetchCategoriesMetadata,
+  fetchSingleTicketMetadata,
 };

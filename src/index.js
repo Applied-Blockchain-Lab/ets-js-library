@@ -10,6 +10,8 @@ import {
   deleteDataFromService,
   getIpfsUrl,
   makeGatewayUrl,
+  fetchCategoriesMetadata,
+  fetchSingleTicketMetadata,
 } from "#ipfs.utils";
 import { calculateTotalValue } from "./utils/lib.js";
 import { ETS_SERVER_URL, NET_RPC_URL, NET_RPC_URL_ID, TOKEN_NAME, NET_LABEL } from "#config";
@@ -254,7 +256,8 @@ export async function manageAllCategorySelling(eventId, value, contract = events
 export async function fetchCategoriesByEventId(eventId, contract = eventsContract) {
   try {
     const categories = await contract.fetchCategoriesByEventId(eventId);
-    return categories;
+    const fullCategories = await fetchCategoriesMetadata(categories);
+    return fullCategories;
   } catch (error) {
     throw error;
   }
@@ -385,6 +388,43 @@ export async function getAddressTicketIdsByEvent(eventId, address, contract = ti
   } catch (error) {
     throw error;
   }
+}
+
+export async function getContractTicketIdsByEvent(eventId, contract = ticketControllerContract) {
+  try {
+    const signer = new ethers.VoidSigner(contract.address, contract.provider);
+    const tickets = await contract.connect(signer).getAddressTicketIdsByEvent(eventId);
+    return tickets;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function getSingleTicketById(ticketId, contract = ticketsContract) {
+  try {
+    const ticket = await contract.getTicket(ticketId);
+    const fullTicket = await fetchSingleTicketMetadata(ticket);
+    return fullTicket;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function getTicketsByIds(ticketIds, contract = ticketsContract) {
+  const fullTickets = [];
+
+  for (const ticketId of ticketIds) {
+    try {
+      const ticket = await contract.getTicket(ticketId);
+      const fullTicket = await fetchSingleTicketMetadata(ticket);
+
+      fullTickets.push(fullTicket);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  return fullTickets;
 }
 
 export async function fetchTicketOwnerOf(ticketId, contract = ticketsContract) {
