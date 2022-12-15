@@ -996,12 +996,10 @@ const categoryData = [
   {
    categoryId: 1,
    ticketAmount: 1,
-   account: "0x...",
   },
   {
    categoryId: 2,
-   ticketAmount: 1
-   account: "0x..."
+   ticketAmount: 1,
   }
 ];
 
@@ -1009,10 +1007,12 @@ const place = [
   {
     row: "Row number of seat",
     seat: "Seat position on row",
+    account: "0x...",
   },
   {
     row: "Row number of seat",
     seat: "Seat position on row",
+    account: "0x...",
   },
 ];
 
