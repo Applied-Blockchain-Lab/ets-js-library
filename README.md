@@ -1100,9 +1100,9 @@ const tickets = await getContractTicketIdsByEvent(eventId);
 ```js
 import { getSingleTicketById } from "ets-js-library";
 
-const eventId = "id of event";
+const ticketId = "id of ticket";
 
-const ticket = await getSingleTicketById(eventId);
+const ticket = await getSingleTicketById(ticketId);
 ```
 
 #### Possible error messages
@@ -1117,9 +1117,9 @@ const ticket = await getSingleTicketById(eventId);
 ```js
 import { getTicketsByIds } from "ets-js-library";
 
-const eventIds = [1, 2, 3];
+const ticketIds = [1, 2, 3];
 
-const ticket = await getTicketsByIds(eventIds);
+const ticket = await getTicketsByIds(ticketIds);
 ```
 
 #### Possible error messages
