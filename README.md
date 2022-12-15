@@ -996,12 +996,10 @@ const categoryData = [
   {
    categoryId: 1,
    ticketAmount: 1,
-   account: "0x...",
   },
   {
    categoryId: 2,
-   ticketAmount: 1
-   account: "0x..."
+   ticketAmount: 1,
   }
 ];
 
@@ -1009,10 +1007,12 @@ const place = [
   {
     row: "Row number of seat",
     seat: "Seat position on row",
+    account: "0x...",
   },
   {
     row: "Row number of seat",
     seat: "Seat position on row",
+    account: "0x...",
   },
 ];
 
@@ -1100,9 +1100,9 @@ const tickets = await getContractTicketIdsByEvent(eventId);
 ```js
 import { getSingleTicketById } from "ets-js-library";
 
-const eventId = "id of event";
+const ticketId = "id of ticket";
 
-const ticket = await getSingleTicketById(eventId);
+const ticket = await getSingleTicketById(ticketId);
 ```
 
 #### Possible error messages
@@ -1117,9 +1117,9 @@ const ticket = await getSingleTicketById(eventId);
 ```js
 import { getTicketsByIds } from "ets-js-library";
 
-const eventIds = [1, 2, 3];
+const ticketIds = [1, 2, 3];
 
-const ticket = await getTicketsByIds(eventIds);
+const ticket = await getTicketsByIds(ticketIds);
 ```
 
 #### Possible error messages
