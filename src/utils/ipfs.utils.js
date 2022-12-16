@@ -70,6 +70,18 @@ async function fetchSingleEventMetadata(eventId, contract = eventsContract) {
     Object.assign(eventMetadata.data, contractData);
     eventMetadata.data.image = makeGatewayUrl(eventMetadata.data.image);
 
+    switch (eventMetadata.data.status) {
+      case 0: // buddy ignore:line
+        eventMetadata.data.status = "normal";
+        break;
+      case 1: // buddy ignore:line
+        eventMetadata.data.status = "postponed";
+        break;
+      case 2: // buddy ignore:line
+        eventMetadata.data.status = "canceled";
+        break;
+    }
+
     return eventMetadata.data;
   } catch (error) {
     throw error;
