@@ -683,7 +683,7 @@ describe("Moderator tests", function () {
     await tx.wait();
 
     const event = await fetchEvent(eventId, eventFacet);
-    expect(event.status).to.equal(2); // buddy ignore:line
+    expect(event.status).to.equal("canceled"); // buddy ignore:line
   });
 
   it("Should withdraw payed tickets price from canceled event", async () => {
@@ -814,7 +814,7 @@ describe("Moderator tests", function () {
     const eventAfterPostpone = await fetchEvent(tokenId, eventFacet);
     const categoriesAfterPostpone = await fetchCategoriesByEventId(tokenId, eventFacet);
 
-    expect(eventAfterPostpone.status).to.equal(1);
+    expect(eventAfterPostpone.status).to.equal("postponed");
     expect(eventAfterPostpone.startTime).to.equal(startDate + time);
     expect(eventAfterPostpone.endTime).to.equal(endDate + time);
     expect(categoriesAfterPostpone[0].saleStartDate.toNumber()).to.equal(categoryStartDate + time);
