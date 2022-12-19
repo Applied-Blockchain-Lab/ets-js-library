@@ -524,6 +524,7 @@ export async function getListedTicketById(
     const ticketWithMetadata = await fetchSingleTicketMetadata(ticket);
     const ticketListedPrice = await marketplace.getListedTicketById(ticketId);
     const fullTicket = { ...ticketWithMetadata };
+    fullTicket.id = ticketId;
     fullTicket.price = ticketListedPrice.price;
     fullTicket.isListed = ticketListedPrice.isListed;
     return fullTicket;
