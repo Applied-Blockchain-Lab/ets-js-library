@@ -523,8 +523,10 @@ export async function getListedTicketById(
     const ticket = await contract.getTicket(ticketId);
     const ticketWithMetadata = await fetchSingleTicketMetadata(ticket);
     const ticketListedPrice = await marketplace.getListedTicketById(ticketId);
-    ticketWithMetadata.price = ticketListedPrice.price;
-    return ticketWithMetadata;
+    const fullTicket = { ...ticketWithMetadata };
+    fullTicket.price = ticketListedPrice.price;
+    fullTicket.isListed = ticketListedPrice.isListed;
+    return fullTicket;
   } catch (error) {
     throw error;
   }

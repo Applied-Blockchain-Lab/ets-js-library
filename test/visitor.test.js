@@ -788,8 +788,8 @@ describe("Visitor tests", () => {
     const tx = await visitorWallet.sendTransaction(populatedSecondListTx);
     await tx.wait();
 
-    const ticket = await getListedTicketById(firstTicketId, ticketMarketplaceFacet);
-    const secondTicket = await getListedTicketById(secondTicketId, ticketMarketplaceFacet);
+    const ticket = await getListedTicketById(firstTicketId, ticketFacet, ticketMarketplaceFacet);
+    const secondTicket = await getListedTicketById(secondTicketId, ticketFacet, ticketMarketplaceFacet);
 
     expect(ticket.isListed).to.eql(true);
     expect(ticket.price).to.eql(price);
@@ -832,7 +832,7 @@ describe("Visitor tests", () => {
     const tx2 = await visitorWallet.sendTransaction(populatedTx2);
     await tx2.wait();
 
-    const ticket = await getListedTicketById(ticketId, ticketMarketplaceFacet);
+    const ticket = await getListedTicketById(ticketId, ticketFacet, ticketMarketplaceFacet);
     expect(ticket.price).to.equal(newPrice);
 
     checkFunctionInvocation();
@@ -956,7 +956,7 @@ describe("Visitor tests", () => {
     const tx = await visitorWallet.sendTransaction(populatedTx);
     await tx.wait();
 
-    const ticket = await getListedTicketById(ticketId, ticketMarketplaceFacet);
+    const ticket = await getListedTicketById(ticketId, ticketFacet, ticketMarketplaceFacet);
     expect(ticket.isListed).to.equal(false);
 
     checkFunctionInvocation();
