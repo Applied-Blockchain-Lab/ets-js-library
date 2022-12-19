@@ -1126,6 +1126,23 @@ const ticket = await getTicketsByIds(ticketIds);
 
 - Event: Event does not exist
 
+### Fetch all ticket ids listed on for sale on secondary market (Everyone)
+
+1. Import fetchAllListedTicketIds function from the library.
+2. Execute fetchAllListedTicketIds function.
+
+```js
+import { fetchAllListedTicketIds } from "ets-js-library";
+
+const ticketIds = await fetchAllListedTicketIds();
+```
+
+Return data:
+
+```js
+const eventIds = [1, 2, 3];
+```
+
 ### Lists ticket for sale (Ticket owner)
 
 1. Import listTicket function from the library.
