@@ -514,11 +514,17 @@ export async function withdrawFromCanceledEvent(eventId, contract = eventsContra
   }
 }
 
-export async function getListedTicketById(ticketId, contract = ticketMarketplaceContract) {
+export async function getListedTicketById(
+  ticketId,
+  contract = ticketsContract,
+  marketplace = ticketMarketplaceContract,
+) {
   try {
-    const ticket = await contract.getListedTicketById(ticketId);
-
-    return ticket;
+    const ticket = await contract.getTicket(ticketId);
+    const ticketWithMetadata = await fetchSingleTicketMetadata(ticket);
+    const ticketListedPrice = await marketplace.getListedTicketById(ticketId);
+    ticketWithMetadata.price = ticketListedPrice.price;
+    return ticketWithMetadata;
   } catch (error) {
     throw error;
   }
