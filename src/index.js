@@ -163,6 +163,14 @@ export async function fetchAllEventIds(contract = eventsContract) {
   return allEventIds;
 }
 
+export async function fetchAllListedTicketIds(contract = ticketMarketplaceContract) {
+  const allTicketIdsBN = await contract.fetchAllListedTicketIds();
+
+  const allTicketIds = allTicketIdsBN.map((eventId) => eventId.toNumber());
+
+  return allTicketIds;
+}
+
 export async function setEventCashier(eventId, address, contract = eventsContract) {
   try {
     const tx = await contract.populateTransaction.setEventCashier(eventId, address);
