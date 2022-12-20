@@ -171,9 +171,9 @@ export async function fetchAllListedTicketIds(contract = ticketMarketplaceContra
   return allTicketIds;
 }
 
-export async function setEventCashier(eventId, address, contract = eventsContract) {
+export async function setEventCashier(eventId, oldCashier, newCashier, contract = eventsContract) {
   try {
-    const tx = await contract.populateTransaction.setEventCashier(eventId, address);
+    const tx = await contract.populateTransaction.setEventCashier(eventId, oldCashier, newCashier);
     return tx;
   } catch (error) {
     throw error;

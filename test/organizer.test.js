@@ -114,14 +114,22 @@ describe("Organizer tests", function () {
   });
 
   it("Should set event cashier", async () => {
+    let oldCashier = "";
     const CASHIER_ROLE = utils.keccak256(utils.toUtf8Bytes("CASHIER_ROLE"));
+    const membersOld = await getEventMembers(tokenId, eventFacet);
+    membersOld.forEach((element) => {
+      if (element.role === CASHIER_ROLE) {
+        oldCashier = element.account;
+      }
+    });
+
     const address = signers[1].address;
-    const populatedTx = await setEventCashier(tokenId, address, eventFacet);
+    const populatedTx = await setEventCashier(tokenId, oldCashier, address, eventFacet);
     const tx = await wallet.sendTransaction(populatedTx);
     await tx.wait();
 
     const members = await getEventMembers(tokenId, eventFacet);
-    const expectedMemberIndex = 5;
+    const expectedMemberIndex = 4;
 
     expect(members[expectedMemberIndex].account).to.equal(address);
     expect(members[expectedMemberIndex].role).to.equal(CASHIER_ROLE);

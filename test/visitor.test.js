@@ -22,12 +22,14 @@ import {
   updateCategorySaleDates,
   updateListedTicketPrice,
   withdrawRefund,
+  getEventMembers,
 } from "../src/index.js";
 import axios from "axios";
 import MockAdapter from "axios-mock-adapter";
 import { DATES, mockedEventParams, mockedContractData, errorMessages, EXAMPLE_ADDRESS } from "./config.js";
 import { StatusCodes } from "http-status-codes";
 import { expect } from "chai";
+import { utils } from "ethers";
 import { mockedCreateEvent, testSetUp, categoryIpfsUrl, ticketIpfsUrl } from "./utils.js";
 import { spy } from "sinon";
 
@@ -641,8 +643,17 @@ describe("Visitor tests", () => {
   it("Should listen for new event Cashier", async () => {
     listeners.listenForNewEventCashier(spyFunc, eventFacet);
 
+    let oldCashier = "";
+    const CASHIER_ROLE = utils.keccak256(utils.toUtf8Bytes("CASHIER_ROLE"));
+    const members = await getEventMembers(firstEventTokenId, eventFacet);
+    members.forEach((element) => {
+      if (element.role === CASHIER_ROLE) {
+        oldCashier = element.account;
+      }
+    });
+
     const address = EXAMPLE_ADDRESS;
-    const populatedTx = await setEventCashier(firstEventTokenId, address, eventFacet);
+    const populatedTx = await setEventCashier(firstEventTokenId, oldCashier, address, eventFacet);
     const tx = await wallet.sendTransaction(populatedTx);
     await tx.wait();
 

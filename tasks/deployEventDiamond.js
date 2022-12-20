@@ -10,6 +10,7 @@ import eventDiamondLoupeSchema from "../config/EventDiamondLoupeFacet.json" asse
 import eventOwnershipSchema from "../config/EventOwnershipFacet.json" assert { type: "json" };
 import eventFacetSchema from "../config/EventFacet.json" assert { type: "json" };
 import eventTicketControllerFacetSchema from "#contract.config/EventTicketControllerFacet.json" assert { type: "json" };
+import categoryFacetSchema from "#contract.config/CategoryFacet.json" assert { type: "json" };
 import ticketFacetSchema from "../config/TicketFacet.json" assert { type: "json" };
 import iDiamondCutSchema from "../config/IDiamondCut.json" assert { type: "json" };
 
@@ -46,7 +47,7 @@ export async function deployEventDiamond() {
   const eventDiamondInit = await EventDiamondInit.deploy();
   await eventDiamondInit.deployed();
 
-  const Facets = [eventDiamondLoupeSchema, eventOwnershipSchema, eventTicketControllerFacetSchema];
+  const Facets = [eventDiamondLoupeSchema, eventOwnershipSchema, eventTicketControllerFacetSchema, categoryFacetSchema];
   const cut = [];
 
   for (const Facet of Facets) {

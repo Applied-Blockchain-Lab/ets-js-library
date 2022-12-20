@@ -1,4 +1,5 @@
 import eventSchema from "#contract.config/EventFacet.json" assert { type: "json" };
+import categorySchema from "#contract.config/CategoryFacet.json" assert { type: "json" };
 import ticketControllerSchema from "#contract.config/EventTicketControllerFacet.json" assert { type: "json" };
 import ticketFacetSchema from "#contract.config/TicketFacet.json" assert { type: "json" };
 import ticketMarketplaceFacetSchema from "#contract.config/TicketMarketplaceFacet.json" assert { type: "json" };
@@ -12,6 +13,7 @@ import {
 } from "#contract.config/constants.cjs";
 
 const EVENT_FACET_ABI = eventSchema.abi;
+const CATEGORY_FACET_ABI = categorySchema.abi;
 const TICKET_CONTROLLER_FACET_ABI = ticketControllerSchema.abi;
 const TICKET_FACET_ABI = ticketFacetSchema.abi;
 const TICKET_MARKETPLACE_FACET_ABI = ticketMarketplaceFacetSchema.abi;
@@ -20,6 +22,7 @@ const ETS_SERVER_URL = "http://127.0.0.1:1337";
 
 export {
   EVENT_FACET_ABI,
+  CATEGORY_FACET_ABI,
   TICKET_CONTROLLER_FACET_ABI,
   TICKET_FACET_ABI,
   TICKET_MARKETPLACE_FACET_ABI,

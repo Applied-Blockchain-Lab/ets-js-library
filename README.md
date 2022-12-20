@@ -488,10 +488,11 @@ const eventIds = [1, 2, 3];
 ```js
 import { setEventCashier } from "ets-js-library";
 
-const address = "Address of new cashier.";
+const oldCashier = "Address of old cashier.";
+const newCashier = "Address of new cashier.";
 const eventId = "Id of event";
 
-const transaction = await setEventCashier(eventId, address);
+const transaction = await setEventCashier(eventId, oldCashier, newCashier);
 //You need to sign and send the transaction after this.
 ```
 

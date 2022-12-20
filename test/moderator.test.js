@@ -13,6 +13,7 @@ import {
   listeners,
   updateEvent,
   removeTeamMember,
+  getEventMembers,
   addTeamMember,
   removeEvent,
   buyTickets,
@@ -84,8 +85,9 @@ describe("Moderator tests", function () {
   });
 
   it("Should revert set event cashier when moderator calls it", async () => {
+    const moderatorAddress = await moderatorWallet.getAddress();
     const address = EXAMPLE_ADDRESS;
-    const populatedTx = await setEventCashier(tokenId, address, eventFacet);
+    const populatedTx = await setEventCashier(tokenId, moderatorAddress, address, eventFacet);
     populatedTx.from = moderatorWallet.address;
 
     await expect(moderatorWallet.sendTransaction(populatedTx)).to.be.revertedWith(errorMessages.callerIsNotAdmin);
@@ -453,10 +455,18 @@ describe("Moderator tests", function () {
 
   // check if balance is withdrawn
   it("Should withdraw the balance of event by cashier and listen for it", async () => {
+    let oldCashier = "";
+    const CASHIER_ROLE = utils.keccak256(utils.toUtf8Bytes("CASHIER_ROLE"));
+    const members = await getEventMembers(tokenId, eventFacet);
+    members.forEach((element) => {
+      if (element.role === CASHIER_ROLE) {
+        oldCashier = element.account;
+      }
+    });
     const cashierWallet = signers[1];
     const cashierAddress = cashierWallet.address;
     const cashierBalanceBefore = await cashierWallet.getBalance();
-    const populatedSetCashierTx = await setEventCashier(tokenId, cashierAddress, eventFacet);
+    const populatedSetCashierTx = await setEventCashier(tokenId, oldCashier, cashierAddress, eventFacet);
     const setEventCashierTX = await wallet.sendTransaction(populatedSetCashierTx);
     await setEventCashierTX.wait();
 
@@ -609,8 +619,18 @@ describe("Moderator tests", function () {
 
   it("Should listen for role granted", async () => {
     listeners.listenForRoleGrant(spyFunc, eventFacet);
+
+    let oldCashier = "";
+    const CASHIER_ROLE = utils.keccak256(utils.toUtf8Bytes("CASHIER_ROLE"));
+    const membersOld = await getEventMembers(tokenId, eventFacet);
+    membersOld.forEach((element) => {
+      if (element.role === CASHIER_ROLE) {
+        oldCashier = element.account;
+      }
+    });
+
     const address = EXAMPLE_ADDRESS;
-    const populatedTx = await setEventCashier(tokenId, address, eventFacet);
+    const populatedTx = await setEventCashier(tokenId, oldCashier, address, eventFacet);
     const tx = await wallet.sendTransaction(populatedTx);
     await tx.wait();
 

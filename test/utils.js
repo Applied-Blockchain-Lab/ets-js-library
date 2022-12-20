@@ -1,6 +1,7 @@
 import eventSchema from "../config/EventFacet.json" assert { type: "json" };
 import ticketControllerSchema from "../config/EventTicketControllerFacet.json" assert { type: "json" };
 import ticketFacetSchema from "#contract.config/TicketFacet.json" assert { type: "json" };
+import categotyFacetSchema from "#contract.config/CategoryFacet.json" assert { type: "json" };
 import ticketMarketplaceSchema from "../config/TicketMarketplaceFacet.json" assert { type: "json" };
 import { deployEventDiamond } from "../tasks/deployEventDiamond.js";
 import { createEvent } from "../src/index.js";
@@ -13,7 +14,7 @@ const ticketIpfsUrl = "ipfs://bafyreiaoq6thpwbvnatxforotjs33hut7rcfzalysp7cozhh3
 async function testSetUp() {
   const { eventDiamondAddress, ticketDiamondAddress } = await deployEventDiamond();
 
-  const eventFacet = await ethers.getContractAt(eventSchema.abi, eventDiamondAddress);
+  const eventFacet = await ethers.getContractAt(eventSchema.abi.concat(categotyFacetSchema.abi), eventDiamondAddress);
   const ticketControllerFacet = await ethers.getContractAt(ticketControllerSchema.abi, eventDiamondAddress);
   const ticketFacet = await ethers.getContractAt(ticketFacetSchema.abi, ticketDiamondAddress);
   const ticketMarketplaceFacet = await ethers.getContractAt(ticketMarketplaceSchema.abi, ticketDiamondAddress);
