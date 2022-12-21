@@ -1304,6 +1304,26 @@ const ticketId = 1; // The ticket id generated when ticket is listed
 await getListedTicketById(ticketId);
 ```
 
+### Gets the listed ticket Data by its id (Everyone)
+
+1. Import getListedTicketDataById function from the library.
+2. Execute getListedTicketDataById function.
+
+```js
+import { getListedTicketDataById } from "ets-js-library";
+
+const ticketId = 1; // The ticket id generated when ticket is listed
+
+const listedTicketData = await getListedTicketDataById(ticketId);
+```
+Return data:
+```js
+const listedTicketData = {
+  price: 1,
+  isListed: true 
+}
+```
+
 ## Tests
 
 > :warning: **hardhat@esm** is used to test the library to be able to match the type which is _module_, but official hardhat requires _commonjs_

@@ -533,6 +533,15 @@ export async function getListedTicketById(
   }
 }
 
+export async function getListedTicketDataById(ticketId, marketplace = ticketMarketplaceContract) {
+  try {
+    const listedTicketData = await marketplace.getListedTicketById(ticketId);
+    return listedTicketData;
+  } catch (error) {
+    throw error;
+  }
+}
+
 /* ========= EXPRESS SERVER FUNCTIONS ========== */
 export async function fetchCountriesFromServer(serverUrl = ETS_SERVER_URL) {
   try {
