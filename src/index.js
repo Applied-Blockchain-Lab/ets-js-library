@@ -343,15 +343,6 @@ export async function returnTicket(ticketParams, contract = ticketControllerCont
   }
 }
 
-export async function withdrawRefund(eventId, ticketId, contract = ticketControllerContract) {
-  try {
-    const tx = await contract.populateTransaction.withdrawRefund(eventId, ticketId);
-    return tx;
-  } catch (error) {
-    throw error;
-  }
-}
-
 export async function withdrawContractBalance(eventId, contract = ticketControllerContract) {
   try {
     const tx = await contract.populateTransaction.withdrawContractBalance(eventId);

@@ -518,26 +518,6 @@ listeners.listenForNewEventRefundDate(callback);
 
 - addRefundDeadline()
 
-### Listen for refund withdraw (Everyone)
-
-1. Import listeners from the library.
-2. Create a callback function.
-3. Supply callback function to listeners.listenForRefundWithdraw as parameter.
-
-```js
-import { listeners } from "ets-js-library";
-
-function callback(data) {
-  //This function will be called when the event is emitted.
-}
-
-listeners.listenForRefundWithdraw(callback);
-```
-
-#### Emitted by:
-
-- withdrawRefund()
-
 ### Listen for event withdraw (Everyone)
 
 1. Import listeners from the library.

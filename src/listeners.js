@@ -171,17 +171,6 @@ export function listenForBatchMetadataUpdate(callback, contract = eventsContract
   });
 }
 
-export function listenForRefund(callback, contract = eventsContract) {
-  contract.on("RefundWithdraw", async (_sender, _tokenId) => {
-    const data = {
-      account: _sender,
-      ticketContractId: _tokenId,
-    };
-
-    await callback(data);
-  });
-}
-
 export function listenForNewEventCashier(callback, contract = eventsContract) {
   contract.on("EventCashierSet", async (eventId, account, setter) => {
     const data = {

@@ -21,7 +21,6 @@ import {
   updateCategory,
   updateCategorySaleDates,
   updateListedTicketPrice,
-  withdrawRefund,
   getEventMembers,
 } from "../src/index.js";
 import axios from "axios";
@@ -556,7 +555,6 @@ describe("Visitor tests", () => {
 
   it("Should withdraw the refund and test the listeners", async () => {
     listeners.listenForRefundedTicket(spyFunc, ticketControllerFacet);
-    listeners.listenForRefundWithdraw(spyFunc, ticketControllerFacet);
 
     let populatedTx;
     let res;
@@ -611,20 +609,12 @@ describe("Visitor tests", () => {
 
     const ticketParams = { eventId: firstEventTokenId, categoryId: 1, ticketId: 6 };
 
+    const walletBalanceBefore = await visitorWallet.getBalance();
+
     const populatedReturnTicketTx = await returnTicket(ticketParams, ticketControllerFacet);
     populatedReturnTicketTx.from = visitorWallet.address;
     const returnTicketTx = await visitorWallet.sendTransaction(populatedReturnTicketTx);
     res = await returnTicketTx.wait();
-
-    checkFunctionInvocation();
-    spyFunc.resetHistory();
-
-    const walletBalanceBefore = await visitorWallet.getBalance();
-
-    populatedTx = await withdrawRefund(ticketParams.eventId, ticketParams.ticketId, ticketControllerFacet);
-    populatedTx.from = visitorWallet.address;
-    const tx = await visitorWallet.sendTransaction(populatedTx);
-    res = await tx.wait();
 
     checkFunctionInvocation();
     spyFunc.resetHistory();
