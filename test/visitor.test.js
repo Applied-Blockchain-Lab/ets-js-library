@@ -994,7 +994,15 @@ describe("Visitor tests", () => {
 
     await ethers.provider.send("evm_increaseTime", [TEN_DAYS * DATES.DAY]);
 
-    const populatedTx = await clipTicket(firstEventTokenId, 1, ticketControllerFacet);
+    const ticketId = 1;
+
+    const messageHash = ethers.utils.solidityKeccak256(["uint"], [ticketId]);
+
+    const messageHashBinary = ethers.utils.arrayify(messageHash);
+
+    const signature = await visitorWallet.signMessage(messageHashBinary);
+
+    const populatedTx = await clipTicket(firstEventTokenId, ticketId, signature, ticketControllerFacet);
     const tx = await wallet.sendTransaction(populatedTx);
     await tx.wait();
 

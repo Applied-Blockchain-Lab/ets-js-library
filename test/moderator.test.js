@@ -904,7 +904,15 @@ describe("Clip ticket", function () {
 
     await ethers.provider.send("evm_increaseTime", [TEN_DAYS * DATES.DAY]);
 
-    const populatedTx = await clipTicket(tokenId, 1, ticketControllerFacet);
+    const ticketId = 1;
+
+    const messageHash = ethers.utils.solidityKeccak256(["uint"], [ticketId]);
+
+    const messageHashBinary = ethers.utils.arrayify(messageHash);
+
+    const signature = await moderatorWallet.signMessage(messageHashBinary);
+
+    const populatedTx = await clipTicket(tokenId, ticketId, signature, ticketControllerFacet);
     populatedTx.from = moderatorWallet.address;
 
     await expect(moderatorWallet.sendTransaction(populatedTx)).to.be.revertedWith(errorMessages.callReverted);
@@ -983,7 +991,14 @@ describe("Clip ticket", function () {
     // Try to clip a ticket
     const ticketId = 1;
     const SIGNER_ARRAY_INDEX = 2;
-    const populatedTx3 = await clipTicket(tokenId, ticketId, ticketControllerFacet);
+
+    const messageHash = ethers.utils.solidityKeccak256(["uint"], [ticketId]);
+
+    const messageHashBinary = ethers.utils.arrayify(messageHash);
+
+    const signature = await moderatorWallet.signMessage(messageHashBinary);
+
+    const populatedTx3 = await clipTicket(tokenId, ticketId, signature, ticketControllerFacet);
     populatedTx3.from = signers[SIGNER_ARRAY_INDEX].address;
 
     await expect(signers[SIGNER_ARRAY_INDEX].sendTransaction(populatedTx3)).to.be.revertedWith(
@@ -1025,7 +1040,12 @@ describe("Clip ticket", function () {
 
     // Try to clip a ticket
     const ticketId = 1;
-    const populatedTx3 = await clipTicket(tokenId, ticketId, ticketControllerFacet);
+
+    const messageHash = ethers.utils.solidityKeccak256(["uint"], [ticketId]);
+    const messageHashBinary = ethers.utils.arrayify(messageHash);
+    const signature = await moderatorWallet.signMessage(messageHashBinary);
+
+    const populatedTx3 = await clipTicket(tokenId, ticketId, signature, ticketControllerFacet);
     populatedTx3.from = moderatorWallet.address;
     await expect(moderatorWallet.sendTransaction(populatedTx3)).to.be.revertedWith(errorMessages.wrongClipDate);
   });
@@ -1066,7 +1086,12 @@ describe("Clip ticket", function () {
 
     // Try to clip a ticket
     const ticketId = 1;
-    const populatedTx3 = await clipTicket(tokenId, ticketId, ticketControllerFacet);
+
+    const messageHash = ethers.utils.solidityKeccak256(["uint"], [ticketId]);
+    const messageHashBinary = ethers.utils.arrayify(messageHash);
+    const signature = await moderatorWallet.signMessage(messageHashBinary);
+
+    const populatedTx3 = await clipTicket(tokenId, ticketId, signature, ticketControllerFacet);
     populatedTx3.from = moderatorWallet.address;
     await expect(moderatorWallet.sendTransaction(populatedTx3)).to.be.revertedWith(errorMessages.wrongClipDate);
   });
@@ -1143,12 +1168,18 @@ describe("Clip ticket", function () {
 
     await ethers.provider.send("evm_increaseTime", [TEN_DAYS * DATES.DAY]);
 
-    const populatedTx = await clipTicket(tokenId, 1, ticketControllerFacet);
+    const ticketId = 1;
+
+    const messageHash = ethers.utils.solidityKeccak256(["uint"], [ticketId]);
+    const messageHashBinary = ethers.utils.arrayify(messageHash);
+    const signature = await moderatorWallet.signMessage(messageHashBinary);
+
+    const populatedTx = await clipTicket(tokenId, ticketId, signature, ticketControllerFacet);
     populatedTx.from = moderatorWallet.address;
     const tx = await moderatorWallet.sendTransaction(populatedTx);
     await tx.wait();
 
-    const populatedTx2Clip = await clipTicket(tokenId, 1, ticketControllerFacet);
+    const populatedTx2Clip = await clipTicket(tokenId, ticketId, signature, ticketControllerFacet);
     populatedTx2Clip.from = moderatorWallet.address;
 
     await expect(moderatorWallet.sendTransaction(populatedTx2Clip)).to.be.revertedWith(errorMessages.callReverted);

@@ -970,6 +970,10 @@ import { clipTicket } from "ets-js-library";
 const eventId = "id of event";
 const ticketId = "id of ticket";
 
+const messageHash = ethers.utils.solidityKeccak256(["uint"], [ticketId]);
+const messageHashBinary = ethers.utils.arrayify(messageHash);
+const signature = await ticketOwnerWallet.signMessage(messageHashBinary);
+
 const transaction = await clipTicket(eventId, ticketId);
 //You need to sign and send the transaction after this.
 ```
