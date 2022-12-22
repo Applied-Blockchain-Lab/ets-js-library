@@ -39,9 +39,9 @@ export async function deleteFromIpfs(nftStorageApiKey, ipfsUri) {
   }
 }
 
-export function createGatewayUrl(url) {
+export async function createGatewayUrl(url) {
   try {
-    const gatewayUrl = makeGatewayUrl(url);
+    const gatewayUrl = await makeGatewayUrl(url);
 
     return gatewayUrl;
   } catch (error) {
