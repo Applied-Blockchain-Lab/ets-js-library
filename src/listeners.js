@@ -4,7 +4,7 @@ import { fetchSingleEventMetadata, makeGatewayUrl } from "#ipfs.utils";
 
 export function listenForNewEvent(callback, contract = eventsContract) {
   contract.on("EventCreated", async (eventId, metadataUri) => {
-    const url = makeGatewayUrl(metadataUri);
+    const url = await makeGatewayUrl(metadataUri);
     const eventMetadata = await axios.get(url);
 
     const membersData = await contract.getEventMembers(eventId);

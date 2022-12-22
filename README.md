@@ -1316,12 +1316,14 @@ const ticketId = 1; // The ticket id generated when ticket is listed
 
 const listedTicketData = await getListedTicketDataById(ticketId);
 ```
+
 Return data:
+
 ```js
 const listedTicketData = {
   price: 1,
-  isListed: true 
-}
+  isListed: true,
+};
 ```
 
 ## Tests

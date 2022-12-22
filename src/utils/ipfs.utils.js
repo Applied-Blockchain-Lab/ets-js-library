@@ -1,11 +1,22 @@
 /* eslint-disable no-useless-catch */
 import { NFTStorage } from "nft.storage";
 import axios from "axios";
-import { IPFS_GATEWAY_PROVIDER_URL } from "#config";
+import { IPFS_PROVIDERS } from "../configs/ipfs.providers.js";
 import { eventsContract } from "#contract";
 
-function makeGatewayUrl(ipfsURI) {
-  return ipfsURI.replace(/^ipfs:\/\//, IPFS_GATEWAY_PROVIDER_URL);
+async function makeGatewayUrl(ipfsURI) {
+  let url;
+  let error;
+  for (let i = 0; i < IPFS_PROVIDERS.length; i++) {
+    url = ipfsURI.replace(/^ipfs:\/\//, IPFS_PROVIDERS[i]);
+    try {
+      await axios.get(url);
+      return url;
+    } catch (_error) {
+      error = _error;
+    }
+  }
+  throw error;
 }
 
 async function uploadDataToIpfs(nftStorageApiKey, metadata) {
@@ -60,7 +71,7 @@ async function fetchSingleEventMetadata(eventId, contract = eventsContract) {
   try {
     const eventUri = await contract.tokenURI(eventId);
 
-    const url = makeGatewayUrl(eventUri);
+    const url = await makeGatewayUrl(eventUri);
 
     const eventMetadata = await axios.get(url);
     const contractData = await contract.fetchEventById(eventId);
@@ -68,7 +79,7 @@ async function fetchSingleEventMetadata(eventId, contract = eventsContract) {
     eventMetadata.data.eventId = eventId;
     eventMetadata.data.cid = eventUri;
     Object.assign(eventMetadata.data, contractData);
-    eventMetadata.data.image = makeGatewayUrl(eventMetadata.data.image);
+    eventMetadata.data.image = await makeGatewayUrl(eventMetadata.data.image);
 
     switch (eventMetadata.data.status) {
       case 0: // buddy ignore:line
@@ -106,11 +117,11 @@ async function fetchCategoriesMetadata(categories) {
 
 async function fetchSingleCategoryMetadata(category) {
   try {
-    const url = makeGatewayUrl(category.cid);
+    const url = await makeGatewayUrl(category.cid);
     const response = await axios.get(url);
     const metadata = response.data;
     Object.assign(metadata, category);
-    metadata.image = makeGatewayUrl(metadata.image);
+    metadata.image = await makeGatewayUrl(metadata.image);
     return metadata;
   } catch {
     return category;
@@ -119,11 +130,11 @@ async function fetchSingleCategoryMetadata(category) {
 
 async function fetchSingleTicketMetadata(ticket) {
   try {
-    const url = makeGatewayUrl(ticket.tokenUri);
+    const url = await makeGatewayUrl(ticket.tokenUri);
     const response = await axios.get(url);
     const metadata = response.data;
     Object.assign(metadata, ticket);
-    metadata.image = makeGatewayUrl(metadata.image);
+    metadata.image = await makeGatewayUrl(metadata.image);
     return metadata;
   } catch {
     return ticket;

@@ -17,7 +17,6 @@ const CATEGORY_FACET_ABI = categorySchema.abi;
 const TICKET_CONTROLLER_FACET_ABI = ticketControllerSchema.abi;
 const TICKET_FACET_ABI = ticketFacetSchema.abi;
 const TICKET_MARKETPLACE_FACET_ABI = ticketMarketplaceFacetSchema.abi;
-const IPFS_GATEWAY_PROVIDER_URL = "https://nftstorage.link/ipfs/";
 const ETS_SERVER_URL = "http://127.0.0.1:1337";
 
 export {
@@ -26,7 +25,6 @@ export {
   TICKET_CONTROLLER_FACET_ABI,
   TICKET_FACET_ABI,
   TICKET_MARKETPLACE_FACET_ABI,
-  IPFS_GATEWAY_PROVIDER_URL,
   ETS_SERVER_URL,
   EVENTS_CONTRACT_ADDRESS,
   TICKETS_CONTRACT_ADDRESS,
