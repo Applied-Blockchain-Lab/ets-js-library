@@ -967,14 +967,16 @@ const transaction = await withdrawContractBalance(eventId);
 ```js
 import { clipTicket } from "ets-js-library";
 
+const timestamp = Math.floor(Date.now() / 1000);
+
 const eventId = "id of event";
 const ticketId = "id of ticket";
 
-const messageHash = ethers.utils.solidityKeccak256(["uint"], [ticketId]);
+const messageHash = ethers.utils.solidityKeccak256(["uint", "uint"], [ticketId, timestamp]);
 const messageHashBinary = ethers.utils.arrayify(messageHash);
 const signature = await ticketOwnerWallet.signMessage(messageHashBinary);
 
-const transaction = await clipTicket(eventId, ticketId);
+const transaction = await clipTicket(eventId, ticketId, timestamp, signature);
 //You need to sign and send the transaction after this.
 ```
 

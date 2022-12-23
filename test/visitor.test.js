@@ -993,16 +993,20 @@ describe("Visitor tests", () => {
     listeners.listenForClipedTicket(spyFunc, ticketControllerFacet);
 
     await ethers.provider.send("evm_increaseTime", [TEN_DAYS * DATES.DAY]);
+    await ethers.provider.send("evm_mine");
+    const blockNumer = await ethers.provider.getBlockNumber();
+    const block = await ethers.provider.getBlock(blockNumer);
+    const timestamp = block.timestamp;
 
     const ticketId = 1;
 
-    const messageHash = ethers.utils.solidityKeccak256(["uint"], [ticketId]);
+    const messageHash = ethers.utils.solidityKeccak256(["uint", "uint"], [ticketId, timestamp]);
 
     const messageHashBinary = ethers.utils.arrayify(messageHash);
 
     const signature = await visitorWallet.signMessage(messageHashBinary);
 
-    const populatedTx = await clipTicket(firstEventTokenId, ticketId, signature, ticketControllerFacet);
+    const populatedTx = await clipTicket(firstEventTokenId, ticketId, timestamp, signature, ticketControllerFacet);
     const tx = await wallet.sendTransaction(populatedTx);
     await tx.wait();
 

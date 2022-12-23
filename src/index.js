@@ -352,9 +352,15 @@ export async function withdrawContractBalance(eventId, contract = ticketControll
   }
 }
 
-export async function clipTicket(eventId, ticketId, signature, contract = ticketControllerContract) {
+export async function clipTicket(
+  eventId,
+  ticketId,
+  signatureTimestamp,
+  signature,
+  contract = ticketControllerContract,
+) {
   try {
-    const tx = await contract.populateTransaction.clipTicket(eventId, ticketId, signature);
+    const tx = await contract.populateTransaction.clipTicket(eventId, ticketId, signatureTimestamp, signature);
     return tx;
   } catch (error) {
     throw error;
