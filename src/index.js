@@ -361,6 +361,17 @@ export async function clipTicket(eventId, ticketId, signature, contract = ticket
   }
 }
 
+export async function isTicketUsable(ticketId, contract = ticketsContract) {
+  try {
+    const ownerOfTicket = await contract.ownerOf(ticketId);
+    const signer = new ethers.VoidSigner(ownerOfTicket, contract.provider);
+    const isConsumed = await contract.connect(signer).isConsumableBy(ownerOfTicket, ticketId, 1);
+    return isConsumed;
+  } catch (error) {
+    throw error;
+  }
+}
+
 export async function bookTickets(ticketUrls, eventId, categoryData, place, contract = ticketControllerContract) {
   try {
     const tx = await contract.populateTransaction.bookTickets(eventId, categoryData, place, ticketUrls);

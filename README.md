@@ -1330,6 +1330,27 @@ const listedTicketData = {
 };
 ```
 
+### Check if ticket is usable (Everyone)
+
+1. Import isTicketUsable function from the library.
+2. Execute isTicketUsable function.
+
+```js
+import { isTicketUsable } from "ets-js-library";
+
+const ticketId = 1; 
+
+const value = await isTicketUsable(ticketId);
+```
+
+Return data:
+
+```js
+const value = true; //Ticket is not used
+//OR
+const value = false; //Ticket is used
+```
+
 ## Tests
 
 > :warning: **hardhat@esm** is used to test the library to be able to match the type which is _module_, but official hardhat requires _commonjs_
