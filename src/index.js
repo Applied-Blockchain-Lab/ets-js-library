@@ -189,6 +189,7 @@ export async function createTicketCategory(ipfsUrl, eventId, contractData, contr
       contractData.saleEndDate,
       contractData.ticketsCount,
       contractData.ticketPrice,
+      contractData.hasPlaces,
       contractData.discountsTicketsCount,
       contractData.discountsPercentage,
       contractData.downPayment,

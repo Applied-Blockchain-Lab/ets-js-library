@@ -79,6 +79,7 @@ const mockedContractData = {
   saleEndDate: date + 3 * DAY, // buddy ignore:line
   ticketsCount: 50,
   ticketPrice: 10,
+  hasPlaces: true,
   discountsTicketsCount: [10, 5], // buddy ignore:line
   discountsPercentage: [20, 10], // buddy ignore:line
   downPayment: {
