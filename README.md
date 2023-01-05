@@ -938,17 +938,17 @@ const transaction = await withdrawRefund(eventId, ticketId);
 
 ### withdraw the balance of event (Cashier)
 
-1. Import withdrawContractBalance function from the library.
-2. Execute withdrawContractBalance function.
+1. Import withdrawEventBalance function from the library.
+2. Execute withdrawEventBalance function.
 3. Sign and send the transaction anyway you like.
    \*The maximum withdraw amount is the amount which can't be refunded from users.
 
 ```js
-import { withdrawContractBalance } from "ets-js-library";
+import { withdrawEventBalance } from "ets-js-library";
 
 const eventId = "id of event";
 
-const transaction = await withdrawContractBalance(eventId);
+const transaction = await withdrawEventBalance(eventId);
 //You need to sign and send the transaction after this.
 ```
 
@@ -1340,7 +1340,7 @@ const listedTicketData = {
 ```js
 import { isTicketUsable } from "ets-js-library";
 
-const ticketId = 1; 
+const ticketId = 1;
 
 const value = await isTicketUsable(ticketId);
 ```
@@ -1352,6 +1352,39 @@ const value = true; //Ticket is not used
 //OR
 const value = false; //Ticket is used
 ```
+
+### Sets fee for every bought ticket with given fee percentage (Contract owner)
+
+1. Import setTicketFeePercentage function from the library.
+2. Execute setTicketFeePercentage function.
+
+```js
+import { setTicketFeePercentage } from "ets-js-library";
+
+const feePercentage = 3; // Percentage from ticket's price
+
+await setTicketFeePercentage(feePercentage);
+```
+
+#### Possible error messages
+
+- "LibEventDiamond: Must be contract owner"
+
+### Withdraws fees (Contract owner)
+
+1. Import withdrawFees function from the library.
+2. Execute withdrawFees function.
+
+```js
+import { withdrawFees } from "ets-js-library";
+
+await withdrawFees();
+```
+
+#### Possible error messages
+
+- "LibEventDiamond: Must be contract owner"
+- "Event: Can't withdraw fees" - This error can occur only when the contract doesn't have enough balance or gas is not enough.
 
 ## Tests
 

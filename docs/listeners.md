@@ -536,7 +536,7 @@ listeners.listenForEventWithdraw(callback);
 
 #### Emitted by:
 
-- withdrawContractBalance()
+- withdrawEventBalance()
 
 ### Listen for cliped ticket (Everyone)
 

@@ -22,7 +22,7 @@ import {
   clipTicket,
   bookTickets,
   sendInvitation,
-  withdrawContractBalance,
+  withdrawEventBalance,
   listTicket,
   postponeEvent,
   cancelEvent,
@@ -472,7 +472,7 @@ describe("Moderator tests", function () {
 
     listeners.listenForEventWithdraw(spyFunc, ticketControllerFacet);
 
-    const populatedTx = await withdrawContractBalance(tokenId, ticketControllerFacet);
+    const populatedTx = await withdrawEventBalance(tokenId, ticketControllerFacet);
     populatedTx.from = cashierWallet.address;
     const tx = await cashierWallet.sendTransaction(populatedTx);
     const res = await tx.wait();
@@ -493,7 +493,7 @@ describe("Moderator tests", function () {
   it("Should revert withdraw the balance of event by non cashier", async () => {
     const signerIndex = 3;
 
-    const populatedTx = await withdrawContractBalance(tokenId, ticketControllerFacet);
+    const populatedTx = await withdrawEventBalance(tokenId, ticketControllerFacet);
     populatedTx.from = signers[signerIndex].address;
 
     await expect(signers[signerIndex].sendTransaction(populatedTx)).to.be.revertedWith(errorMessages.onlyCashier);

@@ -344,9 +344,9 @@ export async function returnTicket(ticketParams, contract = ticketControllerCont
   }
 }
 
-export async function withdrawContractBalance(eventId, contract = ticketControllerContract) {
+export async function withdrawEventBalance(eventId, contract = ticketControllerContract) {
   try {
-    const tx = await contract.populateTransaction.withdrawContractBalance(eventId);
+    const tx = await contract.populateTransaction.withdrawEventBalance(eventId);
     return tx;
   } catch (error) {
     throw error;
@@ -546,6 +546,28 @@ export async function getListedTicketDataById(ticketId, marketplace = ticketMark
   try {
     const listedTicketData = await marketplace.getListedTicketById(ticketId);
     return listedTicketData;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function setTicketFeePercentage(feePercentage, contract = ticketControllerContract) {
+  // Convert percentage to BPS
+  const bpsBase = 100;
+  const feePercentageInBps = feePercentage * bpsBase;
+
+  try {
+    const tx = await contract.populateTransaction.setTicketFeePercentage(feePercentageInBps);
+    return tx;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function withdrawFees(contract = ticketControllerContract) {
+  try {
+    const tx = await contract.populateTransaction.withdrawFees();
+    return tx;
   } catch (error) {
     throw error;
   }
