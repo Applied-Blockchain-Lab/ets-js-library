@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.29.5] - 2023-01-06
+
+### Added
+
+- setSecondaryMarketTicketFeePercentage and withdrawSecondaryMarketFees functions
+- Description for setSecondaryMarketTicketFeePercentage and withdrawSecondaryMarketFees in README
+
 ## [0.29.2] - 2023-01-05
 
 ### Added

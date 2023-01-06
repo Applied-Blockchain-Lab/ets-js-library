@@ -573,6 +573,28 @@ export async function withdrawFees(contract = ticketControllerContract) {
   }
 }
 
+export async function setSecondaryMarketTicketFeePercentage(feePercentage, contract = ticketMarketplaceContract) {
+  // Convert percentage to BPS
+  const bpsBase = 100;
+  const feePercentageInBps = feePercentage * bpsBase;
+
+  try {
+    const tx = await contract.populateTransaction.setTicketFeePercentage(feePercentageInBps);
+    return tx;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function withdrawSecondaryMarketFees(contract = ticketMarketplaceContract) {
+  try {
+    const tx = await contract.populateTransaction.withdrawFees();
+    return tx;
+  } catch (error) {
+    throw error;
+  }
+}
+
 /* ========= EXPRESS SERVER FUNCTIONS ========== */
 export async function fetchCountriesFromServer(serverUrl = ETS_SERVER_URL) {
   try {
