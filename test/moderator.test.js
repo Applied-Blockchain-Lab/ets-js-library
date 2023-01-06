@@ -54,6 +54,7 @@ describe("Moderator tests", function () {
   let wallet;
   let moderatorWallet;
   let signers;
+  const onlyWhiteListedUsers = false;
   const addressLength = 64;
   const spyFunc = spy();
 
@@ -71,17 +72,32 @@ describe("Moderator tests", function () {
     moderatorWallet = signers[1];
 
     const maxTicketPerClient = 10;
-    const startDate = DATES.EVENT_START_DATE;
-    const endDate = DATES.EVENT_END_DATE;
+    const startDate =
+      (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp + TEN_DAYS * DATES.DAY;
+    const endDate =
+      (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp +
+      (TEN_DAYS + TEN_DAYS) * DATES.DAY;
 
-    tokenId = await mockedCreateEvent(maxTicketPerClient, startDate, endDate, eventFacet, wallet, tokenId);
-
+    tokenId = await mockedCreateEvent(
+      maxTicketPerClient,
+      startDate,
+      endDate,
+      onlyWhiteListedUsers,
+      eventFacet,
+      wallet,
+      tokenId,
+    );
     // Grant moderator role
     const moderatorRole = utils.keccak256(utils.toUtf8Bytes("MODERATOR_ROLE"));
     const moderatorAddress = await moderatorWallet.getAddress();
     const addTeamMemberTx = await addTeamMember(tokenId, moderatorRole, moderatorAddress, eventFacet);
     const tx = await wallet.sendTransaction(addTeamMemberTx);
     await tx.wait();
+
+    mockedContractData.saleStartDate =
+      (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp + ONE_DAY * DATES.DAY;
+    mockedContractData.saleEndDate =
+      (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp + THREE_DAYS * DATES.DAY;
   });
 
   it("Should revert set event cashier when moderator calls it", async () => {
@@ -595,7 +611,11 @@ describe("Moderator tests", function () {
     const maxTicketPerClient = 10;
     const startDate = DATES.EVENT_START_DATE;
     const endDate = DATES.EVENT_END_DATE;
-    const populatedTx = await createEvent(eventIpfsUrl, { maxTicketPerClient, startDate, endDate }, eventFacet);
+    const populatedTx = await createEvent(
+      eventIpfsUrl,
+      { maxTicketPerClient, startDate, endDate, onlyWhiteListedUsers },
+      eventFacet,
+    );
     populatedTx.from = moderatorWallet.address;
 
     const eventTx = await moderatorWallet.sendTransaction(populatedTx);
@@ -696,7 +716,15 @@ describe("Moderator tests", function () {
     const maxTicketPerClient = 10;
     const startDate = DATES.EVENT_START_DATE;
     const endDate = DATES.EVENT_END_DATE;
-    const eventId = await mockedCreateEvent(maxTicketPerClient, startDate, endDate, eventFacet, wallet, tokenId);
+    const eventId = await mockedCreateEvent(
+      maxTicketPerClient,
+      startDate,
+      endDate,
+      onlyWhiteListedUsers,
+      eventFacet,
+      wallet,
+      tokenId,
+    );
 
     const populatedTx = await cancelEvent(eventId, eventFacet);
     const tx = await wallet.sendTransaction(populatedTx);
@@ -719,6 +747,7 @@ describe("Moderator tests", function () {
       maxTicketPerClient,
       startDate,
       endDate,
+      onlyWhiteListedUsers,
       eventFacet,
       wallet,
       tokenIdParam,
@@ -863,6 +892,7 @@ describe("Moderator tests", function () {
 
 describe("Clip ticket", function () {
   let eventFacet, ticketControllerFacet, signers, wallet, moderatorWallet;
+  const onlyWhiteListedUsers = false;
 
   before(async () => {
     ({ eventFacet, ticketControllerFacet, signers, wallet } = await testSetUp());
@@ -881,7 +911,15 @@ describe("Clip ticket", function () {
       (TEN_DAYS + TEN_DAYS) * DATES.DAY;
 
     let tokenIdParam;
-    const tokenId = await mockedCreateEvent(maxTicketPerClient, startDate, endDate, eventFacet, wallet, tokenIdParam);
+    const tokenId = await mockedCreateEvent(
+      maxTicketPerClient,
+      startDate,
+      endDate,
+      onlyWhiteListedUsers,
+      eventFacet,
+      wallet,
+      tokenIdParam,
+    );
 
     // Grant moderator role
     const moderatorRole = utils.keccak256(utils.toUtf8Bytes("MODERATOR_ROLE"));
@@ -933,7 +971,15 @@ describe("Clip ticket", function () {
       (TEN_DAYS + TEN_DAYS) * DATES.DAY;
 
     let tokenIdParam;
-    const tokenId = await mockedCreateEvent(maxTicketPerClient, startDate, endDate, eventFacet, wallet, tokenIdParam);
+    const tokenId = await mockedCreateEvent(
+      maxTicketPerClient,
+      startDate,
+      endDate,
+      onlyWhiteListedUsers,
+      eventFacet,
+      wallet,
+      tokenIdParam,
+    );
 
     // Grant moderator role
     const moderatorRole = utils.keccak256(utils.toUtf8Bytes("MODERATOR_ROLE"));
@@ -1025,7 +1071,15 @@ describe("Clip ticket", function () {
       (TEN_DAYS + TEN_DAYS) * DATES.DAY;
 
     let tokenIdParam;
-    const tokenId = await mockedCreateEvent(maxTicketPerClient, startDate, endDate, eventFacet, wallet, tokenIdParam);
+    const tokenId = await mockedCreateEvent(
+      maxTicketPerClient,
+      startDate,
+      endDate,
+      onlyWhiteListedUsers,
+      eventFacet,
+      wallet,
+      tokenIdParam,
+    );
 
     // Grant moderator role
     const moderatorRole = utils.keccak256(utils.toUtf8Bytes("MODERATOR_ROLE"));
@@ -1073,7 +1127,15 @@ describe("Clip ticket", function () {
       (TEN_DAYS + TEN_DAYS) * DATES.DAY;
 
     let tokenIdParam;
-    const tokenId = await mockedCreateEvent(maxTicketPerClient, startDate, endDate, eventFacet, wallet, tokenIdParam);
+    const tokenId = await mockedCreateEvent(
+      maxTicketPerClient,
+      startDate,
+      endDate,
+      onlyWhiteListedUsers,
+      eventFacet,
+      wallet,
+      tokenIdParam,
+    );
 
     // Grant moderator role
     const moderatorRole = utils.keccak256(utils.toUtf8Bytes("MODERATOR_ROLE"));
@@ -1123,7 +1185,15 @@ describe("Clip ticket", function () {
       (TEN_DAYS + TEN_DAYS) * DATES.DAY;
 
     let tokenIdParam;
-    const tokenId = await mockedCreateEvent(maxTicketPerClient, startDate, endDate, eventFacet, wallet, tokenIdParam);
+    const tokenId = await mockedCreateEvent(
+      maxTicketPerClient,
+      startDate,
+      endDate,
+      onlyWhiteListedUsers,
+      eventFacet,
+      wallet,
+      tokenIdParam,
+    );
 
     // Grant moderator role
     const moderatorRole = utils.keccak256(utils.toUtf8Bytes("MODERATOR_ROLE"));

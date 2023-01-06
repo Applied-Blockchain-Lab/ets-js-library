@@ -106,6 +106,7 @@ const contractData = {
   maxTicketPerClient: 5,
   startDate: 1666666666, // unix timestamp
   endDate: 1666666666, // unix timestamp
+  onlyWhiteListedUsers: false,
 };
 
 const ipfsUrl = "ipfs://bafyreiaoq6thpwbvnatxforotjs33hut7rcfzalysp7cozhh3kkgkfkhhy/metadata.json";

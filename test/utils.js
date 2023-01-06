@@ -23,8 +23,12 @@ async function testSetUp() {
   return { eventFacet, ticketControllerFacet, ticketFacet, ticketMarketplaceFacet, signers, wallet };
 }
 
-async function mockedCreateEvent(maxTicketPerClient, startDate, endDate, eventFacet, wallet) {
-  const populatedTx = await createEvent(eventIpfsUrl, { maxTicketPerClient, startDate, endDate }, eventFacet);
+async function mockedCreateEvent(maxTicketPerClient, startDate, endDate, onlyWhiteListedUsers, eventFacet, wallet) {
+  const populatedTx = await createEvent(
+    eventIpfsUrl,
+    { maxTicketPerClient, startDate, endDate, onlyWhiteListedUsers },
+    eventFacet,
+  );
 
   const eventTx = await wallet.sendTransaction(populatedTx);
   const eventTxResponse = await eventTx.wait();

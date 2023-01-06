@@ -43,6 +43,7 @@ describe("Visitor tests", () => {
   let wallet;
   let visitorWallet;
   let signers;
+  const onlyWhiteListedUsers = false;
   const spyFunc = spy();
   const ONE_DAY = 1;
   const THREE_DAYS = 3;
@@ -69,8 +70,22 @@ describe("Visitor tests", () => {
     ({ eventFacet, ticketControllerFacet, ticketFacet, ticketMarketplaceFacet, signers, wallet } = await testSetUp());
     visitorWallet = signers[1];
 
-    firstEventTokenId = await mockedCreateEvent(maxTicketPerClient, startDate, endDate, eventFacet, wallet);
-    secondEventTokenId = await mockedCreateEvent(maxTicketPerClient + 1, startDate, endDate, eventFacet, wallet);
+    firstEventTokenId = await mockedCreateEvent(
+      maxTicketPerClient,
+      startDate,
+      endDate,
+      onlyWhiteListedUsers,
+      eventFacet,
+      wallet,
+    );
+    secondEventTokenId = await mockedCreateEvent(
+      maxTicketPerClient + 1,
+      startDate,
+      endDate,
+      onlyWhiteListedUsers,
+      eventFacet,
+      wallet,
+    );
 
     mockedContractData.saleStartDate =
       (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp + ONE_DAY * DATES.DAY;

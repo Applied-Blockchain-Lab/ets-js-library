@@ -20,6 +20,7 @@ describe("Organizer tests", function () {
   let tokenId;
   let wallet;
   let signers;
+  const onlyWhiteListedUsers = false;
   const addressLength = 64;
   const TEN_DAYS = 10;
 
@@ -39,7 +40,15 @@ describe("Organizer tests", function () {
       (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp +
       (TEN_DAYS + TEN_DAYS) * DATES.DAY;
 
-    tokenId = await mockedCreateEvent(maxTicketPerClient, startDate, endDate, eventFacet, wallet, tokenId);
+    tokenId = await mockedCreateEvent(
+      maxTicketPerClient,
+      startDate,
+      endDate,
+      onlyWhiteListedUsers,
+      eventFacet,
+      wallet,
+      tokenId,
+    );
   });
 
   it("Should call create event method from smart contract", async () => {
