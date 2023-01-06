@@ -1369,6 +1369,7 @@ await setTicketFeePercentage(feePercentage);
 #### Possible error messages
 
 - "LibEventDiamond: Must be contract owner"
+- "Event: Fee percentage max 10_000"
 
 ### Withdraws fees (Contract owner)
 
@@ -1385,6 +1386,40 @@ await withdrawFees();
 
 - "LibEventDiamond: Must be contract owner"
 - "Event: Can't withdraw fees" - This error can occur only when the contract doesn't have enough balance or gas is not enough.
+
+### Sets fee for every bought listed ticket with given fee percentage (Contract owner)
+
+1. Import setSecondaryMarketTicketFeePercentage function from the library.
+2. Execute setSecondaryMarketTicketFeePercentage function.
+
+```js
+import { setSecondaryMarketTicketFeePercentage } from "ets-js-library";
+
+const feePercentage = 3; // Percentage from ticket's price
+
+await setSecondaryMarketTicketFeePercentage(feePercentage);
+```
+
+#### Possible error messages
+
+- "LibTicketDiamond: Must be contract owner"
+- "TicketMarketplace: Fee percentage max 10_000"
+
+### Withdraws fees from secondary market (Contract owner)
+
+1. Import withdrawSecondaryMarketFees function from the library.
+2. Execute withdrawSecondaryMarketFees function.
+
+```js
+import { withdrawSecondaryMarketFees } from "ets-js-library";
+
+await withdrawSecondaryMarketFees();
+```
+
+#### Possible error messages
+
+- "LibTicketDiamond: Must be contract owner"
+- "TicketMarketplace: Can't withdraw fees" - This error can occur only when the contract doesn't have enough balance or gas is not enough.
 
 ## Tests
 
