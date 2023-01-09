@@ -56,6 +56,7 @@ export async function createEvent(ipfsUrl, contractData, contract = eventsContra
       contractData.maxTicketPerClient,
       contractData.startDate,
       contractData.endDate,
+      contractData.onlyWhiteListedUsers,
       ipfsUrl,
     );
 
